@@ -1,0 +1,11 @@
+# pip install -r requirements.txt
+
+pandas
+sklearn
+requests
+flask
+SQLAlchemy
+jwt
+Werkzeug==0.16.0
+numpy
+nltk
