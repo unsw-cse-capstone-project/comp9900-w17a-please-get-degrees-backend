@@ -1,0 +1,12 @@
+pandas
+sklearn
+dill
+collections-extended
+requests
+flask
+SQLAlchemy
+jwt
+Werkzeug==0.16.0
+numpy
+nltk
+

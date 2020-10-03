@@ -1,0 +1,6 @@
+Stock_ID,Symbol,Company_Name,Current_Price,Last_Price
+1,APPL,Apple,100,90
+2,MSFT,Microsoft,200,210
+3,KPMG,KPMG,300,250
+4,ACCN,Accenture,400,450
+5,DELL,Dell,500,520
