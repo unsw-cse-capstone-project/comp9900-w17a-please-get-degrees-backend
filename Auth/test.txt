@@ -1,5 +1,5 @@
 1. Install neccessary packages using requirements.txt
-2. Run API_stocks.py
+2. Run simvestr_api.py
 3. http://127.0.0.1:5000/
 4. Signup with email id and pwd
 5. Get auth token using the 'token' function
