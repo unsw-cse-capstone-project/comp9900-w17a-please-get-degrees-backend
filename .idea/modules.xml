@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/BackEnd.iml" filepath="$PROJECT_DIR$/.idea/BackEnd.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../comp9900-w17a-please-get-degrees-backend/.idea/comp9900-w17a-please-get-degrees-backend.iml" filepath="$PROJECT_DIR$/../../comp9900-w17a-please-get-degrees-backend/.idea/comp9900-w17a-please-get-degrees-backend.iml" />
     </modules>
   </component>
 </project>

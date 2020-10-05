@@ -7,21 +7,47 @@ Back end of the investment simulator project for COMP9900
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
-[comment]: <> (TODO)
-What things you need to install the software and how to install them
+[comment]: <> (TODO: expand on this as we go)
+Currently we only need Flask and FlaskSQLAlchemy. 
+
+
+### Dev Setup
+[comment]: <> (TODO: check that this procedure works on CSE/team pcs)
+First, setup your virtual environment. You can use conda or venv.
+
+####```conda```
+```
+path_to_app $ conda create -n "investr" python=3.7.0 flask flask_sqlalchemy
+path_to_app $ conda activate investr
+(investr) path_to_app $ 
+```
+
+####  ```pip``` 
+You must have the correct python version installed (python3.7) when using the pip method
+```
+path_to_app $ python3.7 -m venv .investr
+```
+
+##### Activating venv
+
+OSX or Linux:
 
 ```
-Give examples
+path_to_app $ source .investr/bin/activate
+(.investr) path_to_app $ 
 ```
 
-### Installing
-[comment]: <> (TODO)
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+Windows:
 
 ```
-Give the example
+path_to_app>.\investr\Scripts\activate
+(.investr) path_to_app>
+```
+
+Now ```pip``` install the dependencies:
+
+```
+(.investr) ($ or >) pip install flask flask_sqlalchemy
 ```
 
 And repeat
@@ -31,6 +57,16 @@ until finished
 ```
 
 End with an example of getting some data out of the system or using it for a little demo
+
+### Installation as package
+
+If you git clone the repo it can also be installed as a package in your virtual environment.
+
+```
+pip install -e .
+```
+
+This will access the [setup.py](setup.py) file and run setuptools.
 
 ## Running the tests
 [comment]: <> (TODO)

@@ -1,6 +1,4 @@
-import os
 from pathlib import Path
-
 from flask import Flask
 
 
@@ -10,8 +8,8 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=Path(app.instance_path) / 'investr.sqlite',
-        SQLALCHEMY_DATABASE_URI='sqlite:///' + str(Path(app.instance_path) / 'investr.db'),
+        DATABASE=Path(app.instance_path) / 'simvestr.sqlite',
+        SQLALCHEMY_DATABASE_URI='sqlite:///' + str(Path(app.instance_path) / 'simvestr.db'),
     )
 
     if test_config is None:
@@ -28,8 +26,19 @@ def create_app(test_config=None):
         pass
 
     # a simple page that says hello
-    @app.route('/')
+    @app.route('/hello')
     def hello():
-        return 'Investr app'
+        return 'Hello, World!'
+
+    # Example how to add a simple route that renders a page
+    @app.route('/')
+    def index():
+        return 'Simvestr App'
+
+    from .models import db
+    db.init_app(app)
+
+    from simvestr.apis import blueprint as api
+    app.register_blueprint(api)
 
     return app
