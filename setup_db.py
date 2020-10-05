@@ -1,8 +1,8 @@
-from investr import create_app
+from simvestr import create_app
 
 app = create_app()
 
 
 with app.app_context():
-    from investr.models.db import db
+    from simvestr.db import db
     db.create_all()
