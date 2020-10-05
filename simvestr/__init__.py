@@ -30,11 +30,15 @@ def create_app(test_config=None):
     def hello():
         return 'Hello, World!'
 
+    # Example how to add a simple route that renders a page
     @app.route('/')
     def index():
         return 'Simvestr App'
 
     from .models import db
     db.init_app(app)
+
+    from simvestr.apis import blueprint as api
+    app.register_blueprint(api)
 
     return app

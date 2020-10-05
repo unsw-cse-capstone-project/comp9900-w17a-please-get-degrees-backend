@@ -1,5 +1,5 @@
-# from flask import Flask
-# from flask_sqlalchemy import SQLAlchemy
+from pathlib import Path
+import pandas as pd
 from flask import current_app, g
 import click
 from flask.cli import with_appcontext
@@ -9,7 +9,9 @@ from simvestr.models import db
 
 def get_db():
     if 'db' not in g:
-        g.db = db.init_app(current_app)
+        db.init_app(current_app)
+        g.db = db
+
     return g.db
 
 
@@ -19,12 +21,24 @@ def close_db(e=None):
     if db is not None:
         db.close()
 
-# @click.command('init-db')
-# @with_appcontext
+
 def init_db():
     db = get_db()
     db.create_all()
 
+
+def load_dummy():
+    from .models import User
+    db = get_db()
+    user_data_path = Path.cwd() / 'tests' / 'test_data_user.xlsx'
+    user_df = pd.read_excel(user_data_path)
+    user_df.columns = user_df.columns.str.lower()
+    db.session.bulk_insert_mappings(
+        User,
+        user_df.to_dict(orient="records")
+    )
+    db.session.commit()
+    db.session.close()
 
 @click.command('init-db')
 @with_appcontext
