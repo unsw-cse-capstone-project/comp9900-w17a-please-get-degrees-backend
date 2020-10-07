@@ -5,8 +5,8 @@ Created on Mon Sep 28 12:27:41 2020
 @author: Kovid
 """
 
-from flask import Flask, jsonify
-from flask_restx import Resource, Api, fields, reqparse, Namespace
+from flask import jsonify
+from flask_restx import Resource, fields, reqparse, Namespace
 from werkzeug.security import generate_password_hash
 
 # from simvestr_email import send_email
@@ -14,17 +14,8 @@ from werkzeug.security import generate_password_hash
 from ..models import User
 from .. import db
 
-# app = create_app()
-# api = Api(app,
-#           authorizations = {'TOKEN-BASED': {'name': 'API-TOKEN', 'in': 'header', 'type': 'apiKey'}},
-#           security = 'TOKEN-BASED',
-#           default = 'User Login and Authentication',
-#           title = 'Simvestr',
-#           description = 'Back-end API User signup and authentication'
-#          )
-
 api = Namespace(
-    'token',
+    'Signup',
     authorizations = {'TOKEN-BASED': {'name': 'API-TOKEN', 'in': 'header', 'type': 'apiKey'}},
     security = 'TOKEN-BASED',
     default = 'User Login and Authentication',
@@ -51,7 +42,7 @@ class Signup(Resource):
     @api.response(200, 'Successful')
     @api.response(444, 'User already exists')
     @api.response(445, 'Email ID already exists')
-    @api.doc(description="creates user")
+    @api.doc(description="Creates a new user")
     @api.expect(signup_parser, validate=True)
     def put(self):
         args = signup_parser.parse_args()

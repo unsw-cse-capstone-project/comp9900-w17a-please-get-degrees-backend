@@ -7,3 +7,15 @@ click~=7.1.2
 flask~=1.1.2
 xlrd~=1.2.0
 pandas>=1.0.0
+
+#flask_sqlalchemy~=1.0 #doesn't work
+flask_sqlalchemy~=2.4.4
+Werkzeug==0.16.0
+numpy~=1.16.2
+
+#not on cse machine
+flask_restx 
+jwt>=1.0.0
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
