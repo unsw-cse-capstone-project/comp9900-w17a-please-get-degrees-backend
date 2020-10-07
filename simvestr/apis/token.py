@@ -5,8 +5,7 @@ Created on Mon Sep 28 12:27:41 2020
 @author: Kovid
 """
 
-from flask import Flask
-from flask_restx import Resource, Api, fields, reqparse, Namespace
+from flask_restx import Resource, fields, reqparse, Namespace
 from werkzeug.security import check_password_hash
 import jwt
 import datetime
@@ -16,18 +15,8 @@ import datetime
 from ..models import User
 
 
-# app = Flask(__name__)
-# app = create_app()
-# api = Api(app,
-#           authorizations = {'TOKEN-BASED': {'name': 'API-TOKEN', 'in': 'header', 'type': 'apiKey'}},
-#           security = 'TOKEN-BASED',
-#           default = 'User Login and Authentication',
-#           title = 'Simvestr',
-#           description = 'Back-end API User signup and authentication'
-#           )
-
 api = Namespace(
-    'authentication',
+    'Authentication',
     security = 'TOKEN-BASED',
     default = 'User Login and Authentication',
     title = 'Simvestr',
