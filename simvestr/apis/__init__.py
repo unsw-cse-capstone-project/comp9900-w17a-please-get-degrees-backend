@@ -18,7 +18,7 @@ api = Api(blueprint,
 )
 
 #Register each new namespace here
-api.add_namespace(ns1,  path='/hello/')
-api.add_namespace(ns2,  path='/user/')
-api.add_namespace(ns3,  path='/signup/')
-api.add_namespace(ns4,  path='/token/')
+api.add_namespace(ns1,  path='/hello')
+api.add_namespace(ns2,  path='/user')
+api.add_namespace(ns3,  path='/signup')
+api.add_namespace(ns4,  path='/token')

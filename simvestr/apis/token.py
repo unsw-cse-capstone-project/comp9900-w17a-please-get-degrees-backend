@@ -6,23 +6,34 @@ Created on Mon Sep 28 12:27:41 2020
 """
 
 from flask import Flask
-from flask_restx import Resource, Api, fields, reqparse
+from flask_restx import Resource, Api, fields, reqparse, Namespace
 from werkzeug.security import check_password_hash
 import jwt
 import datetime
 
-from simvestr_email import send_email
+# from simvestr_email import send_email
+# from simvestr import create_app
 from ..models import User
 
 
-app = Flask(__name__)
-api = Api(app,
-          authorizations = {'TOKEN-BASED': {'name': 'API-TOKEN', 'in': 'header', 'type': 'apiKey'}},
-          security = 'TOKEN-BASED',
-          default = 'User Login and Authentication',
-          title = 'Simvestr',
-          description = 'Back-end API User signup and authentication'
-          )
+# app = Flask(__name__)
+# app = create_app()
+# api = Api(app,
+#           authorizations = {'TOKEN-BASED': {'name': 'API-TOKEN', 'in': 'header', 'type': 'apiKey'}},
+#           security = 'TOKEN-BASED',
+#           default = 'User Login and Authentication',
+#           title = 'Simvestr',
+#           description = 'Back-end API User signup and authentication'
+#           )
+
+api = Namespace(
+    'authentication',
+    security = 'TOKEN-BASED',
+    default = 'User Login and Authentication',
+    title = 'Simvestr',
+    description = 'Back-end API User signup and authentication'
+)
+
 
 class AuthenticationToken:
     def __init__(self, secret_key, expires_in):
@@ -53,7 +64,7 @@ credential_model = api.model('credential', {
 credential_parser = reqparse.RequestParser()
 credential_parser.add_argument('username', type=str)
 credential_parser.add_argument('password', type=str)
-@api.route('/token')
+@api.route('/')
 class Token(Resource):
     @api.response(200, 'Successful')
     @api.response(455, 'User does not exist')
@@ -72,7 +83,7 @@ class Token(Resource):
             return {'message': 'Incorrect password, retry'}, 456
         else:
             message_content = 'You have logged into Simvestr. Login will expire after 24hours!'
-            send_email(user.email_id, 'Log in successful', message_content) #sends a logged in email to the user
+            # send_email(user.email_id, 'Log in successful', message_content) #sends a logged in email to the user
             return {"token": auth.generate_token(username)}
         return {"message": "authorization has been refused for those credentials."}, 401
 # ---------------- Create Token -------------- #

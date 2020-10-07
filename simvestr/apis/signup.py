@@ -6,21 +6,31 @@ Created on Mon Sep 28 12:27:41 2020
 """
 
 from flask import Flask, jsonify
-from flask_restx import Resource, Api, fields, reqparse
+from flask_restx import Resource, Api, fields, reqparse, Namespace
 from werkzeug.security import generate_password_hash
 
-from simvestr_email import send_email
+# from simvestr_email import send_email
+# from simvestr import create_app
 from ..models import User
 from .. import db
 
-app = Flask(__name__)
-api = Api(app,
-          authorizations = {'TOKEN-BASED': {'name': 'API-TOKEN', 'in': 'header', 'type': 'apiKey'}},
-          security = 'TOKEN-BASED',
-          default = 'User Login and Authentication',
-          title = 'Simvestr',
-          description = 'Back-end API User signup and authentication'
-         )
+# app = create_app()
+# api = Api(app,
+#           authorizations = {'TOKEN-BASED': {'name': 'API-TOKEN', 'in': 'header', 'type': 'apiKey'}},
+#           security = 'TOKEN-BASED',
+#           default = 'User Login and Authentication',
+#           title = 'Simvestr',
+#           description = 'Back-end API User signup and authentication'
+#          )
+
+api = Namespace(
+    'token',
+    authorizations = {'TOKEN-BASED': {'name': 'API-TOKEN', 'in': 'header', 'type': 'apiKey'}},
+    security = 'TOKEN-BASED',
+    default = 'User Login and Authentication',
+    title = 'Simvestr',
+    description = 'Back-end API User signup and authentication'
+)
 
 # ---------------- Signup new user ----------- #
 signup_model = api.model('signup', {
@@ -36,7 +46,7 @@ signup_parser.add_argument('email_id', type=str)
 signup_parser.add_argument('password', type=str)
 signup_parser.add_argument('first_name', type=str)
 signup_parser.add_argument('last_name', type=str)
-@api.route('/signup')
+@api.route('/')
 class Signup(Resource):
     @api.response(200, 'Successful')
     @api.response(444, 'User already exists')
@@ -62,6 +72,6 @@ class Signup(Resource):
         db.session.add(new_user)
         db.session.commit()
         message_content = 'A new user from your email ID has signed-up for our free investing simlutor. Please login to start investing'
-        send_email(username, 'User created successfully', message_content) #sends a confirmation email to the user
+        # send_email(username, 'User created successfully', message_content) #sends a confirmation email to the user
         return jsonify({'message' : 'New user created!'})
 # ---------------- Signup new user ----------- #
