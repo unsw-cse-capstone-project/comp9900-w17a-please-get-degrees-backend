@@ -9,7 +9,7 @@ from .forgotuser import api as ns5
 
 from flask import Blueprint
 
-blueprint = Blueprint('api', __name__, url_prefix='/api/')
+blueprint = Blueprint('api', __name__, url_prefix='/api')
 
 api = Api(blueprint,
     title='SimvestrAPI',
