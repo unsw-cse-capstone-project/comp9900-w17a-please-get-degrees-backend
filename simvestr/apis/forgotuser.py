@@ -13,7 +13,7 @@ from simvestr_email import send_email
 # from simvestr import create_app
 from ..models import User
 import random
-from .. import db
+from simvestr.models import db
 
 api = Namespace(
     'Forgot User',
