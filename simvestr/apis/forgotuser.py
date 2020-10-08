@@ -48,6 +48,7 @@ email_sent_flag = False
 class ForgotUser(Resource):
     @api.response(200, 'Successful')
     @api.response(445, 'Bad OTP')
+    @api.response(447, 'Password should be atleast 8 characters')
     @api.doc(description="Resets password for user using OTP")
     @api.expect(forgotuser_email_parser, validate=True)
     def get(self):
@@ -77,7 +78,9 @@ class ForgotUser(Resource):
         #     message_content = f'ALERT! You have requested password change for your Simvestr account. Please copy the 4 digit OTP {random_OTP}.'
         #     send_email(username, f'Forgot Password - OTP: {random_OTP}', message_content) #sends a confirmation email to the user
         #     email_sent_flag = True
-        #     return jsonify({'message' : 'Email sent!'})  
+        #     return jsonify({'message' : 'Email sent!'})
+        if len(password) < 8:
+            return {'message' : 'Password should be atleast 8 characters'}, 447
         if one_time_pass != str(random_OTP):
               return {'message': 'The OTP you entered is incorrect!'}, 445
         user.password = generate_password_hash(password, method='sha256')
