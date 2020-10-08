@@ -11,6 +11,11 @@ setup(
     zip_safe=False,
     install_requires=[
         'flask',
+        'flask-sqlalchemy',
+        'flask-restx',
+        'pyjwt',
+        'openpyxl',
+        'pandas'
     ],
     author="Jihad Meraachli; Khan Schroder-Turner; Kovid Sharma; Simon Garrod; Timothy Brunette",
     author_email="simvestr@gmail.com",
