@@ -12,7 +12,7 @@ from werkzeug.security import generate_password_hash
 # from simvestr_email import send_email
 # from simvestr import create_app
 from ..models import User
-from .. import db
+from simvestr.models import db
 
 api = Namespace(
     'Signup',
