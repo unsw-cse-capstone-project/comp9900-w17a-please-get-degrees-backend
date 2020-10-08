@@ -1,4 +1,4 @@
-/.idea/
+.idea/*
 /simvestr/models/
 
 *.pyc
@@ -10,6 +10,5 @@ instance/
 .coverage
 htmlcov/
 
-dist/
 build/
 *.egg-info/
