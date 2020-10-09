@@ -15,14 +15,14 @@ All pre-requisites are listed in [requirements.txt](requirements.txt). They have
 [comment]: <> (TODO: check that this procedure works on CSE/team pcs)
 First, setup your virtual environment. You can use conda or venv.
 
-####```conda```
+#### ```conda```
 ```
 path_to_app $ conda create -n "simvestr" python=3.7.0 flask flask_sqlalchemy
 path_to_app $ conda activate simvestr
 (simvestr) path_to_app $ 
 ```
 
-####  ```pip``` 
+#### ```pip``` 
 You must have the correct python version installed (python3.7) when using the pip method
 ```
 path_to_app $ python3.7 -m venv .simvestr
