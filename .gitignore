@@ -1,5 +1,4 @@
-.idea/*
-/simvestr/models/
+.idea
 
 *.pyc
 __pycache__/
