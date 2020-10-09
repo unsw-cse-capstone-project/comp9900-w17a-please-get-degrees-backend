@@ -1,5 +1,5 @@
 from flask_restx import Resource, Namespace
-from ..models import User
+from ..models import User, Watchlist, Stock
 api = Namespace('user', description='Demo api for querying users')
 
 @api.route('/')
@@ -17,7 +17,8 @@ class UsersQuery(Resource):
 class UserQuery(Resource):
     def get(self, user_id: int):
         user = User.query.filter_by(id=user_id).first()
-        data = {u.id:dict(username=u.username, email=u.email, watchlist=u.watchlist) for u in user}
+        watch = Watchlist.query.filter(Watchlist.user_id==user.id).all()
+        data = dict(username=user.username, email=user.email_id, watchlist=[s.stock_symbol for s in watch])
         payload = dict(
             data=data
         )
