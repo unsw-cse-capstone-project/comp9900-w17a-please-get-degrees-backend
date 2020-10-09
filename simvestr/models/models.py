@@ -45,9 +45,7 @@ class User(db.Model):
 class Watchlist(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # user = db.relationship("User")
     stock_symbol = db.Column(db.Integer, db.ForeignKey('stock.symbol'))
-    # stock_symbol_rel = db.relationship("Stock", back_populates='watchlist')
     timestamp = db.Column(db.DateTime, default=datetime.now,)
 
 
