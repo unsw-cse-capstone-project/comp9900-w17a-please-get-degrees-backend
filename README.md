@@ -73,6 +73,7 @@ pip install dist\simvestr-0.0.1.tar.gz
 
 Running the app is as simple as running the [run.py](run.py) file.
 ```
+chmod -x run.py
 python run.py
 ```
 
