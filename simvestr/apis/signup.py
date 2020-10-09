@@ -46,7 +46,7 @@ class Signup(Resource):
     @api.response(447, 'Password should be atleast 8 characters')
     @api.doc(description="Creates a new user")
     @api.expect(signup_parser, validate=True)
-    def put(self):
+    def post(self):
         args = signup_parser.parse_args()
         username = args.get('username')
         email = args.get('email_id')
@@ -58,13 +58,13 @@ class Signup(Resource):
         print("User",user)
         print("Email",email)
         if user:
-              return {'message': 'User already exists'}, 444
+              return {'error': 'User already exists'}, 444
         if email_check:
-              return {'message': 'Email ID already exists'}, 445
+              return {'error': 'Email ID already exists'}, 445
         if len(username) < 8:
-            return {'message' : 'Username should be atleast 8 characters'}, 446
+            return {'error' : 'Username should be atleast 8 characters'}, 446
         if len(password) < 8:
-            return {'message' : 'Password should be atleast 8 characters'}, 447
+            return {'error' : 'Password should be atleast 8 characters'}, 447
         new_user = User(username=username, email_id=email, first_name=fname, last_name=lname, password=generate_password_hash(password, method='sha256'))
         db.session.add(new_user)
         db.session.commit()
