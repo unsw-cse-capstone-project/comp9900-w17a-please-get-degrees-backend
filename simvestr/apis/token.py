@@ -67,7 +67,7 @@ class Token(Resource):
         password = args.get('password')
         user = User.query.filter_by(username=username).first()
         if not user or not check_password_hash(user.password, password):
-            return {'error': 'User dosen\'t exist'}, 449
+            return {'error': 'User doesn\'t exist'}, 449
         isSamePassword=check_password_hash(user.password,password)        
         if not isSamePassword:
             return {'error': 'Incorrect password, retry'}, 442
