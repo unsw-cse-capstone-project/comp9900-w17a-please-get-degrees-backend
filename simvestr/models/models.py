@@ -35,9 +35,9 @@ class User(db.Model):
     other_name = db.Column(db.String(60))
     date_joined = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-    validated = db.Column(db.Boolean(False))
+    validated = db.Column(db.Boolean, default=False)
     role = db.Column(ChoiceType(ROLE_CHOICES))
-    watchlist = db.relationship("Watchlist", uselist=False, back_populates="user")#need similar for portfolio, except it will be 1-m
+    watchlist = db.relationship("Watchlist", backref='user', lazy=True)#need similar for portfolio, except it will be 1-m
     
     def __repr__(self):
         return '<User %r>' % self.username
@@ -45,6 +45,7 @@ class User(db.Model):
 class Watchlist(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),primary_key=True,)
     stock_symbol = db.Column(db.Integer, db.ForeignKey('stock.symbol'), primary_key=True,)
+    stock_symbol_rel = db.relationship("Stock", back_populates='watchlist')
     timestamp = db.Column(db.DateTime, default=datetime.now)
 
 
@@ -52,7 +53,7 @@ class Stock(db.Model):
     #TODO: Need to confirm max length of symbol, light research suggests 6
     #TODO: Need to confirm max length of name
     #TODO: Handle crypto currencies codes
-    symbol = db.Column(db.String(6), unique=True, nullable=False)
+    symbol = db.Column(db.String(6), unique=True, nullable=False, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=False)
     currency = db.Column(db.String(3), nullable=False)
     exchange = db.Column(db.String(200),)
