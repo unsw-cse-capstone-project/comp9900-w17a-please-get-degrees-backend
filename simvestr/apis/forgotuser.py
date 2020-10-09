@@ -48,7 +48,7 @@ class ForgotUser(Resource):
     @api.response(200, 'Successful')
     @api.response(448, 'Bad OTP')
     @api.response(447, 'Password should be atleast 8 characters')
-    @api.response(449, 'User dosen\'t exist')
+    @api.response(449, 'User doesn\'t exist')
     @api.doc(description="Resets password for user using OTP")
     @api.expect(forgotuser_email_parser, validate=True)
     def get(self):
@@ -57,7 +57,7 @@ class ForgotUser(Resource):
         print('\nusername to send email:', username) #z5240067
         user = User.query.filter_by(username=username).first()
         if not user:
-            return {'error' : 'User dosen\'t exist'}, 449
+            return {'error' : 'User doesn\'t exist'}, 449
         global random_OTP
         random_OTP = random.randint(1000,9999)
         message_content = f'ALERT! You have requested password change for your Simvestr account. Please copy the 4 digit OTP {random_OTP}.'
@@ -72,7 +72,7 @@ class ForgotUser(Resource):
         one_time_pass = args.get('OTP')
         user = User.query.filter_by(username=username).first()
         if not user:
-            return {'error' : 'User dosen\'t exist'}, 449
+            return {'error' : 'User doesn\'t exist'}, 449
         print('\nusername:', username) #z5240067
         print('password', password)
         print('one_time_pass:',one_time_pass)
