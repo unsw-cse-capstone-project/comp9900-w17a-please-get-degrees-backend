@@ -1,0 +1,11 @@
+For successful execution, replies will be in the form of {'message':'description'}
+For unsuccessful execution, replies will be in the form of {'error':'description'}
+
+Api Response Code and their meaning:
+	200 - Successful
+	444 - User already exists
+	445 - Email ID already exists
+	446 - Username should be atleast 8 characters
+	447 - Password should be atleast 8 characters
+	448 - Bad OTP
+	449 - User dosen't exist
