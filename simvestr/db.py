@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from flask import current_app, g
 import click
 from flask.cli import with_appcontext
@@ -28,16 +29,26 @@ def init_db():
 
 
 def load_dummy():
-    from .models import User
+    from .models import User, Watchlist, Stock
     db = get_db()
-    user_data_path = Path.cwd() / 'tests' / 'test_data_user.xlsx'
-    user_df = pd.read_excel(user_data_path)
-    user_df.columns = user_df.columns.str.lower()
-    db.session.bulk_insert_mappings(
-        User,
-        user_df.to_dict(orient="records")
+    data_path = Path.cwd() / 'tests' / 'test_data_user.xlsx'
+
+    #Order of models matterss
+    load_mapping = dict(
+        users=User,
+        stock=Stock,
+        watchlist=Watchlist,
     )
-    db.session.commit()
+
+    for sheet, model in load_mapping.items():
+        df = pd.read_excel(data_path, sheet_name=sheet)
+        df = df.replace({np.nan: None})
+        df.columns = df.columns.str.lower()
+        db.session.bulk_insert_mappings(
+            model,
+            df.to_dict(orient="records")
+        )
+        db.session.commit()
     db.session.close()
 
 @click.command('init-db')
