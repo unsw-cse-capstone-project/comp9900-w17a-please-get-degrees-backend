@@ -56,8 +56,9 @@ credential_parser.add_argument('password', type=str)
 @api.route('/')
 class Token(Resource):
     @api.response(200, 'Successful')
-    @api.response(455, 'User does not exist')
-    @api.response(456, 'Incorrect password, retry')
+    @api.response(401, 'Unsuccessful')
+    @api.response(449, 'User does not exist')
+    @api.response(442, 'Incorrect password, retry')
     @api.doc(description="Generates a authentication token")
     @api.expect(credential_parser, validate=True)
     def get(self):
@@ -65,14 +66,14 @@ class Token(Resource):
         username = args.get('username')
         password = args.get('password')
         user = User.query.filter_by(username=username).first()
-        if not user  or not check_password_hash(user.password, password):
-            return {'message': 'User does not exists'}, 455
+        if not user or not check_password_hash(user.password, password):
+            return {'error': 'User dosen\'t exist'}, 449
         isSamePassword=check_password_hash(user.password,password)        
         if not isSamePassword:
-            return {'message': 'Incorrect password, retry'}, 456
+            return {'error': 'Incorrect password, retry'}, 442
         else:
             message_content = 'You have logged into Simvestr. Login will expire after 24hours!'
             send_email(user.email_id, 'Log in successful', message_content) #sends a logged in email to the user
             return {"token": auth.generate_token(username)}
-        return {"message": "authorization has been refused for those credentials."}, 401
+        return {"error": "authorization has been refused for those credentials."}, 401
 # ---------------- Create Token -------------- #
