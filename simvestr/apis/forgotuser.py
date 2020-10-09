@@ -41,8 +41,7 @@ forgotuser_email_model = api.model('forgotuser', {
 forgotuser_email_parser = reqparse.RequestParser()
 forgotuser_email_parser.add_argument('username', type=str)
 
-    
-random_OTP = random.randint(1000,9999)
+random_OTP = 1234
 email_sent_flag = False
 @api.route('/')
 class ForgotUser(Resource):
@@ -60,6 +59,7 @@ class ForgotUser(Resource):
         if not user:
             return {'error' : 'User dosen\'t exist'}, 449
         global random_OTP
+        random_OTP = random.randint(1000,9999)
         message_content = f'ALERT! You have requested password change for your Simvestr account. Please copy the 4 digit OTP {random_OTP}.'
         send_email(user.email_id, f'Forgot Password - OTP: {random_OTP}', message_content) #sends a confirmation email to the user
         return jsonify({'message' : 'Email sent!'})
@@ -71,17 +71,13 @@ class ForgotUser(Resource):
         password = args.get('password')
         one_time_pass = args.get('OTP')
         user = User.query.filter_by(username=username).first()
+        if not user:
+            return {'error' : 'User dosen\'t exist'}, 449
         print('\nusername:', username) #z5240067
         print('password', password)
         print('one_time_pass:',one_time_pass)
         print("user:",user,'\n')
         global random_OTP
-        # global email_sent_flag
-        # if not email_sent_flag:
-        #     message_content = f'ALERT! You have requested password change for your Simvestr account. Please copy the 4 digit OTP {random_OTP}.'
-        #     send_email(username, f'Forgot Password - OTP: {random_OTP}', message_content) #sends a confirmation email to the user
-        #     email_sent_flag = True
-        #     return jsonify({'message' : 'Email sent!'})
         if len(password) < 8:
             return {'error' : 'Password should be atleast 8 characters'}, 447
         if one_time_pass != str(random_OTP):
