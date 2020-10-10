@@ -1,55 +1,62 @@
+aiohttp==3.6.2
 aniso8601 @ file:///tmp/build/80754af9/aniso8601_1597771691111/work
-atomicwrites==1.4.0
+async-timeout==3.0.1
 attrs @ file:///tmp/build/80754af9/attrs_1600298409949/work
+blinker==1.4
+brotlipy==0.7.0
+cachetools @ file:///tmp/build/80754af9/cachetools_1596822027882/work
 certifi==2020.6.20
-cffi @ file:///C:/ci/cffi_1600699250966/work
+cffi @ file:///opt/concourse/worker/volumes/live/74b22aae-8eb9-44eb-6c00-a8a07af62b36/volume/cffi_1600699174113/work
+chardet==3.0.4
 click==7.1.2
-colorama==0.4.3
-cryptography @ file:///C:/ci/cryptography_1601046913206/work
+cryptography @ file:///opt/concourse/worker/volumes/live/449c9d42-da39-4138-6bf0-843317a1ad24/volume/cryptography_1601046862310/work
+et-xmlfile==1.0.1
+finnhub-python==2.2.1
 Flask==1.1.2
 flask-restx @ file:///tmp/build/80754af9/flask-restx_1597772017480/work
 Flask-SQLAlchemy @ file:///tmp/build/80754af9/flask-sqlalchemy_1596836624296/work
-importlib-metadata @ file:///C:/ci/importlib-metadata_1593446525189/work
+google-auth @ file:///tmp/build/80754af9/google-auth_1601995530934/work
+google-auth-oauthlib==0.4.1
+idna @ file:///tmp/build/80754af9/idna_1593446292537/work
+importlib-metadata @ file:///opt/concourse/worker/volumes/live/84197498-cbc0-4436-7ce0-03c4490b7a28/volume/importlib-metadata_1593446431408/work
 iniconfig @ file:///tmp/build/80754af9/iniconfig_1596827328212/work
 itsdangerous==1.1.0
+jdcal==1.4.1
 Jinja2==2.11.2
-jsonschema @ file:///C:/ci/jsonschema_1594363671836/work
-MarkupSafe @ file:///C:/ci/markupsafe_1594405949945/work
+jsonschema @ file:///opt/concourse/worker/volumes/live/0ebf0882-768b-4bcb-68e7-d8d818a92fe6/volume/jsonschema_1601490617240/work
+MarkupSafe==1.1.1
 mkl-fft==1.2.0
 mkl-random==1.1.1
 mkl-service==2.3.0
 more-itertools @ file:///tmp/build/80754af9/more-itertools_1598884071673/work
-numpy @ file:///C:/ci/numpy_and_numpy_base_1596233945180/work
-opencv-contrib-python==4.3.0.36
-opt-einsum==3.3.0
+multidict @ file:///opt/concourse/worker/volumes/live/36866b75-3506-404d-4bf8-25adbcd7e41f/volume/multidict_1600456436970/work
+numpy==1.16.6
+oauthlib==3.1.0
+openpyxl @ file:///tmp/build/80754af9/openpyxl_1598113097404/work
 packaging==20.4
-pandas==1.1.0
-pexpect==4.8.0
-Pillow==7.2.0
+pandas @ file:///opt/concourse/worker/volumes/live/bfd63b8c-6035-4ed3-5bce-5690df409bf9/volume/pandas_1602088141563/work
 pluggy==0.13.1
-protobuf==3.12.2
-ptyprocess==0.6.0
 py @ file:///tmp/build/80754af9/py_1593446248552/work
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
 pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
 PyJWT==1.7.1
+pyOpenSSL @ file:///tmp/build/80754af9/pyopenssl_1594392929924/work
 pyparsing==2.4.7
-pyrsistent @ file:///C:/ci/pyrsistent_1600123688363/work
+pyrsistent @ file:///opt/concourse/worker/volumes/live/656e0c1b-ef87-4251-4a51-1290b2351993/volume/pyrsistent_1600141745371/work
+PySocks==1.7.1
 pytest==0.0.0
 python-dateutil==2.8.1
 pytz==2020.1
-scikit-image==0.17.2
-scipy==1.4.1
+PyYAML==5.3.1
+requests @ file:///tmp/build/80754af9/requests_1592841827918/work
+requests-oauthlib==1.3.0
+rsa @ file:///tmp/build/80754af9/rsa_1596998415516/work
 six==1.15.0
-SQLAlchemy @ file:///C:/ci/sqlalchemy_1598374801163/work
-tabulate==0.8.7
-tensorboard==2.2.2
-tensorboard-plugin-wit==1.7.0
-tensorflow==2.2.0
-tensorflow-estimator==2.2.0
-tifffile==2020.7.17
+SQLAlchemy @ file:///opt/concourse/worker/volumes/live/c8ccb658-c55f-4a2e-6c0c-7f57021ac0b1/volume/sqlalchemy_1598374749865/work
 toml @ file:///tmp/build/80754af9/toml_1592853716807/work
-urllib3==1.25.10
+urllib3 @ file:///tmp/build/80754af9/urllib3_1597086586889/work
 Werkzeug==1.0.1
-wincertstore==0.2
 xlrd==1.2.0
+yarl @ file:///opt/concourse/worker/volumes/live/403f145d-9997-465a-456f-ff2d0551e460/volume/yarl_1602006839565/work
 zipp==3.1.0
