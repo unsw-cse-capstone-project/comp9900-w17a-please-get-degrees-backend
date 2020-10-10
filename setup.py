@@ -15,7 +15,9 @@ setup(
         'flask-restx',
         'pyjwt',
         'openpyxl',
-        'pandas'
+        'pandas',
+        'pyyaml',
+        'finnhub-python',
     ],
     author="Jihad Meraachli; Khan Schroder-Turner; Kovid Sharma; Simon Garrod; Timothy Brunette",
     author_email="simvestr@gmail.com",
