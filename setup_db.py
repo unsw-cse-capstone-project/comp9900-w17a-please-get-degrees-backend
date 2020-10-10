@@ -1,8 +1,9 @@
 from simvestr import create_app
-from simvestr.db import init_db, load_dummy
-
+from simvestr.db import init_db, load_dummy, delete_db
 app = create_app()
 
+
 with app.app_context():
+    delete_db()
     init_db()
     load_dummy()

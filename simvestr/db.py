@@ -28,6 +28,11 @@ def init_db():
     db.create_all()
 
 
+def delete_db():
+    curr_dir = Path.cwd()
+    db_path = curr_dir / 'instance' / 'simvestr.db'
+    db_path.unlink()
+
 def load_dummy():
     from .models import User, Watchlist, Stock
     db = get_db()

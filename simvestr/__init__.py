@@ -1,5 +1,13 @@
 from pathlib import Path
 from flask import Flask
+import yaml
+
+config_yml_path = Path(__file__).parent / 'config.yml'
+
+def load_yaml_config():
+    with open(config_yml_path) as conf:
+        config_data = yaml.safe_load(conf)
+    return config_data
 
 
 def create_app(test_config=None):
@@ -11,6 +19,8 @@ def create_app(test_config=None):
         DATABASE=Path(app.instance_path) / 'simvestr.sqlite',
         SQLALCHEMY_DATABASE_URI='sqlite:///' + str(Path(app.instance_path) / 'simvestr.db'),
     )
+    config_yml = load_yaml_config()
+    app.config['FINNHUB_API_KEY'] = config_yml['Finnhub API Key']
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
