@@ -6,7 +6,7 @@ api = Namespace('user', description='Demo api for querying users')
 class UsersQuery(Resource):
     def get(self):
         user = User.query.all()
-        data = {u.id:dict(username=u.username, email=u.email_id) for u in user}
+        data = {u.id:dict(username=u.username, email=u.email_id, role=u.role, fname=u.first_name, lname=u.last_name, validated=u.validated) for u in user}
         payload = dict(
             data=data
         )
