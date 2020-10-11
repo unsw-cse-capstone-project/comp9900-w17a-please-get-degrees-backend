@@ -29,7 +29,8 @@ signup_model = api.model('signup', {
     'email_id': fields.String,
     'password': fields.String,
     'first_name':fields.String,
-    'last_name':fields.String
+    'last_name':fields.String,
+    'other_name':fields.String
 })
 signup_parser = reqparse.RequestParser()
 signup_parser.add_argument('username', type=str)
@@ -37,6 +38,7 @@ signup_parser.add_argument('email_id', type=str)
 signup_parser.add_argument('password', type=str)
 signup_parser.add_argument('first_name', type=str)
 signup_parser.add_argument('last_name', type=str)
+signup_parser.add_argument('other_name', type=str)
 @api.route('/')
 class Signup(Resource):
     @api.response(200, 'Successful')
@@ -53,6 +55,7 @@ class Signup(Resource):
         password = args.get('password')
         fname=args.get('first_name')
         lname=args.get('last_name')
+        oname=args.get('other_name')
         user = User.query.filter_by(username=username).first()
         email_check = User.query.filter_by(email_id=email).first()
         print("User",user)
@@ -65,7 +68,7 @@ class Signup(Resource):
             return {'error' : 'Username should be atleast 8 characters'}, 446
         if len(password) < 8:
             return {'error' : 'Password should be atleast 8 characters'}, 447
-        new_user = User(username=username, email_id=email, first_name=fname, last_name=lname, password=generate_password_hash(password, method='sha256'))
+        new_user = User(username=username, email_id=email, first_name=fname, last_name=lname, other_name=oname, role='user', password=generate_password_hash(password, method='sha256'))
         db.session.add(new_user)
         db.session.commit()
         message_content = 'A new user from your email ID has signed-up for our free investing simlutor. Please login to start investing'
