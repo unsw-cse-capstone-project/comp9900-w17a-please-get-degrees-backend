@@ -63,17 +63,21 @@ class Token(Resource):
     @api.expect(credential_parser, validate=True)
     def get(self):
         args = credential_parser.parse_args()
-        username = args.get('username')
+        username_login = args.get('username')
         password = args.get('password')
-        user = User.query.filter_by(username=username).first()
-        if not user or not check_password_hash(user.password, password):
+        print('username_login detail: ',username_login)
+        print('username_login detail: ',type(username_login))
+        if '@' not in username_login:
+            user = User.query.filter_by(username=username_login).first()
+        else:
+            user = User.query.filter_by(email_id=username_login).first()            
+        if not user:
             return {'error': 'User doesn\'t exist'}, 449
-        isSamePassword=check_password_hash(user.password,password)        
-        if not isSamePassword:
+        if not check_password_hash(user.password,password):
             return {'error': 'Incorrect password, retry'}, 442
         else:
             message_content = 'You have logged into Simvestr. Login will expire after 24hours!'
             send_email(user.email_id, 'Log in successful', message_content) #sends a logged in email to the user
-            return {"token": auth.generate_token(username)}
+            return {"token": auth.generate_token(user.username)}
         return {"error": "authorization has been refused for those credentials."}, 401
 # ---------------- Create Token -------------- #
