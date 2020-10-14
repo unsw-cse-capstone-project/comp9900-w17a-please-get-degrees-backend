@@ -16,7 +16,7 @@ import random
 from simvestr.models import db
 
 api = Namespace(
-    'Forgot User',
+    'forgotuser',
     security = 'TOKEN-BASED',
     default = 'User Login and Authentication',
     title = 'Simvestr',
@@ -25,66 +25,85 @@ api = Namespace(
 
 
 # ---------------- Forgot User --------------- #
-forgotuser_model = api.model('forgotuser', {
-    'username': fields.String,
-    'password': fields.String,
-    'OTP':fields.String
-})
+forgotuser_model = api.model(
+    'ForgotUser', 
+    {
+        'email_id': fields.String,
+        'password': fields.String,
+        'OTP':fields.String
+    }
+)
+
 forgotuser_parser = reqparse.RequestParser()
-forgotuser_parser.add_argument('username', type=str)
+forgotuser_parser.add_argument('email_id', type=str)
 forgotuser_parser.add_argument('password', type=str)
 forgotuser_parser.add_argument('OTP', type=str)
 
 forgotuser_email_model = api.model('forgotuser', {
-    'username': fields.String,
+    'email_id': fields.String,
 })
 forgotuser_email_parser = reqparse.RequestParser()
-forgotuser_email_parser.add_argument('username', type=str)
+forgotuser_email_parser.add_argument('email_id', type=str)
 
 random_OTP = 1234
-email_sent_flag = False
-@api.route('/')
+@api.route("")
 class ForgotUser(Resource):
     @api.response(200, 'Successful')
     @api.response(448, 'Bad OTP')
     @api.response(447, 'Password should be atleast 8 characters')
     @api.response(449, 'User doesn\'t exist')
-    @api.doc(description="Resets password for user using OTP")
+    @api.doc(model="ForgotUser", description="Resets password for user using OTP")
     @api.expect(forgotuser_email_parser, validate=True)
     def get(self):
         args = forgotuser_email_parser.parse_args()
-        username = args.get('username')
-        print('\nusername to send email:', username) #z5240067
-        user = User.query.filter_by(username=username).first()
+        email_id = args.get('email_id')
+        user = User.query.filter_by(email_id=email_id).first()
         if not user:
-            return {'error' : 'User doesn\'t exist'}, 449
+            return (
+            {"error": True, "message": "User doesn\'t exist"}, 
+            449,
+        )
+        
         global random_OTP
         random_OTP = random.randint(1000,9999)
         message_content = f'ALERT! You have requested password change for your Simvestr account. Please copy the 4 digit OTP {random_OTP}.'
         send_email(user.email_id, f'Forgot Password - OTP: {random_OTP}', message_content) #sends a confirmation email to the user
-        return jsonify({'message' : 'Email sent!'})
+        return ({"error": False, "message": "Email sent!"}, 200)
     
+    @api.doc(model="ForgotUser", body=forgotuser_model, description="Resets password for user using OTP")
     @api.expect(forgotuser_parser, validate=True)
     def put(self):
         args = forgotuser_parser.parse_args()
-        username = args.get('username')
+        email_id = args.get('email_id')
         password = args.get('password')
         one_time_pass = args.get('OTP')
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(email_id=email_id).first()
         if not user:
-            return {'error' : 'User doesn\'t exist'}, 449
-        print('\nusername:', username) #z5240067
-        print('password', password)
-        print('one_time_pass:',one_time_pass)
-        print("user:",user,'\n')
+            return (
+                {"error": True, "message": "User doesn\'t exist"}, 
+                449,
+            )
+        
         global random_OTP
         if len(password) < 8:
-            return {'error' : 'Password should be atleast 8 characters'}, 447
+            return (
+                {"error": True, "message": "Password should be atleast 8 characters"}, 
+                447,
+            )
+
         if one_time_pass != str(random_OTP):
-              return {'error': 'The OTP you entered is incorrect!'}, 448
+            return (
+                {"error": True, "message": "The OTP you entered is incorrect!"}, 
+                448,
+            )
+
         user.password = generate_password_hash(password, method='sha256')
         db.session.commit()
+        
         message_content = 'ALERT! Your password for Simvestr has been changed. Please contact us if this wasn\'t you.'
-        send_email(user.email_id, 'Password updated successfully', message_content) #sends a confirmation email to the user
-        return jsonify({'message' : 'Password updated!'})
+        send_email(email_id, 'Password updated successfully', message_content) #sends a confirmation email to the user
+        return (
+            {"error": False, "message": "Password updated!"}, 
+            200
+        )
 # ---------------- Forgot User --------------- #
