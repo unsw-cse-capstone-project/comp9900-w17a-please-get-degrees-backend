@@ -30,21 +30,17 @@ api = Namespace(
 signup_model = api.model(
     "Signup",
     {
-        "username": fields.String,
         "email_id": fields.String,
         "password": fields.String,
         "first_name": fields.String,
         "last_name": fields.String,
-        "other_name": fields.String,
     },
 )
 signup_parser = reqparse.RequestParser()
-signup_parser.add_argument("username", type=str)
 signup_parser.add_argument("email_id", type=str)
 signup_parser.add_argument("password", type=str)
 signup_parser.add_argument("first_name", type=str)
 signup_parser.add_argument("last_name", type=str)
-signup_parser.add_argument("other_name", type=str)
 
 
 @api.route("")
@@ -57,36 +53,26 @@ class Signup(Resource):
     @api.doc(model="Signup", body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
-        username = args.get("username")
-        email = args.get("email_id")
+        email_id = args.get("email_id")
         password = args.get("password")
         fname = args.get("first_name")
         lname = args.get("last_name")
-        oname = args.get("other_name")
-        user = User.query.filter_by(username=username).first()
-        email_check = User.query.filter_by(email_id=email).first()
-        print("User", user)
-        print("Email", email)
+        user = User.query.filter_by(email_id=email_id).first()
         if user:
-            return {"error": True, "message": "User already exists"}, 444
-        if email_check:
-            return {"error": True, "message": "Email ID already exists"}, 445
-        if len(username) < 8:
             return (
-                {"error": True, "message": "Username should be at least 8 characters"},
-                446,
+                {"error": True, "message": "User already exists"}, 
+                444,
             )
+
         if len(password) < 8:
             return (
                 {"error": True, "message": "Password should be at least 8 characters",},
                 447,
             )
         new_user = User(
-            username=username,
-            email_id=email,
+            email_id=email_id,
             first_name=fname,
             last_name=lname,
-            other_name=oname,
             role="user",
             password=generate_password_hash(password, method="sha256"),
         )
@@ -94,9 +80,10 @@ class Signup(Resource):
         db.session.commit()
         message_content = "A new user from your email ID has signed-up for our free investing simulator. Please login to start investing"
         send_email(
-            email, "User created successfully", message_content
+            email_id, "User created successfully", message_content
         )  # sends a confirmation email to the user
-        return {"error": False, "message": "New user created!"}, 200
-
-
+        return (
+            {"error": False, "message": "New user created!"}, 
+            200
+        )
 # ---------------- Signup new user ----------- #
