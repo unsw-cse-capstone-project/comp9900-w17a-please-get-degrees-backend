@@ -49,8 +49,6 @@ class Watchlist(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.now,)
 
 
-
-
 class Stock(db.Model):
     #TODO: Need to confirm max length of symbol, light research suggests 6
     #TODO: Need to confirm max length of name
