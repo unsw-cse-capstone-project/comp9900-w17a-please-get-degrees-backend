@@ -92,7 +92,7 @@ class Signup(Resource):
         )
         db.session.add(new_user)
         db.session.commit()
-        message_content = "A new user from your email ID has signed-up for our free investing simlutor. Please login to start investing"
+        message_content = "A new user from your email ID has signed-up for our free investing simulator. Please login to start investing"
         send_email(
             email, "User created successfully", message_content
         )  # sends a confirmation email to the user
