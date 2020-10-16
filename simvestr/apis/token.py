@@ -87,7 +87,7 @@ class Token(Resource):
                 200,
             )
         return (
-            {"error": "authorization has been refused for those credentials."}, 
+            {"error": True, "message": "authorization has been refused for those credentials."}, 
             401,
         )
 # ---------------- Create Token -------------- #
