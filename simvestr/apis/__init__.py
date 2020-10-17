@@ -6,7 +6,13 @@ from .user import api as ns2
 from .signup import api as ns3
 from .token import api as ns4
 from .forgotuser import api as ns5
-from .search import api as ns6
+
+from .viewportfolio import api as ns7
+from .viewportfolioprice import api as ns8
+from .viewtransaction import api as ns9
+from .marketorder import api as ns10
+from .viewstocksowned import api as ns11
+
 
 from flask import Blueprint
 
@@ -25,4 +31,9 @@ api.add_namespace(ns2, path='/user')
 api.add_namespace(ns3, path='/signup')
 api.add_namespace(ns4, path='/token')
 api.add_namespace(ns5, path='/forgotuser')
-api.add_namespace(ns6, path='/search')
+
+api.add_namespace(ns7, path='/viewportfolio')
+api.add_namespace(ns8, path='/viewportfolioprice')
+api.add_namespace(ns9, path='/viewtransaction')
+api.add_namespace(ns10, path='/marketorder')
+api.add_namespace(ns11, path='/viewstocksowned')
