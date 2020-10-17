@@ -12,13 +12,13 @@ from sqlalchemy.sql import func
 
 api = Namespace(
     "marketorder",
-    authorizations={
+    authorizations = {
         "TOKEN-BASED": {"name": "API-TOKEN", "in": "header", "type": "apiKey"}
     },
-    security="TOKEN-BASED",
-    default="Buying and selling stocks",
-    title="Simvestr",
-    description="Back-end API for placing market-orders",
+    security = "TOKEN-BASED",
+    default = "Buying and selling stocks",
+    title = "Simvestr",
+    description = "Back-end API for placing market-orders",
 )
 
 
@@ -43,13 +43,13 @@ trade_parser.add_argument("quantity", type=int)
 
 def commit_transaction(user_id, portfolio_id, symbol, cost, trade_type, total_quantity, fee):
     new_transaction = Transaction(
-        user_id=user_id, 
-        portfolio_id=portfolio_id, 
-        symbol=symbol, 
-        cost=cost,	
-        trade_type=trade_type, 
-        quantity=total_quantity, 
-        fee=fee
+        user_id = user_id, 
+        portfolio_id = portfolio_id, 
+        symbol = symbol, 
+        cost = cost,	
+        trade_type = trade_type, 
+        quantity = total_quantity, 
+        fee = fee
     )
     db.session.add(new_transaction)
     db.session.commit()
@@ -64,7 +64,7 @@ class TradeStock(Resource):
     @api.response(603, 'You currently don\'t own this stock')
     @api.response(650, 'Insufficient funds')
     @api.response(651, 'Insufficient quantity of funds to sell')
-    @api.doc(model="marketorder", body=trade_model, description="Places a market order")
+    @api.doc(model = "marketorder", body = trade_model, description = "Places a market order")
     def post(self):
         args = trade_parser.parse_args()
         user_id = args.get("user_id")
@@ -74,9 +74,9 @@ class TradeStock(Resource):
         trade_type = args.get("trade_type")
         quantity = args.get("quantity")
         
-        user = User.query.filter_by(id=user_id).first()
-        portfolio_user = Portfolio.query.filter_by(portfolio_id=portfolio_id).all()
-        portfolio_user_price = PortfolioPrice.query.filter_by(portfolio_id=portfolio_id).first()
+        user = User.query.filter_by(id = user_id).first()
+        portfolio_user = Portfolio.query.filter_by(portfolio_id = portfolio_id).all()
+        portfolio_user_price = PortfolioPrice.query.filter_by(portfolio_id = portfolio_id).first()
         
         if not user:
             return (
@@ -105,7 +105,7 @@ class TradeStock(Resource):
             )            
             total_quantity = quantity
             # find total quantity of stocks for symbol, if owned previously
-            check_stock = Transaction.query.filter_by(user_id=user_id, portfolio_id=portfolio_id, symbol=symbol, trade_type="settled").all()
+            check_stock = Transaction.query.filter_by(user_id = user_id, portfolio_id = portfolio_id, symbol = symbol, trade_type = "settled").all()
             if check_stock:
                 total_quantity = quantity + check_stock[-1].quantity
                 commit_transaction(user_id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
@@ -117,7 +117,7 @@ class TradeStock(Resource):
         if trade_type == "sell": #check if user owns this stock first, then the quantity he's trying to sell should'nt be more than he owns
             # check_stock = Transaction.query.with_entities (func.sum(Transaction.quantity).label('sum')). \
             #             filter_by(user_id=user_id, portfolio_id=portfolio_id, symbol=symbol).first()
-            check_stock = Transaction.query.filter_by(user_id=user_id, portfolio_id=portfolio_id, symbol=symbol, trade_type="settled").all()
+            check_stock = Transaction.query.filter_by(user_id = user_id, portfolio_id = portfolio_id, symbol = symbol, trade_type = "settled").all()
             if not check_stock:
                 return (
                     {"error": True, "message": "You currently don\'t own this stock"},
@@ -137,13 +137,13 @@ class TradeStock(Resource):
         portfolio_user_price.close_balance = new_close_balance #update user's balance after trade
         
         new_transaction = Transaction(
-            user_id=user_id, 
-            portfolio_id=portfolio_id, 
-            symbol=symbol, 
-            cost=cost,	
-            trade_type=trade_type, 
-            quantity=quantity, 
-            fee=fee
+            user_id = user_id, 
+            portfolio_id = portfolio_id, 
+            symbol = symbol, 
+            cost = cost,	
+            trade_type = trade_type, 
+            quantity = quantity, 
+            fee = fee
         )
         
         db.session.add(new_transaction)
