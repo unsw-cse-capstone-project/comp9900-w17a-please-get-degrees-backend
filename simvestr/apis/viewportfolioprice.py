@@ -1,6 +1,6 @@
 from flask_restx import Resource, Namespace
 from ..models import User, Watchlist, Stock, Portfolio, PortfolioPrice
-api = Namespace('view closing balance', description='Api for viewing closing balance for a User')
+api = Namespace('view closing balance', description = 'Api for viewing closing balance for a User')
 
 @api.route('/<int:user_id>')
 class PortfolioPriceQuery(Resource):
@@ -9,8 +9,8 @@ class PortfolioPriceQuery(Resource):
     def get(self, user_id: int):
         
         
-        port = Portfolio.query.filter_by(user_id=user_id).first()
-        portprice = PortfolioPrice.query.filter(PortfolioPrice.user_id==port.user_id).all()
+        port = Portfolio.query.filter_by(user_id = user_id).first()
+        portprice = PortfolioPrice.query.filter(PortfolioPrice.user_id == port.user_id).all()
         
         if not portprice:
             return (
@@ -23,11 +23,11 @@ class PortfolioPriceQuery(Resource):
                 602,
             )
         
-        data = dict(name=port.portfolio_name,
+        data = dict(name = port.portfolio_name,
                     plist = [(p.portfolio_id, p.close_balance, str(p.timestamp)) for p in portprice]
                     )
         payload = dict(
-            data=data
+            data = data
         )
         return payload
     
@@ -53,6 +53,6 @@ class PortfolioPriceUserQuery(Resource):
                 602,
             )
         
-        data = dict(user_id=port.user_id, portfolio_name=port.portfolio_name, close_balance=portprice.close_balance)
+        data = dict(user_id = port.user_id, portfolio_name = port.portfolio_name, close_balance = portprice.close_balance)
         payload = { portprice.id : data }
         return payload
