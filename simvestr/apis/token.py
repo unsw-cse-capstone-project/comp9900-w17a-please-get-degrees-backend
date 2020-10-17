@@ -91,7 +91,7 @@ class Token(Resource):
                 user.email_id, "Log in successful", message_content
             )  # sends a logged in email to the user
             return (
-                {"error": False, "token": auth.generate_token(user.email_id)},
+                {"token": auth.generate_token(user.email_id)},
                 200,
             )
         return (
