@@ -4,16 +4,16 @@ from ..models import User, Watchlist, Stock, Transaction
 
 api = Namespace(
     "view transactions",
-    authorizations={
+    authorizations = {
         "TOKEN-BASED": {"name": "API-TOKEN", "in": "header", "type": "apiKey"}
     },
-    security="TOKEN-BASED",
-    default="Buying and selling stocks",
-    title="Simvestr",
-    description="Demo api for querying transactions",
+    security = "TOKEN-BASED",
+    default = "Buying and selling stocks",
+    title = "Simvestr",
+    description = "Demo api for querying transactions",
 )
 
-@api.route('/')
+@api.route("")
 class TransactionsQuery(Resource):
     def get(self):
         transaction = Transaction.query.all()
@@ -25,7 +25,7 @@ class TransactionsQuery(Resource):
             }
             
         payload = dict(
-            data=data
+            data = data
         )
         return payload
     
@@ -33,7 +33,7 @@ class TransactionsQuery(Resource):
 @api.route('/<int:portfolio_id>')
 class TransactionQuery(Resource):
     def get(self, portfolio_id: int):
-        transaction = Transaction.query.filter_by(portfolio_id=portfolio_id).all()
+        transaction = Transaction.query.filter_by(portfolio_id = portfolio_id).all()
         data = {
                     t.id:dict(user_id = t.user_id, portfolio_id = t.portfolio_id, symbol = t.symbol, \
                           cost = t.cost, trade_type = t.trade_type, timestamp = str(t.timestamp), \
