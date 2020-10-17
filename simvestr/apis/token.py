@@ -63,9 +63,8 @@ class Token(Resource):
     @api.response(401, "Unsuccessful")
     @api.response(449, "User does not exist")
     @api.response(442, "Incorrect password, retry")
-    @api.expect(credential_parser, validate=True)
     @api.doc(
-        model="Creddential",
+        model="Credential",
         body=credential_model,
         descriptions="Generates an authentication token",
     )
