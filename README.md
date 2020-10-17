@@ -7,30 +7,85 @@ Back end of the investment simulator project for COMP9900
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
-[comment]: <> (TODO)
-What things you need to install the software and how to install them
+[comment]: <> (TODO: expand on this as we go)
+All pre-requisites are listed in [requirements.txt](requirements.txt). They have also been packaged in the distribution if that is teh prefered method for building.
 
+
+### Dev Setup
+[comment]: <> (TODO: check that this procedure works on CSE/team pcs)
+First, setup your virtual environment. You can use conda or venv.
+
+#### ```conda```
 ```
-Give examples
-```
-
-### Installing
-[comment]: <> (TODO)
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
+path_to_app $ conda create -n "simvestr" python=3.7.0 flask flask_sqlalchemy
+path_to_app $ conda activate simvestr
+(simvestr) path_to_app $ 
 ```
 
-And repeat
+#### ```pip``` 
+You must have the correct python version installed (python3.7) when using the pip method
+```
+path_to_app $ python3.7 -m venv .simvestr
+```
+
+##### Activating venv
+
+OSX or Linux:
 
 ```
-until finished
+path_to_app $ source .simvestr/bin/activate
+(.simvestr) path_to_app $ 
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+Windows:
+
+```
+path_to_app>.\simvestr\Scripts\activate
+(.simvestr) path_to_app>
+```
+
+Now either ```pip``` or ```conda``` install the dependencies:
+
+```
+(.simvestr) ($ or >) pip install -r pip_requirments.txt
+```
+
+```
+(.simvestr) ($ or >) conda install --file conda_requirments.txt
+```
+
+
+### Installation as package
+
+If you git clone the repo it can also be installed as a package in your virtual environment.
+
+```
+pip install -e .
+```
+
+or you can build from the distribution if you are unable to download packages from pip or conda.
+
+```
+pip install dist\simvestr-0.0.1.tar.gz
+```
+
+## Running the app
+
+Running the app is as simple as running the [run.py](run.py) file.
+```
+chmod -x run.py
+python run.py
+```
+
+## Packaging new versions
+
+To package simply run the [package.py](package.py) file. This will package the app into build and dist directories. Only [dist](dist) is maintained on github.
+
+```
+python package.py
+```
+
+Note: any additional packages that are required to the app must be added to the requirements files and to the [setup.py](setup.py) file.
 
 ## Running the tests
 [comment]: <> (TODO)
@@ -56,29 +111,23 @@ Give an example
 [comment]: <> (TODO)
 Add additional notes about how to deploy this on a live system
 
-## Built With
-[comment]: <> (TODO)
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-[comment]: <> (TODO)
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
 ## Versioning
 [comment]: <> (TODO)
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
 
 ## Authors
 [comment]: <> (TODO)
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+|Name | zID | Email|
+| --- | --- | ---- |
+| Jihad Meraachli | z5156156 | j.meraachli@student.unsw.edu.au | 
+| Khan Schroder-Turner | z5020362 | k.schroder-turner@student.unsw.edu.au | 
+| Kovid Sharma | z5240067 | k.sharma.1@student.unsw.edu.au | 
+| Simon Garrod | z3264122 | s.garrod@student.unsw.edu.au | 
+| Timothy Brunette | z5233368 | t.brunette@student.unsw.edu.au | /project/contributors) who participated in this project.
 
 ## License
 [comment]: <> (TODO)
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE v3 - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 [comment]: <> (TODO)
