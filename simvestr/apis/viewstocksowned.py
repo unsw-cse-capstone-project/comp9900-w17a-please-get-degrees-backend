@@ -10,13 +10,13 @@ from ..models import User, Watchlist, Stock, Transaction
 
 api = Namespace(
     "view stocks owned by user",
-    authorizations={
+    authorizations = {
         "TOKEN-BASED": {"name": "API-TOKEN", "in": "header", "type": "apiKey"}
     },
-    security="TOKEN-BASED",
-    default="Buying and selling stocks",
-    title="Simvestr",
-    description="Demo api for querying owned stocks",
+    security = "TOKEN-BASED",
+    default = "Buying and selling stocks",
+    title = "Simvestr",
+    description = "Demo api for querying owned stocks",
 )
    
 
