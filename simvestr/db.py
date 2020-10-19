@@ -34,7 +34,7 @@ def delete_db():
     db_path.unlink()
 
 def load_dummy():
-    from .models import User, Watchlist, Stock
+    from .models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction
     db = get_db()
     data_path = Path.cwd() / 'tests' / 'test_data_user.xlsx'
 
@@ -43,6 +43,9 @@ def load_dummy():
         users=User,
         stock=Stock,
         watchlist=Watchlist,
+        portfolio = Portfolio,
+        portfolioprice = PortfolioPrice,
+        transaction = Transaction
     )
 
     for sheet, model in load_mapping.items():
