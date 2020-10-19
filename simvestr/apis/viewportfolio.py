@@ -15,11 +15,14 @@ class PortfoliosQuery(Resource):
             )
 
         data = {
-                    p.id:dict(id = p.id, user_id = p.user_id, \
-                    portfolio_name = p.portfolio_name) for p in portfolio_users
+                    p.id:dict(
+                        id=p.id,
+                        user_id=p.user_id,
+                        portfolio_name=p.portfolio_name
+                    ) for p in portfolio_users
                 }
         payload = dict(
-            data = data
+            data=data
         )
         return payload
     
@@ -36,10 +39,13 @@ class PortfolioQuery(Resource):
                 601,
             )
         data = {
-                    p.id:dict(portfolio_id = p.id, user_id = p.user_id, \
-                    portfolio_name = p.portfolio_name)
+                    p.id:dict(
+                        id=p.id,
+                        user_id=p.user_id,
+                        portfolio_name=p.portfolio_name
+                    )
                 }
         payload = dict(
-            data = data
+            data=data
         )
         return payload
