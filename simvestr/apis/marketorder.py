@@ -23,7 +23,7 @@ api = Namespace(
 
 
 trade_model = api.model(
-    "marketorder",
+    "MarketOrder",
     {
         "user_id": fields.Integer,
         "portfolio_id": fields.Integer,
@@ -64,7 +64,7 @@ class TradeStock(Resource):
     @api.response(603, 'You currently don\'t own this stock')
     @api.response(650, 'Insufficient funds')
     @api.response(651, 'Insufficient quantity of funds to sell')
-    @api.doc(model = "marketorder", body = trade_model, description = "Places a market order")
+    @api.doc(model = "MarketOrder", body = trade_model, description = "Places a market order")
     def post(self):
         args = trade_parser.parse_args()
         user_id = args.get("user_id")
