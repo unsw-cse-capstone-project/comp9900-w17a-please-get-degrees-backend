@@ -43,9 +43,9 @@ def load_dummy():
         users=User,
         stock=Stock,
         watchlist=Watchlist,
-        portfolio = Portfolio,
-        portfolioprice = PortfolioPrice,
-        transaction = Transaction
+        portfolio=Portfolio,
+        portfolioprice=PortfolioPrice,
+        transaction=Transaction
     )
 
     for sheet, model in load_mapping.items():
