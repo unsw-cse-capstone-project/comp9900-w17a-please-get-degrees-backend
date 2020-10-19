@@ -12,7 +12,7 @@ from .viewstocksowned import api as ns8
 from .viewportfolio import api as ns9
 from .viewbalance import api as ns10
 from .viewtransaction import api as ns11
-from .changedetails import api as ns11
+from .changedetails import api as ns12
 
 
 from flask import Blueprint
