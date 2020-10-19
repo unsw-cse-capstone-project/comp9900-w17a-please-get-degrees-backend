@@ -69,7 +69,6 @@ class Stock(db.Model):
 class Portfolio(db.Model):
     __tablename__ = 'portfolio'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # portfolio_id = db.Column(db.Integer, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_name = db.Column(db.String(30), nullable=False)
     portfolio_price = db.relationship("PortfolioPrice", backref='portfolio', lazy='dynamic', cascade="all, delete-orphan",)
