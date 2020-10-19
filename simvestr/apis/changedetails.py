@@ -15,7 +15,7 @@ from ..models import User
 from simvestr.models import db
 
 api = Namespace(
-    "changedetails",
+    "change user details",
     authorizations={
         "TOKEN-BASED": {"name": "API-TOKEN", "in": "header", "type": "apiKey"}
     },
@@ -27,7 +27,7 @@ api = Namespace(
 
 # ------------ Change user details ----------- #
 changedetails_model = api.model(
-    "changedetails",
+    "ChangeDetails",
     {
         "user_id": fields.Integer,
         "first_name": fields.String,
@@ -45,7 +45,7 @@ changedetails_parser.add_argument("password", type=str)
 class ChangeDetails(Resource):
     @api.response(200, "Successful")
     @api.response(447, "Password should be at least 8 characters")
-    @api.doc(model="changedetails", body=changedetails_model, description="Resets user details")
+    @api.doc(model="ChangeDetails", body=changedetails_model, description="Resets user details")
     @api.expect(changedetails_parser, validate=True)
     def put(self):
         args = changedetails_parser.parse_args()
