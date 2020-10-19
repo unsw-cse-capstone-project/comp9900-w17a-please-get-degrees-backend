@@ -5,14 +5,13 @@ Created on Mon Sep 28 12:27:41 2020
 @author: Kovid
 """
 
-from flask import jsonify
 from flask_restx import Resource, fields, reqparse, Namespace
 from werkzeug.security import generate_password_hash
 
 from simvestr_email import send_email
 
 # from simvestr import create_app
-from ..models import User
+from ..models import User, Portfolio, PortfolioPrice
 from simvestr.models import db
 
 api = Namespace(
@@ -23,7 +22,7 @@ api = Namespace(
     security="TOKEN-BASED",
     default="User Login and Authentication",
     title="Simvestr",
-    description="Back-end API User signup and authentication",
+    description="Back-end API for new user signup",
 )
 
 # ---------------- Signup new user ----------- #
@@ -57,7 +56,7 @@ class Signup(Resource):
         password = args.get("password")
         fname = args.get("first_name")
         lname = args.get("last_name")
-        user = User.query.filter_by(email_id=email_id).first()
+        user = User.query.filter_by(email_id = email_id).first()
         if user:
             return (
                 {"error": True, "message": "User already exists"}, 
@@ -70,14 +69,32 @@ class Signup(Resource):
                 447,
             )
         new_user = User(
-            email_id=email_id,
-            first_name=fname,
-            last_name=lname,
-            role="user",
-            password=generate_password_hash(password, method="sha256"),
+            email_id = email_id,
+            first_name = fname,
+            last_name = lname,
+            role = "user",
+            password = generate_password_hash(password, method="sha256"),
         )
         db.session.add(new_user)
         db.session.commit()
+        
+        user = User.query.filter_by(email_id = email_id).first()
+        new_portfolio = Portfolio(
+            user_id = user.id,
+            portfolio_name = fname + '\'s Portfolio' # make a portfolio for new user
+        )
+        db.session.add(new_portfolio)
+        db.session.commit()
+        
+        port = Portfolio.query.filter_by(user_id = user.id).first()
+        new_portfolioprice = PortfolioPrice(
+            user_id = user.id,
+            portfolio_id = port.id,
+            close_balance = 100000 # give dummy amount of 100k to new user
+        )
+        db.session.add(new_portfolioprice)
+        db.session.commit()
+        
         message_content = "A new user from your email ID has signed-up for our free investing simulator. Please login to start investing"
         send_email(
             email_id, "User created successfully", message_content
