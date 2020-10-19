@@ -29,14 +29,16 @@ api = Namespace(
 changedetails_model = api.model(
     "ChangeDetails",
     {
-        "user_id": fields.Integer,
+#         "user_id": fields.Integer,
+        "email_id": fields.String,
         "first_name": fields.String,
         "last_name": fields.String,
         "password": fields.String
     },
 )
 changedetails_parser = reqparse.RequestParser()
-changedetails_parser.add_argument("user_id", type=int)
+# changedetails_parser.add_argument("user_id", type=int)
+changedetails_parser.add_argument("email_id", type=str)
 changedetails_parser.add_argument("first_name", type=str)
 changedetails_parser.add_argument("last_name", type=str)
 changedetails_parser.add_argument("password", type=str)
@@ -49,11 +51,14 @@ class ChangeDetails(Resource):
     @api.expect(changedetails_parser, validate=True)
     def put(self):
         args = changedetails_parser.parse_args()
-        user_id = args.get("user_id")
+#         user_id = args.get("user_id")
+        email_id = args.get("email_id")
         first_name = args.get("first_name")
         last_name = args.get("last_name")
         password = args.get("password")
-        user = User.query.filter_by(id = user_id).first()
+        
+#         user = User.query.filter_by(id = user_id).first()
+        user = User.query.filter_by(email_id = email_id).first()
 
         if len(password) < 8:
             return (
