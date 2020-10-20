@@ -26,35 +26,72 @@ api = Namespace(
 )
 
 # ------------ Change user details ----------- #
-changedetails_model = api.model(
-    "ChangeDetails",
+changenames_model = api.model(
+    "ChangeNames",
     {
 #         "user_id": fields.Integer,
         "email_id": fields.String,
         "first_name": fields.String,
-        "last_name": fields.String,
+        "last_name": fields.String
+    },
+)
+changenames_parser = reqparse.RequestParser()
+# changenames_parser.add_argument("user_id", type=int)
+changenames_parser.add_argument("email_id", type=str)
+changenames_parser.add_argument("first_name", type=str)
+changenames_parser.add_argument("last_name", type=str)
+
+
+changepwd_model = api.model(
+    "ChangePwd",
+    {
+#         "user_id": fields.Integer,
+        "email_id": fields.String,
         "password": fields.String
     },
 )
-changedetails_parser = reqparse.RequestParser()
-# changedetails_parser.add_argument("user_id", type=int)
-changedetails_parser.add_argument("email_id", type=str)
-changedetails_parser.add_argument("first_name", type=str)
-changedetails_parser.add_argument("last_name", type=str)
-changedetails_parser.add_argument("password", type=str)
+changepwd_parser = reqparse.RequestParser()
+changepwd_parser.add_argument("email_id", type=str)
+changepwd_parser.add_argument("password", type=str)
 
-@api.route("")
-class ChangeDetails(Resource):
+@api.route('/changenames')
+class ChangeNames(Resource):
     @api.response(200, "Successful")
-    @api.response(447, "Password should be at least 8 characters")
-    @api.doc(model="ChangeDetails", body=changedetails_model, description="Resets user details")
-    @api.expect(changedetails_parser, validate=True)
+    @api.doc(model="ChangeNames", body=changenames_model, description="Resets user\'s names")
+    @api.expect(changenames_parser, validate=True)
     def put(self):
-        args = changedetails_parser.parse_args()
+        args = changenames_parser.parse_args()
 #         user_id = args.get("user_id")
         email_id = args.get("email_id")
         first_name = args.get("first_name")
         last_name = args.get("last_name")
+        
+#         user = User.query.filter_by(id = user_id).first()
+        user = User.query.filter_by(email_id = email_id).first()
+
+        user.first_name = first_name
+        user.last_name = last_name
+        db.session.commit()
+
+        message_content = "You have succesfully changed your personal details. Let us know if this wasn\'t you."
+        send_email(
+            user.email_id, "User details have been changed", message_content
+        )  # sends a confirmation email to the user
+        return (
+            {"error": False, "message": "User details changed!"}, 
+            200
+        )
+    
+@api.route('/changepwd')
+class ChangePwd(Resource):
+    @api.response(200, "Successful")
+    @api.response(447, "Password should be at least 8 characters")
+    @api.doc(model="ChangePwd", body=changepwd_model, description="Resets password")
+    @api.expect(changepwd_parser, validate=True)
+    def put(self):
+        args = changepwd_parser.parse_args()
+#         user_id = args.get("user_id")
+        email_id = args.get("email_id")
         password = args.get("password")
         
 #         user = User.query.filter_by(id = user_id).first()
@@ -66,17 +103,15 @@ class ChangeDetails(Resource):
                 447,
             )
 
-        user.first_name = first_name
-        user.last_name = last_name
         user.password = generate_password_hash(password, method="sha256")
         db.session.commit()
 
-        message_content = "You have succesfully changed your user details. Let us know if this wasn\'t you."
+        message_content = "You have succesfully changed your password. Let us know if this wasn\'t you."
         send_email(
             user.email_id, "User details have been changed", message_content
         )  # sends a confirmation email to the user
         return (
-            {"error": False, "message": "User details changed!"}, 
+            {"error": False, "message": "Password changed!"}, 
             200
         )
 # ------------ Change user details ----------- #
