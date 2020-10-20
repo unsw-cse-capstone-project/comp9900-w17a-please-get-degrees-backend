@@ -58,10 +58,15 @@ class Stock(db.Model):
     #TODO: Need to confirm max length of symbol, light research suggests 6
     #TODO: Need to confirm max length of name
     #TODO: Handle crypto currencies codes
-    symbol = db.Column(db.String(6), unique=True, nullable=False, primary_key=True)
-    name = db.Column(db.String(200), unique=True, nullable=False)
-    currency = db.Column(db.String(3), nullable=False)
-    exchange = db.Column(db.String(200),)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    symbol = db.Column(db.String(15), nullable=False,)
+    display_symbol = db.Column(db.String(10), nullable=False,)
+    name = db.Column(db.String(200), nullable=False)
+    currency = db.Column(db.String(20), nullable=False)
+    exchange = db.Column(db.String(200), nullable=False)
+    is_crypto = db.Column(db.Boolean, default=False, nullable=False)
+
+    #CHANGE: I think these two can be deleted.
     industry = db.Column(db.String(120),)
     country = db.Column(db.String(120),)
 
@@ -100,3 +105,8 @@ class Transaction(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.now,)
     quantity = db.Column(db.Integer, nullable=False)
     fee = db.Column(db.Integer, default=0)
+
+class Exchanges(db.Model):
+    code = db.Column(db.String(10), primary_key=True,)
+    name = db.Column(db.String(60),)
+    is_crypto = db.Column(db.Boolean, default=False, nullable=False)
