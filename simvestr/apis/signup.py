@@ -56,7 +56,7 @@ class Signup(Resource):
         password = args.get("password")
         fname = args.get("first_name")
         lname = args.get("last_name")
-        user = User.query.filter_by(email_id = email_id).first()
+        user = User.query.filter_by(email_id=email_id).first()
         if user:
             return (
                 {"error": True, "message": "User already exists"}, 
@@ -78,7 +78,7 @@ class Signup(Resource):
         db.session.add(new_user)
         db.session.commit()
         
-        user = User.query.filter_by(email_id = email_id).first()
+        user = User.query.filter_by(email_id=email_id).first()
         new_portfolio = Portfolio(
             user_id = user.id,
             portfolio_name = fname + '\'s Portfolio' # make a portfolio for new user
