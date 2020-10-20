@@ -5,7 +5,7 @@ import requests
 api = Namespace('Search', description='Search stocks')
 
 
-@api.route('/<string:exchange>')
+@api.route('/exchange/<string:exchange>')
 class StockList(Resource):
     def get(self, exchange: str = 'US'):
         SYMBOL_ALL_API = lambda \
@@ -15,12 +15,11 @@ class StockList(Resource):
         return r.json()
 
 
-@api.route('/<string:stock_symbol>')
+@api.route('/symbol/<string:stock_symbol>')
 class StockQuery(Resource):
     def get(self, stock_symbol: str = 'APPL'):
         PROFILE_API = lambda \
             sym: f'https://finnhub.io/api/v1/stock/profile2?symbol={sym}&token={current_app.config["FINNHUB_API_KEY"]}'
-        print(PROFILE_API(stock_symbol))
         r = requests.get(PROFILE_API(stock_symbol))
         return r.json()
 
@@ -38,7 +37,7 @@ class get_stock_finn(Resource):
         return jsonify(stock)
 
 
-@ api.route('/symbols/<string:exchange>')
+@ api.route('/symbols')
 class get_symbols(Resource):
     def get(self, exchange: str = 'US'):
         PROFILE_API = lambda \
