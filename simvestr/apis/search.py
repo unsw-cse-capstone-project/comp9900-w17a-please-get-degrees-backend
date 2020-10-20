@@ -1,25 +1,49 @@
-from flask_restx import Resource, Namespace, reqparse
+from flask_restx import Resource, Namespace
 from ..models import User, Watchlist, Stock
-from flask import current_app, jsonify
+from flask import jsonify, current_app
 import requests
+api = Namespace('Search', description='Search stocks')
 
-api = Namespace("Search", description="Search stocks")
 
-
-@api.route("/<string:exchange>")
-@api.param("exchange", "The exchange to query for stocks")
+@api.route('/exchange/<string:exchange>')
 class StockList(Resource):
-    def get(self, exchange: str = "US"):
-        SYMBOL_ALL_API = f'https://finnhub.io/api/v1/stock/symbol?exchange={exchange}&token={current_app.config["FINNHUB_API_KEY"]}'
+    def get(self, exchange: str = 'US'):
+        SYMBOL_ALL_API = lambda \
+            ex: f'https://finnhub.io/api/v1/stock/symbol?exchange={ex}&token={current_app.config["FINNHUB_API_KEY"]}'
 
-        r = requests.get(SYMBOL_ALL_API)
+        r = requests.get(SYMBOL_ALL_API(exchange))
         return r.json()
 
 
-@api.route("/symbol/<string:stock_symbol>")
-@api.param("stock_symbol", "The stock symbol of the searched stock")
+@api.route('/symbol/<string:stock_symbol>')
 class StockQuery(Resource):
-    def get(self, stock_symbol: str = "AAPL"):
-        PROFILE_API = f'https://finnhub.io/api/v1/stock/profile2?symbol={stock_symbol}&token={current_app.config["FINNHUB_API_KEY"]}'
-        r = requests.get(PROFILE_API)
+    def get(self, stock_symbol: str = 'APPL'):
+        PROFILE_API = lambda \
+            sym: f'https://finnhub.io/api/v1/stock/profile2?symbol={sym}&token={current_app.config["FINNHUB_API_KEY"]}'
+        r = requests.get(PROFILE_API(stock_symbol))
         return r.json()
+
+
+@ api.route('/finnhub/<string:stock_symbol>')
+class get_stock_finn(Resource):
+    def get(self, stock_symbol: str = 'APPL'):
+        PROFILE_API = lambda \
+            sym: f'https://finnhub.io/api/v1/stock/profile2?symbol={sym}&token={current_app.config["FINNHUB_API_KEY"]}'
+        stock = requests.get(PROFILE_API(stock_symbol)).json()
+        PROFILE_API = lambda \
+            sym: f'https://finnhub.io/api/v1/quote?symbol={sym}&token={current_app.config["FINNHUB_API_KEY"]}'
+        r = requests.get(PROFILE_API(stock_symbol)).json()
+        stock.update(r)
+        return jsonify(stock)
+
+
+@ api.route('/symbols')
+class get_symbols(Resource):
+    def get(self, exchange: str = 'US'):
+        PROFILE_API = lambda \
+            ex: f'https://finnhub.io/api/v1/stock/symbol?exchange={ex}&token={current_app.config["FINNHUB_API_KEY"]}'
+        stocks = requests.get(PROFILE_API(exchange)).json()
+        payload = []
+        for stock in stocks:
+            payload.append(stock['symbol'])
+        return jsonify(payload)

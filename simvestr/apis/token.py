@@ -6,6 +6,7 @@ Created on Mon Sep 28 12:27:41 2020
 """
 
 from flask_restx import Resource, fields, reqparse, Namespace
+from flask import make_response
 from werkzeug.security import check_password_hash
 import jwt
 import datetime
@@ -17,11 +18,11 @@ from ..models import User
 
 
 api = Namespace(
-    "authentication",
+    "generate token",
     security="TOKEN-BASED",
     default="User Login and Authentication",
     title="Simvestr",
-    description="Back-end API User signup and authentication",
+    description="Generates a JWT, sets a cookie in browser",
 )
 
 
@@ -83,24 +84,19 @@ class Token(Resource):
                 {"error": True, "message": "Incorrect password, retry"},
                 442,
             )
-        else:
-            message_content = (
-                "You have logged into Simvestr. Login will expire after 24hours!"
-            )
-            send_email(
-                user.email_id, "Log in successful", message_content
-            )  # sends a logged in email to the user
-            return (
-                {"token": auth.generate_token(user.email_id)},
-                200,
-            )
-        return (
-            {
-                "error": True,
-                "message": "authorization has been refused for those credentials.",
-            },
-            401,
-        )
 
+        message_content = (
+            "You have logged into Simvestr. Login will expire after 24 hours!"
+        )
+        send_email(
+            user.email_id, "Log in successful", message_content
+        )  # sends a logged in email to the user
+        
+        # set cookie in browser
+        token = auth.generate_token(user.email_id)
+        resp = make_response()
+        resp.set_cookie('token', value = token, httponly = True)
+
+        return resp 
 
 # ---------------- Create Token -------------- #
