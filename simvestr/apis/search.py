@@ -21,7 +21,7 @@ class StockList(Resource):
 class StockDetails(Resource):
     def get(self, stock_symbol: str = "APPL"):
         # This can be STOCK or CRYPTO
-        type = "STOCK"
+        stockType = "STOCK"
         PROFILE_API = (
             lambda sym: f'https://finnhub.io/api/v1/stock/profile2?symbol={sym}&token={current_app.config["FINNHUB_API_KEY"]}'
         )
@@ -30,7 +30,7 @@ class StockDetails(Resource):
             lambda sym: f'https://finnhub.io/api/v1/quote?symbol={sym}&token={current_app.config["FINNHUB_API_KEY"]}'
         )
         r = requests.get(QUOTE_API(stock_symbol)).json()
-        stock.update({"type": type, "quote": r})
+        stock.update({"type": stockType, "quote": r})
         return jsonify(stock)
 
 
