@@ -1,4 +1,4 @@
-from flask_restx import Resource, Namespace, reqparse
+from flask_restx import Resource, Namespace, reqparse, fields
 from ..models import User, Watchlist, Stock
 from flask import jsonify, current_app
 import requests
@@ -35,21 +35,66 @@ class ExchangeList(Resource):
         return r.json()
 
 
+quote_model = api.model(
+    "Quote", {
+        "o": fields.Float,
+        "h": fields.Float,
+        "l": fields.Float,
+        "c": fields.Float,
+        "pc": fields.Float,
+    }
+)
+symbol_model = api.model(
+    "Symbol", {
+        "type": fields.String,
+        "symbol": fields.String,
+        "name": fields.String,
+        "exchage": fields.String,
+        "marketCapitalization": fields.Integer,
+        "quote": fields.Nested(quote_model, skip_none=False)
+    }
+)
+
 @api.route("/symbol/<string:stock_symbol>")
 class StockDetails(Resource):
+    response_fields = [
+        "type",
+        "symbol",
+        "name",
+        "exchage",
+        "marketCapitalization",
+        "quote",
+    ]
+    @api.param('stock_symbol', 'Stock or crypto symbol to be searched')
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
+    @api.doc(
+        model="Symbol",
+        body=symbol_model,
+        descriptions="Query's for stock or crypto details including price and market cap",
+    )
     def get(self, stock_symbol: str = "APPL"):
 
-        stock_q = Stock.query.filter_by(display_symbol=stock_symbol).all()
-        # This can be STOCK or CRYPTO
-        stockType = "STOCK"
+        # First hit the db to see if we've got the data
+        stock_q = Stock.query.filter_by(display_symbol=stock_symbol.upper()).all()
+
+        stockType = STOCK_TYPE_MAP[False]
         if not stock_q:
+            # If not in the db, hit the stock api to check if its there
             uri = finnhub_search(
                 query="profile",
                 arg=stock_symbol
             )
             stock = requests.get(uri).json()
+
+            # If not, it will hit the crypto api to see if the stock is there.
+            if not stock:
+                stockType = STOCK_TYPE_MAP[True]
+                uri = finnhub_search(
+                    query="profile",
+                    arg=stock_symbol
+                )
+                stock = requests.get(uri).json()
         else:
             return [
                 dict(
@@ -68,6 +113,7 @@ class StockDetails(Resource):
                 )
             for s in stock_q]
 
+        # if it cant be found, error out
         if not stock:
             return {
                 "error":True,
@@ -79,7 +125,8 @@ class StockDetails(Resource):
         )
         r = requests.get(uri).json()
         stock.update({"type": stockType, "quote": r})
-        return jsonify(stock)
+        stock = {k:v for k, v in stock if k in StockDetails.response_fields}
+        return stock
 
 
 @api.route("/symbols")
