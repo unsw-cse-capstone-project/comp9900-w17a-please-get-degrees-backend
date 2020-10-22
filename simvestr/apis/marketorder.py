@@ -5,10 +5,11 @@ Created on Mon Oct 14 11:23:31 2020
 @author: Kovid
 """
 
-from flask_restx import Resource, fields, reqparse, Namespace
+from flask_restx import Resource, fields, reqparse, Namespace, abort
 from ..models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction
 from simvestr.models import db
 from sqlalchemy.sql import func
+from .auth import requires_auth, get_email
 
 api = Namespace(
     "marketorder",
@@ -25,8 +26,8 @@ api = Namespace(
 trade_model = api.model(
     "MarketOrder",
     {
-        "user_id": fields.Integer,
-        "portfolio_id": fields.Integer,
+        # "user_id": fields.Integer,
+        # "portfolio_id": fields.Integer,
         "symbol": fields.String,
         "cost": fields.Float,
         "trade_type": fields.String,
@@ -34,8 +35,8 @@ trade_model = api.model(
     },
 )
 trade_parser = reqparse.RequestParser()
-trade_parser.add_argument("user_id", type=str)
-trade_parser.add_argument("portfolio_id", type=str)
+# trade_parser.add_argument("user_id", type=str)
+# trade_parser.add_argument("portfolio_id", type=str)
 trade_parser.add_argument("symbol", type=str)
 trade_parser.add_argument("cost", type=float)
 trade_parser.add_argument("trade_type", type=str)
@@ -59,24 +60,37 @@ def commit_transaction(user_id, portfolio_id, symbol, cost, trade_type, total_qu
 class TradeStock(Resource):
     @api.response(200, 'Successful')
     @api.response(449, 'User doesn\'t exist')
+    @api.response(401, 'Exception error')
     @api.response(601, 'Portfolio doesn\'t exist')
     @api.response(602, 'Portfolio Price doesn\'t exist')
     @api.response(603, 'You currently don\'t own this stock')
     @api.response(650, 'Insufficient funds')
     @api.response(651, 'Insufficient quantity of funds to sell')
     @api.doc(model = "MarketOrder", body = trade_model, description = "Places a market order")
+    @requires_auth
     def post(self):
         args = trade_parser.parse_args()
-        user_id = args.get("user_id")
-        portfolio_id = args.get("portfolio_id")
+        # user_id = args.get("user_id")
+        # portfolio_id = args.get("portfolio_id")            
         symbol = args.get("symbol")
         cost = args.get("cost")
         trade_type = args.get("trade_type")
         quantity = args.get("quantity")
         
-        user = User.query.filter_by(id = user_id).first()
-        portfolio_user = Portfolio.query.filter_by(id = portfolio_id).all()
-        portfolio_price_user = PortfolioPrice.query.filter_by(portfolio_id = portfolio_id).first()
+        # get user details from token
+        try:
+            email = get_email()
+        except Exception as e:
+            abort(401, e)
+            
+        # user = User.query.filter_by(id = user_id).first()
+        # portfolio_user = Portfolio.query.filter_by(id = portfolio_id).all()
+        # portfolio_price_user = PortfolioPrice.query.filter_by(portfolio_id = portfolio_id).first()
+                
+        user = User.query.filter_by(email_id = email).first()
+        portfolio_id = user.id
+        portfolio_user = Portfolio.query.filter_by(id = user.id).all()
+        portfolio_price_user = PortfolioPrice.query.filter_by(portfolio_id = user.id).first()
         
         if not user:
             return (
@@ -105,19 +119,19 @@ class TradeStock(Resource):
             )            
             total_quantity = quantity
             # find total quantity of stocks for symbol, if owned previously
-            check_stock = Transaction.query.filter_by(user_id = user_id, portfolio_id = portfolio_id, symbol = symbol, trade_type = "settled").all()
+            check_stock = Transaction.query.filter_by(user_id = user.id, portfolio_id = portfolio_id, symbol = symbol, trade_type = "settled").all()
             if check_stock:
                 total_quantity = quantity + check_stock[-1].quantity
-                commit_transaction(user_id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
+                commit_transaction(user.id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
             else:
-                commit_transaction(user_id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
+                commit_transaction(user.id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
         # ------------- Buy-ends ------------- #            
         
         # --------------- Sell --------------- #
         if trade_type == "sell": #check if user owns this stock first, then the quantity he's trying to sell should'nt be more than he owns
             # check_stock = Transaction.query.with_entities (func.sum(Transaction.quantity).label('sum')). \
             #             filter_by(user_id=user_id, portfolio_id=portfolio_id, symbol=symbol).first()
-            check_stock = Transaction.query.filter_by(user_id = user_id, portfolio_id = portfolio_id, symbol = symbol, trade_type = "settled").all()
+            check_stock = Transaction.query.filter_by(user_id = user.id, portfolio_id = portfolio_id, symbol = symbol, trade_type = "settled").all()
             if not check_stock:
                 return (
                     {"error": True, "message": "You currently don\'t own this stock"},
@@ -130,14 +144,14 @@ class TradeStock(Resource):
                 {"error": True, "message": "Insufficient quantity of funds to sell"},
                 651
                 )
-            commit_transaction(user_id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
+            commit_transaction(user.id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
             new_close_balance = portfolio_price_user.close_balance + ((cost * quantity) + fee)
         # -------------- Sell-ends ----------- #
 
         portfolio_price_user.close_balance = new_close_balance #update user's balance after trade
         
         new_transaction = Transaction(
-            user_id = user_id, 
+            user_id = user.id, 
             portfolio_id = portfolio_id, 
             symbol = symbol, 
             cost = cost,	
