@@ -51,7 +51,7 @@ class StocksOwnedQuery(Resource):
                                         user_id = owned_stock.user_id, 
                                         portfolio_id = owned_stock.portfolio_id, 
                                         symbol = owned_stock.symbol, 
-                                        cost = owned_stock.cost, 
+                                        quote = owned_stock.quote, 
                                         # trade_type = owned_stock.trade_type, 
                                         # timestamp = str(owned_stock.timestamp), 
                                         quantity = owned_stock.quantity 
