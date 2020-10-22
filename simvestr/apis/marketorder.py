@@ -29,7 +29,7 @@ trade_model = api.model(
         # "user_id": fields.Integer,
         # "portfolio_id": fields.Integer,
         "symbol": fields.String,
-        "cost": fields.Float,
+        "quote": fields.Float,
         "trade_type": fields.String,
         "quantity": fields.Integer,
     },
@@ -38,16 +38,16 @@ trade_parser = reqparse.RequestParser()
 # trade_parser.add_argument("user_id", type=str)
 # trade_parser.add_argument("portfolio_id", type=str)
 trade_parser.add_argument("symbol", type=str)
-trade_parser.add_argument("cost", type=float)
+trade_parser.add_argument("quote", type=float)
 trade_parser.add_argument("trade_type", type=str)
 trade_parser.add_argument("quantity", type=int)
 
-def commit_transaction(user_id, portfolio_id, symbol, cost, trade_type, total_quantity, fee):
+def commit_transaction(user_id, portfolio_id, symbol, quote, trade_type, total_quantity, fee):
     new_transaction = Transaction(
         user_id = user_id, 
         portfolio_id = portfolio_id, 
         symbol = symbol, 
-        cost = cost,	
+        quote = quote,	
         trade_type = trade_type, 
         quantity = total_quantity, 
         fee = fee
@@ -73,7 +73,7 @@ class TradeStock(Resource):
         # user_id = args.get("user_id")
         # portfolio_id = args.get("portfolio_id")            
         symbol = args.get("symbol")
-        cost = args.get("cost")
+        quote = args.get("quote")
         trade_type = args.get("trade_type")
         quantity = args.get("quantity")
         
@@ -110,8 +110,9 @@ class TradeStock(Resource):
         
         fee = 0
         
+        # --------------- Buy ---------------- #
         if trade_type == "buy": #check if user even has enough money to buy this stock quantity
-            new_close_balance = portfolio_price_user.close_balance - ((cost * quantity) + fee)
+            new_close_balance = portfolio_price_user.close_balance - ((quote * quantity) + fee)
             if new_close_balance < 0:
                 return (
                 {"error": True, "message": "Insufficiant funds"},
@@ -122,9 +123,9 @@ class TradeStock(Resource):
             check_stock = Transaction.query.filter_by(user_id = user.id, portfolio_id = portfolio_id, symbol = symbol, trade_type = "settled").all()
             if check_stock:
                 total_quantity = quantity + check_stock[-1].quantity
-                commit_transaction(user.id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
+                commit_transaction(user.id, portfolio_id, symbol, quote, "settled", total_quantity, fee)
             else:
-                commit_transaction(user.id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
+                commit_transaction(user.id, portfolio_id, symbol, quote, "settled", total_quantity, fee)
         # ------------- Buy-ends ------------- #            
         
         # --------------- Sell --------------- #
@@ -144,8 +145,8 @@ class TradeStock(Resource):
                 {"error": True, "message": "Insufficient quantity of funds to sell"},
                 651
                 )
-            commit_transaction(user.id, portfolio_id, symbol, cost, "settled", total_quantity, fee)
-            new_close_balance = portfolio_price_user.close_balance + ((cost * quantity) + fee)
+            commit_transaction(user.id, portfolio_id, symbol, quote, "settled", total_quantity, fee)
+            new_close_balance = portfolio_price_user.close_balance + ((quote * quantity) + fee)
         # -------------- Sell-ends ----------- #
 
         portfolio_price_user.close_balance = new_close_balance #update user's balance after trade
@@ -154,7 +155,7 @@ class TradeStock(Resource):
             user_id = user.id, 
             portfolio_id = portfolio_id, 
             symbol = symbol, 
-            cost = cost,	
+            quote = quote,	
             trade_type = trade_type, 
             quantity = quantity, 
             fee = fee
