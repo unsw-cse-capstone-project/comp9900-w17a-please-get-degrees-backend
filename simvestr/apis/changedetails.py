@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash
 from simvestr_email import send_email
 
 # from simvestr import create_app
-from ..models import User
+from ..models import User, Portfolio
 from simvestr.models import db
 
 api = Namespace(
@@ -71,6 +71,11 @@ class ChangeNames(Resource):
 
         user.first_name = first_name
         user.last_name = last_name
+        db.session.commit()
+        
+        # if name is changed, change portfolio name as well
+        portfolio = Portfolio.query.filter_by(id = user.id).first()
+        portfolio.portfolio_name = user.first_name + '\'s Portfolio' 
         db.session.commit()
 
         message_content = "You have succesfully changed your personal details. Let us know if this wasn\'t you."
