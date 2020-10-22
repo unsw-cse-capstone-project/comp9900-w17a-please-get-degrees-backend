@@ -5,32 +5,27 @@ import requests
 
 api = Namespace("search", description="Search stocks")
 
-FINNHUB_BASE = 'https://finnhub.io/api/v1/'
+FINNHUB_BASE = "https://finnhub.io/api/v1/"
 
 QUERYS = dict(
     exchange="stock/symbol?exchange=",
     profile="stock/profile2?symbol=",
-    quote="quote?symbol="
+    quote="quote?symbol=",
 )
 
-STOCK_TYPE_MAP = {
-    True:"CRYPTO",
-    False:"STOCK"
-}
+STOCK_TYPE_MAP = {True: "CRYPTO", False: "STOCK"}
 
-def finnhub_search(query:str, arg):
+
+def finnhub_search(query: str, arg):
     token = f'&token={current_app.config["FINNHUB_API_KEY"]}'
     query_string = QUERYS[query]
-    uri = f'{FINNHUB_BASE}{query_string}{arg}{token}'
+    uri = f"{FINNHUB_BASE}{query_string}{arg}{token}"
     return uri
 
 @api.route("/exchange/<string:exchange>")
 class ExchangeList(Resource):
     def get(self, exchange: str = "US"):
-        uri = finnhub_search(
-            query="exchange",
-            arg=exchange
-        )
+        uri = finnhub_search(query="exchange", arg=exchange)
         r = requests.get(uri)
         return r.json()
 
@@ -55,7 +50,7 @@ symbol_model = api.model(
     }
 )
 
-@api.route("/symbol/<string:stock_symbol>")
+@api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
     response_fields = [
         "type",
@@ -68,11 +63,7 @@ class StockDetails(Resource):
     @api.param('stock_symbol', 'Stock or crypto symbol to be searched')
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
-    @api.doc(
-        model="Symbol",
-        body=symbol_model,
-        descriptions="Query's for stock or crypto details including price and market cap",
-    )
+    @api.doc(description="Gets details for the specified stock",)
     def get(self, stock_symbol: str = "APPL"):
 
         # First hit the db to see if we've got the data
@@ -80,11 +71,7 @@ class StockDetails(Resource):
 
         stockType = STOCK_TYPE_MAP[False]
         if not stock_q:
-            # If not in the db, hit the stock api to check if its there
-            uri = finnhub_search(
-                query="profile",
-                arg=stock_symbol
-            )
+            uri = finnhub_search(query="profile", arg=stock_symbol)
             stock = requests.get(uri).json()
 
             # If not, it will hit the crypto api to see if the stock is there.
@@ -102,31 +89,37 @@ class StockDetails(Resource):
                     symbol=s.display_symbol,
                     name=s.name,
                     exchage=s.exchange,
-                    marketCapitalization=requests.get(finnhub_search(
-                        query="profile",
-                        arg=s.symbol
-                    )).json()["marketCapitalization"],
-                    quote=requests.get(finnhub_search(
-                        query='quote',
-                        arg=stock_symbol
-                    )).json()
+                    marketCapitalization=requests.get(
+                        finnhub_search(query="profile", arg=s.symbol)
+                    ).json()["marketCapitalization"],
+                    quote=requests.get(
+                        finnhub_search(query="quote", arg=stock_symbol)
+                    ).json(),
                 )
-            for s in stock_q]
+                for s in stock_q
+            ]
 
         # if it cant be found, error out
         if not stock:
             return {
-                "error":True,
-                "message": "Symbol not found. Incorrect symbol, check spelling."
+                "error": True,
+                "message": "Symbol not found. Incorrect symbol, check spelling.",
             }
-        uri = finnhub_search(
-            query="quote",
-            arg=stock_symbol
-        )
+        uri = finnhub_search(query="quote", arg=stock_symbol)
         r = requests.get(uri).json()
         stock.update({"type": stockType, "quote": r})
         stock = {k:v for k, v in stock if k in StockDetails.response_fields}
         return stock
+
+
+@api.route("/<string:name>")
+class StockSearch(Resource):
+    def get(self, name: str = "APPL"):
+        stock_q = Stock.query.filter(Stock.display_symbol.ilike(name + "%")).all()
+        return [
+            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name,)
+            for s in stock_q
+        ]
 
 
 @api.route("/symbols")
@@ -134,9 +127,6 @@ class StockSymbols(Resource):
     def get(self, exchange: str = "US"):
         stock_q = Stock.query.all()
         return [
-                dict(
-                    symbol=s.symbol,
-                    display_symbol=s.display_symbol,
-                    name=s.name,
-                )
-            for s in stock_q]
+            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name,)
+            for s in stock_q
+        ]
