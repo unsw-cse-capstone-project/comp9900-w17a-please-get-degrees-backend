@@ -8,7 +8,7 @@ Created on Mon Sep 28 12:27:41 2020
 from flask_restx import Resource, fields, reqparse, Namespace
 from werkzeug.security import generate_password_hash
 
-from simvestr_email import send_email
+from simvestr.helpers.simvestr_email import send_email
 
 # from simvestr import create_app
 from ..models import User, Portfolio, PortfolioPrice

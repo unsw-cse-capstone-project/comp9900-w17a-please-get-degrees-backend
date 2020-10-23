@@ -6,10 +6,9 @@ Created on Mon Oct 14 11:23:31 2020
 """
 
 from flask_restx import Resource, fields, reqparse, Namespace, abort
-from ..models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction
+from ..models import User, Portfolio, PortfolioPrice, Transaction
 from simvestr.models import db
-from sqlalchemy.sql import func
-from .auth import requires_auth, get_email
+from simvestr.helpers.auth import requires_auth, get_email
 
 api = Namespace(
     "marketorder",

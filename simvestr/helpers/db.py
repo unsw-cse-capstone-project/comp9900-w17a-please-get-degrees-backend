@@ -1,10 +1,14 @@
+from simvestr.models import db
+from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
+
+
 from pathlib import Path
 import pandas as pd
 import numpy as np
 from flask import current_app, g
 import click
 from flask.cli import with_appcontext
-from simvestr.models import db
+import requests
 
 
 # Defines setup and tear down the database
@@ -46,8 +50,7 @@ def bulk_add_from_df(df, db, model):
 
 
 def populate_stocks():
-    from .models import Exchanges, Stock
-    import requests
+
 
     db = get_db()
 
@@ -91,7 +94,6 @@ def populate_stocks():
 
 
 def load_dummy():
-    from .models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
     db = get_db()
     data_path = Path.cwd() / "resources" / "test_data_user.xlsx"
 

@@ -11,7 +11,7 @@ from werkzeug.security import check_password_hash
 import jwt
 import datetime
 
-from simvestr_email import send_email
+from simvestr.helpers.simvestr_email import send_email
 
 # from simvestr import create_app
 from ..models import User

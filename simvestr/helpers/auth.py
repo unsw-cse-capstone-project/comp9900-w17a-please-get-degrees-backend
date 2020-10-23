@@ -7,7 +7,7 @@ Created on Thu Oct 22 12:07:31 2020
 
 from flask_restx import abort, reqparse
 from functools import wraps
-from .verifytoken import validate_passed_token, AuthenticationToken
+from simvestr.apis.verifytoken import validate_passed_token, AuthenticationToken
 
 
 secret_key = "thisismysecretkeydonotstealit"
