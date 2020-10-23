@@ -16,7 +16,7 @@ stock_parser.add_argument('exchange', type=str)
 stock_parser.add_argument('industry', type=str)
 stock_parser.add_argument('country', type=str)
 
-
+@api.deprecated
 @api.route('/')
 class put_pstock(Resource):
     @api.expect(stock_parser, validate=True)
@@ -36,7 +36,7 @@ class put_pstock(Resource):
 
 # gets stock data from simvestr database
 
-
+@api.deprecated
 @ api.route('/stored/<symbol>')
 class get_stock(Resource):
     def get(self, symbol):
@@ -45,7 +45,7 @@ class get_stock(Resource):
 
 # gets ALL data from simvestr database
 
-
+@api.deprecated
 @ api.route('/all')
 class get_stocks(Resource):
     def get(self):

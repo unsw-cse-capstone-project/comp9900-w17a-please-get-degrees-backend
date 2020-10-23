@@ -8,11 +8,13 @@ Created on Mon Sep 28 12:27:41 2020
 from flask_restx import Resource, fields, reqparse, Namespace
 from werkzeug.security import generate_password_hash
 
-from simvestr.helpers.simvestr_email import send_email
+
 
 # from simvestr import create_app
 from ..models import User, Portfolio, PortfolioPrice
 from simvestr.models import db
+from simvestr.helpers.simvestr_email import send_email
+from simvestr.helpers.db import make_salt
 
 api = Namespace(
     "signup",
@@ -41,6 +43,19 @@ signup_parser.add_argument("password", type=str)
 signup_parser.add_argument("first_name", type=str)
 signup_parser.add_argument("last_name", type=str)
 
+def new_user(email_id: str, first_name: str, last_name: str, role: str, password: str):
+    salt = make_salt()
+    password = "".join([generate_password_hash(password, method="sha256"), salt])
+    new_user = User(
+        email_id=email_id,
+        first_name=first_name,
+        last_name=last_name,
+        role=role,
+        password=password,
+        salt=salt
+    )
+    db.session.add(new_user)
+    db.session.commit()
 
 @api.route("")
 class Signup(Resource):
@@ -59,48 +74,48 @@ class Signup(Resource):
         user = User.query.filter_by(email_id=email_id).first()
         if user:
             return (
-                {"error": True, "message": "User already exists"}, 
+                {"error": True, "message": "User already exists"},
                 444,
             )
 
         if len(password) < 8:
             return (
-                {"error": True, "message": "Password should be at least 8 characters",},
+                {"error": True, "message": "Password should be at least 8 characters", },
                 447,
             )
         new_user = User(
-            email_id = email_id,
-            first_name = fname,
-            last_name = lname,
-            role = "user",
-            password = generate_password_hash(password, method="sha256"),
+            email_id=email_id,
+            first_name=fname,
+            last_name=lname,
+            role="user",
+            password="".join([generate_password_hash(password, method="sha256"),]),
         )
         db.session.add(new_user)
         db.session.commit()
-        
+
         user = User.query.filter_by(email_id=email_id).first()
         new_portfolio = Portfolio(
-            user_id = user.id,
-            portfolio_name = fname + '\'s Portfolio' # make a portfolio for new user
+            user_id=user.id,
+            portfolio_name=fname + '\'s Portfolio'  # make a portfolio for new user
         )
         db.session.add(new_portfolio)
         db.session.commit()
-        
-        port = Portfolio.query.filter_by(user_id = user.id).first()
+
+        port = Portfolio.query.filter_by(user_id=user.id).first()
         new_portfolioprice = PortfolioPrice(
-            user_id = user.id,
-            portfolio_id = port.id,
-            close_balance = 100000 # give dummy amount of 100k to new user
+            user_id=user.id,
+            portfolio_id=port.id,
+            close_balance=100000  # give dummy amount of 100k to new user
         )
         db.session.add(new_portfolioprice)
         db.session.commit()
-        
+
         message_content = "A new user from your email ID has signed-up for our free investing simulator. Please login to start investing"
         send_email(
             email_id, "User created successfully", message_content
         )  # sends a confirmation email to the user
         return (
-            {"error": False, "message": "New user created!"}, 
+            {"error": False, "message": "New user created!"},
             200
         )
 # ---------------- Signup new user ----------- #

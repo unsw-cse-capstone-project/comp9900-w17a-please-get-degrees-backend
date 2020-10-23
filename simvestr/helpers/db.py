@@ -9,7 +9,13 @@ from flask import current_app, g
 import click
 from flask.cli import with_appcontext
 import requests
+from werkzeug.security import generate_password_hash
 
+SALT_SIZE = 6
+def make_salt():
+    valid_pw_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY0123456789!@#$%^&*()-_=+<>,./?:;{}[]`~"
+
+    return "".join(np.random.choice(list(valid_pw_chars),size=SALT_SIZE))
 
 # Defines setup and tear down the database
 
@@ -100,7 +106,6 @@ def load_dummy():
     # Order of models matterss
     load_mapping = dict(
         users=User,
-        # stock=Stock,
         watchlist=Watchlist,
         portfolio=Portfolio,
         portfolioprice=PortfolioPrice,
@@ -110,6 +115,10 @@ def load_dummy():
 
     for sheet, model in load_mapping.items():
         df = pd.read_excel(data_path, sheet_name=sheet)
+        if sheet == "users":
+            df['salt'] = [make_salt() for _ in range(len(df))]
+            df.password = df.password + df.salt
+            df.password = df.password.apply(generate_password_hash, method="sha256")
         bulk_add_from_df(df, db, model)
     db.session.close()
 

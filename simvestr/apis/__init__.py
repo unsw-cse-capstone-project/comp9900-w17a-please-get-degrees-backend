@@ -13,6 +13,7 @@ from .viewportfolio import api as ns9
 from .viewbalance import api as ns10
 from .viewtransaction import api as ns11
 from .changedetails import api as ns12
+from .watchlist import api as ns13
 
 
 from flask import Blueprint
@@ -39,3 +40,4 @@ api.add_namespace(ns9, path='/viewportfolio')
 api.add_namespace(ns10, path='/viewbalance')
 api.add_namespace(ns11, path='/viewtransaction')
 api.add_namespace(ns12, path='/changedetails')
+api.add_namespace(ns13, path='/watchlist')

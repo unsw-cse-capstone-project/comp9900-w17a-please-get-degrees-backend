@@ -51,12 +51,25 @@ auth = AuthenticationToken(secret_key, expires_in)
 
 # ---------------- Create Token -------------- #
 credential_model = api.model(
-    "Credential", {"email": fields.String, "password": fields.String}
+    "Credential",
+    {
+        "email": fields.String(
+            required=True,
+            description="User email",
+            example="simon@unsw.edu.au"
+        ),
+        "password": fields.String(
+            required=True,
+            description="User password",
+            example="pass1234"
+        )
+    }
 )
 credential_parser = reqparse.RequestParser()
 credential_parser.add_argument("email", type=str)
 credential_parser.add_argument("password", type=str)
 
+def validate_password()
 
 @api.route("")
 class Token(Resource):
@@ -73,6 +86,7 @@ class Token(Resource):
         args = credential_parser.parse_args()
         email_id = args.get("email")
         password = args.get("password")
+        print(password)
         user = User.query.filter_by(email_id=email_id).first()
         if not user:
             return (

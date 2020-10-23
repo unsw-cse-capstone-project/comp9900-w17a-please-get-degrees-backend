@@ -4,18 +4,20 @@ Created on Thu Oct 22 12:07:31 2020
 
 @author: Kovid
 """
-
+import numpy as np
 from flask_restx import abort, reqparse
 from functools import wraps
 from simvestr.apis.verifytoken import validate_passed_token, AuthenticationToken
 
 
-secret_key = "thisismysecretkeydonotstealit"
-expires_in = 86400  # 24 Hours
-auth = AuthenticationToken(secret_key, expires_in)
+SECRET_KEY = "thisismysecretkeydonotstealit"
+EXPIRES_IN = 86400  # 24 Hours
+auth = AuthenticationToken(SECRET_KEY, EXPIRES_IN)
+
 
 token_parser = reqparse.RequestParser()
 token_parser.add_argument('token', location='cookies')
+
 
         
 def requires_auth(f):
