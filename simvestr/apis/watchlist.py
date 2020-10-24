@@ -57,15 +57,19 @@ class WatchlistAll(Resource):
         #     )
         return watchlist_list
 
-
+def in_watchlist(symbol, user) -> bool:
+    watched_stock = Watchlist.query.filter_by(user_id=user.id, stock_symbol=symbol).first()
+    if watched_stock:
+        return True
+    return False
 
 
 @api.route('/symbol/<string:symbol>')
 class WatchlistPost(Resource):
     # @api.param('symbol', 'Stock or crypto symbol to be searched')
 
-    @requires_auth
-    @api.response(200, "Success")
+    @api.response(200, "Entry in watchlist")
+    @api.response(201, "Entry created")
     @api.response(404, "Symbol not found")
     @api.doc(
         description="Gets details for the specified stock",
@@ -78,19 +82,40 @@ class WatchlistPost(Resource):
         except Exception as e:
             abort(401, e)
         user = User.query.filter_by(email_id=email).first()
-        watchlist = Watchlist(
-            user_id=user.id,
-            stock_symbol=symbol.upper()
-        )
-        db.session.add(watchlist)
-        db.session.commit()
+        if not in_watchlist(symbol, user):
+            watchlist = Watchlist(
+                user_id=user.id,
+                stock_symbol=symbol.upper()
+            )
+            db.session.add(watchlist)
+            db.session.commit()
 
-        return {
-            "message": f"{symbol} added to watchlist"
-        }, 200
+            return {
+                "message": f"{symbol} added to watchlist"
+            }, 201
+        else:
+            return
 
-    # def delete(self, ):
-    #     return
+    @api.response(200, "Success")
+    @api.response(404, "Symbol not found")
+    @api.doc(
+        description="Gets details for the specified stock",
+        security=["TOKEN-BASED"]
+    )
+    @requires_auth
+    def delete(self, symbol: str):
+        try:
+            email = get_email()
+        except Exception as e:
+            abort(401, e)
+        user = User.query.filter_by(email_id=email).first()
+        watchlist = Watchlist.query.filter_by(user_id=user.id, stock_symbol=symbol).first()
+        if watchlist:
+            db.session.delete(watchlist)
+            db.session.commit()
+            return f"{symbol} deleted from watchlist", 200
+        else:
+            return f"{symbol} not in watchlist", 404
 
 # @api.route('/<string:watchlist_id>/<string:symbol>')
 # class WatchlistSingle(Resource):
