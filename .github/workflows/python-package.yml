@@ -31,3 +31,17 @@ jobs:
     - name: Run the package script
       run: |
         python setup.py sdist bdist_wheel
+
+    - name: Commit build files
+      run:
+        git commit -m "Build distribution" -a
+
+    - name: GitHub Push
+      uses: ad-m/github-push-action@v0.6.0
+
+    - name: Push changes
+      uses: ad-m/github-push-action@dev
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+
