@@ -1,17 +1,20 @@
-from ..models import User, Watchlist, Stock
+from simvestr.models import db, User, Watchlist, Stock
 from simvestr.helpers.auth import requires_auth, get_email
 
-
-from flask_restx import Resource, Namespace
-from flask import current_app, request
+from collections import defaultdict
 import requests
-authorizations={
-        "TOKEN-BASED": {
-            "name": "API-TOKEN",
-            "in": "header",
-            "type": "apiKey"
-        }
+
+from flask_restx import Resource, Namespace, abort
+from flask import current_app, request
+
+
+authorizations = {
+    "TOKEN-BASED": {
+        "name": "API-TOKEN",
+        "in": "header",
+        "type": "apiKey"
     }
+}
 api = Namespace(
     'watchlist',
     authorizations=authorizations,
@@ -20,21 +23,71 @@ api = Namespace(
 )
 
 
-@api.route('/<string:watchlist_id>')
-class Watchlist(Resource):
-    @api.param('watchlist_id', 'Stock or crypto symbol to be searched')
+@api.route('/')
+class WatchlistAll(Resource):
+    # @api.param('watchlist_id', 'Stock or crypto symbol to be searched')
     @api.response(200, "Success")
-    # @api.response(404, "Symbol not found")
     @api.doc(
         description="Gets details for the specified stock",
         security=["TOKEN-BASED"]
     )
-    # @requires_auth
-    def get(self, watchlist_id):
-        email = get_email()
-        user_id = User.query.filter_by(email_id=email)
-        watchlist = Watchlist.query.filter_by()
-        return
+    @requires_auth
+    def get(self):
+        # get user details from token
+        try:
+            email = get_email()
+        except Exception as e:
+            abort(401, e)
+        user_id = User.query.filter_by(email_id=email).first()
+        watchlist = Watchlist.query.filter_by(user_id=user_id.id, ).all()
+        watchlist_list = []
+        for stock in watchlist:
+            watchlist_list.append(
+                {
+                    "symbol": stock.stock_symbol
+                }
+            )
+        # Use this logic if we allow users to have multiple watch lsits.
+        # watchlist_list = defaultdict(list)
+        # for stock in watchlist:
+        #     watchlist_list[stock.id].append(
+        #         {
+        #             "symbol": stock.stock_symbol
+        #         }
+        #     )
+        return watchlist_list
+
+
+
+
+@api.route('/symbol/<string:symbol>')
+class WatchlistPost(Resource):
+    # @api.param('symbol', 'Stock or crypto symbol to be searched')
+
+    @requires_auth
+    @api.response(200, "Success")
+    @api.response(404, "Symbol not found")
+    @api.doc(
+        description="Gets details for the specified stock",
+        security=["TOKEN-BASED"]
+    )
+    @requires_auth
+    def post(self, symbol: str):
+        try:
+            email = get_email()
+        except Exception as e:
+            abort(401, e)
+        user = User.query.filter_by(email_id=email).first()
+        watchlist = Watchlist(
+            user_id=user.id,
+            stock_symbol=symbol.upper()
+        )
+        db.session.add(watchlist)
+        db.session.commit()
+
+        return {
+            "message": f"{symbol} added to watchlist"
+        }, 200
 
     # def delete(self, ):
     #     return

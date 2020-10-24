@@ -24,17 +24,33 @@ api = Namespace(
 trade_model = api.model(
     "MarketOrder",
     {
-        # "user_id": fields.Integer,
-        # "portfolio_id": fields.Integer,
-        "symbol": fields.String,
-        "quote": fields.Float,
-        "trade_type": fields.String,
-        "quantity": fields.Integer,
+        "symbol": fields.String(
+            required=True,
+            description="Stock symbol for transaction",
+            example="AAPL"
+        ),
+        "quote": fields.Float(
+            required=True,
+            description="Quote price per share of stock",
+            example="1200"
+        ),
+        "trade_type": fields.String(
+            required=True,
+            description="Stock symbol for transaction",
+            example="buy",
+            enum=[
+                "buy",
+                "sell"
+            ]
+        ),
+        "quantity": fields.Integer(
+            required=True,
+            description="Quote price per share of stock",
+            example="5"
+        ),
     },
 )
 trade_parser = reqparse.RequestParser()
-# trade_parser.add_argument("user_id", type=str)
-# trade_parser.add_argument("portfolio_id", type=str)
 trade_parser.add_argument("symbol", type=str)
 trade_parser.add_argument("quote", type=float)
 trade_parser.add_argument("trade_type", type=str)
