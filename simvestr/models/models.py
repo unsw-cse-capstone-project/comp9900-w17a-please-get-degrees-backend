@@ -100,7 +100,7 @@ class Transaction(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
     symbol = db.Column(db.String(6), nullable=False)
-    cost = db.Column(db.Integer, nullable=False)
+    quote = db.Column(db.Integer, nullable=False)
     trade_type = db.Column(ChoiceType(TRADE_CHOICES))
     timestamp = db.Column(db.DateTime, default=datetime.now,)
     quantity = db.Column(db.Integer, nullable=False)

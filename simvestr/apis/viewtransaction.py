@@ -19,7 +19,7 @@ class TransactionsQuery(Resource):
         transaction = Transaction.query.all()
         data = {
                     t.id:dict(user_id = t.user_id, portfolio_id = t.portfolio_id, symbol = t.symbol, \
-                          cost = t.cost, trade_type = t.trade_type, timestamp = str(t.timestamp), \
+                          quote = t.quote, trade_type = t.trade_type, timestamp = str(t.timestamp), \
                           quantity = t.quantity, fee = t.fee) 
                 for t in transaction
             }
@@ -36,7 +36,7 @@ class TransactionQuery(Resource):
         transaction = Transaction.query.filter_by(portfolio_id = portfolio_id).all()
         data = {
                     t.id:dict(user_id = t.user_id, portfolio_id = t.portfolio_id, symbol = t.symbol, \
-                          cost = t.cost, trade_type = t.trade_type, timestamp = str(t.timestamp), \
+                          quote = t.quote, trade_type = t.trade_type, timestamp = str(t.timestamp), \
                           quantity = t.quantity, fee = t.fee) 
                 for t in transaction
             }

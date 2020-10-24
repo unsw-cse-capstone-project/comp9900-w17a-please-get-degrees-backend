@@ -5,13 +5,7 @@ Created on Sun Oct 18 11:13:21 2020
 @author: Kovid
 """
 
-from flask_restx import Resource, fields, reqparse, Namespace, abort
-from flask import Flask, request, make_response
-from functools import wraps
-from http import cookies
-# import urllib
-# import httplib2
-import urllib.request as urllib
+from flask_restx import Resource, reqparse, Namespace
 import jwt
 import datetime
 
@@ -67,11 +61,9 @@ def validate_passed_token(cookie):
 
 
 @api.route("")
-class SetCookie(Resource):
+class VerifyToken(Resource):
     @api.response(200, "Successful")
     @api.response(401, "Unsuccessful")
-    # @requires_valid_token
-
     def get(self):
         args = token_parser.parse_args() # From http cookies
         token = args.get("token")
