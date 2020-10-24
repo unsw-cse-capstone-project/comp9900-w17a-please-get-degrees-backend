@@ -38,38 +38,32 @@ class StockDetails(Resource):
     @api.doc(description="Gets details for the specified stock",)
     def get(self, stock_symbol: str = "APPL"):
 
-        stock_q = Stock.query.filter_by(display_symbol=stock_symbol).all()
+        # Since we are fetching from finnhub we need to fetch anyway, so why hit the DB at all?
+        details = requests.get(finnhub_search(query="profile", arg=stock_symbol)).json()
+        quote = requests.get(finnhub_search(query="quote", arg=stock_symbol)).json()
+        print(details)
         # This can be STOCK or CRYPTO
         stockType = "STOCK"
-        if not stock_q:
-            uri = finnhub_search(query="profile", arg=stock_symbol)
-            stock = requests.get(uri).json()
-        else:
-            return [
-                dict(
-                    type=STOCK_TYPE_MAP[s.is_crypto],
-                    symbol=s.display_symbol,
-                    name=s.name,
-                    exchage=s.exchange,
-                    marketCapitalization=requests.get(
-                        finnhub_search(query="profile", arg=s.symbol)
-                    ).json()["marketCapitalization"],
-                    quote=requests.get(
-                        finnhub_search(query="quote", arg=stock_symbol)
-                    ).json(),
-                )
-                for s in stock_q
-            ]
-
-        if not stock:
-            return {
-                "error": True,
-                "message": "Symbol not found. Incorrect symbol, check spelling.",
+        if details and quote:
+            stock = {
+                "type": stockType,
+                "symbol": details["ticker"],
+                "name": details["name"],
+                "industry": details["finnhubIndustry"],
+                "exchange": details["exchange"],
+                "logo": details["logo"],
+                "marketCapitalization": details["marketCapitalization"],
+                "quote": quote,
             }
-        uri = finnhub_search(query="quote", arg=stock_symbol)
-        r = requests.get(uri).json()
-        stock.update({"type": stockType, "quote": r})
-        return jsonify(stock)
+            return jsonify(stock)
+        else:
+            return (
+                {
+                    "error": True,
+                    "message": "Symbol not found. Incorrect symbol, check spelling.",
+                },
+                404,
+            )
 
 
 @api.route("/<string:name>")
