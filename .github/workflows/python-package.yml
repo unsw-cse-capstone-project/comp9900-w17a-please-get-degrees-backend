@@ -34,7 +34,6 @@ jobs:
         python setup.py sdist bdist_wheel
 
     - name: Commit build files
-      uses: actions/checkout@dev
       run: |
         git config --global user.name "Github Action"
         git config --global user.email "KhanMechAI@users.noreply.github.com"
