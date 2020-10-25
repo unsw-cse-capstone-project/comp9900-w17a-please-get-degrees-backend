@@ -76,7 +76,7 @@ class StockDetails(Resource):
             search(source_api="finnhub", query="quote", arg=stock_symbol)
         ).json()
         print(details)
-        # This can be STOCK or CRYPTO
+        # This can be STOCK or CRYPTO, for now only handle STOCK
         stockType = "STOCK"
         if details and quote:
             stock = {
