@@ -23,6 +23,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -33,17 +34,18 @@ jobs:
         python setup.py sdist bdist_wheel
 
     - name: Commit build files
-      run:
-        git config --local user.email "khan.schroderturner@gmail.com"
-        git config --local user.name "GitHub Action"
-        git commit -m "Build distribution" -a
+      run: |
+        git config --global user.name "Github Action"
+        git config --global user.email "KhanMechAI@users.noreply.github.com"
+        git commit -am "Build distribution"
+        git push
 
-    - name: GitHub Push
-      uses: ad-m/github-push-action@v0.6.0
-
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.ref }}
-
+#    - name: GitHub Push
+#      uses: ad-m/github-push-action@v0.6.0
+#
+#    - name: Push changes
+#      uses: ad-m/github-push-action@master
+#      with:
+#        github_token: ${{ secrets.GITHUB_TOKEN }}
+#        branch: ${{ github.ref }}
+#        git config --global user.email "KhanMechAI@users.noreply.github.com"

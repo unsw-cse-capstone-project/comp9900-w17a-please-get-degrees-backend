@@ -1,46 +1,80 @@
-from flask_restx import Resource, Namespace, reqparse
-from ..models import User, Watchlist, Stock
-from flask import jsonify, current_app
 import requests
 
+from flask_restx import Resource, Namespace, reqparse, fields
+from flask import jsonify, current_app
+
+from simvestr.models import User, Watchlist, Stock
+from simvestr.helpers.search import search, STOCK_TYPE_MAP
+
 api = Namespace("search", description="Search stocks")
-
-FINNHUB_BASE = "https://finnhub.io/api/v1/"
-
-QUERYS = dict(
-    exchange="stock/symbol?exchange=",
-    profile="stock/profile2?symbol=",
-    quote="quote?symbol=",
-)
-
-STOCK_TYPE_MAP = {True: "CRYPTO", False: "STOCK"}
-
-
-def finnhub_search(query: str, arg):
-    token = f'&token={current_app.config["FINNHUB_API_KEY"]}'
-    query_string = QUERYS[query]
-    uri = f"{FINNHUB_BASE}{query_string}{arg}{token}"
-    return uri
 
 
 @api.route("/exchange/<string:exchange>")
 class ExchangeList(Resource):
     def get(self, exchange: str = "US"):
-        uri = finnhub_search(query="exchange", arg=exchange)
+        uri = search(source_api="finnhub", query="exchange", arg=exchange)
         r = requests.get(uri)
         return r.json()
 
 
+quote_model = api.model(
+    "Quote",
+    {
+        "o": fields.Float,
+        "h": fields.Float,
+        "l": fields.Float,
+        "c": fields.Float,
+        "pc": fields.Float,
+    },
+)
+base_symbol_model = api.model(
+    "Symbol",
+    {
+        "type": fields.String,
+        "symbol": fields.String,
+        "display_symbol": fields.String,
+        "name": fields.String,
+    },
+)
+symbol_model = api.model(
+    "Symbol",
+    {
+        "type": fields.String,
+        "symbol": fields.String,
+        "name": fields.String,
+        "exchage": fields.String,
+        "marketCapitalization": fields.Integer,
+        "quote": fields.Nested(quote_model, skip_none=False),
+    },
+)
+
+
 @api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
+    response_fields = [
+        "type",
+        "symbol",
+        "name",
+        "industry",
+        "exchange",
+        "logo",
+        "marketCapitalization",
+        "quote",
+    ]
+
+    @api.marshal_with(symbol_model)
+    @api.param("stock_symbol", "Stock or crypto symbol to be searched")
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
     @api.doc(description="Gets details for the specified stock",)
     def get(self, stock_symbol: str = "APPL"):
-
         # Since we are fetching from finnhub we need to fetch anyway, so why hit the DB at all?
-        details = requests.get(finnhub_search(query="profile", arg=stock_symbol)).json()
-        quote = requests.get(finnhub_search(query="quote", arg=stock_symbol)).json()
+        details = requests.get(
+            search(source_api="finnhub", query="profile", arg=stock_symbol)
+        ).json()
+        quote = requests.get(
+            search(source_api="finnhub", query="quote", arg=stock_symbol)
+        ).json()
         print(details)
         # This can be STOCK or CRYPTO
         stockType = "STOCK"
@@ -66,14 +100,14 @@ class StockDetails(Resource):
             )
 
 
-@api.route("/<string:name>")
-class StockSearch(Resource):
-    def get(self, name: str = "APPL"):
-        stock_q = Stock.query.filter(Stock.display_symbol.ilike(name + "%")).all()
-        return [
-            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name,)
-            for s in stock_q
-        ]
+# @api.route("/<string:name>")
+# class StockSearch(Resource):
+#     def get(self, name: str = "APPL"):
+#         stock_q = Stock.query.filter(Stock.display_symbol.ilike(name + "%")).all()
+#         return [
+#             dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
+#             for s in stock_q
+#         ]
 
 
 @api.route("/symbols")
