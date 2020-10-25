@@ -91,12 +91,12 @@ class Token(Resource):
         send_email(
             user.email_id, "Log in successful", message_content
         )  # sends a logged in email to the user
-        
+
         # set cookie in browser
         token = auth.generate_token(user.email_id)
         resp = make_response()
-        resp.set_cookie('token', value = token, httponly = True)
+        resp.set_cookie("token", value=token, httponly=True)
+        return resp
 
-        return resp 
 
 # ---------------- Create Token -------------- #
