@@ -91,12 +91,15 @@ class Token(Resource):
         send_email(
             user.email_id, "Log in successful", message_content
         )  # sends a logged in email to the user
-        
+
         # set cookie in browser
         token = auth.generate_token(user.email_id)
         resp = make_response()
-        resp.set_cookie('token', value = token, httponly = True)
+        resp.set_cookie("token", value=token, httponly=True)
+        # resp.headers["Access-Control-Allow-Credentials"] = True
+        # resp.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+        # resp.headers["Access-Control-Allow-Headers"] = "http://localhost:3000"
+        return resp
 
-        return resp 
 
 # ---------------- Create Token -------------- #
