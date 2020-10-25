@@ -13,6 +13,7 @@ cryptography @ file:///opt/concourse/worker/volumes/live/449c9d42-da39-4138-6bf0
 et-xmlfile==1.0.1
 finnhub-python==2.2.1
 Flask==1.1.2
+flask-cors==3.0.9
 flask-restx @ file:///tmp/build/80754af9/flask-restx_1597772017480/work
 Flask-SQLAlchemy @ file:///tmp/build/80754af9/flask-sqlalchemy_1596836624296/work
 google-auth @ file:///tmp/build/80754af9/google-auth_1601995530934/work
