@@ -64,7 +64,7 @@ class Stock(db.Model):
     name = db.Column(db.String(200), nullable=False)
     currency = db.Column(db.String(20), nullable=False)
     exchange = db.Column(db.String(200), nullable=False)
-    is_crypto = db.Column(db.Boolean, default=False, nullable=False)
+    type = db.Column(db.String(10), default="stock", nullable=False)
 
     #CHANGE: I think these two can be deleted.
     industry = db.Column(db.String(120),)
