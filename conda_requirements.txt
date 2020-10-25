@@ -12,6 +12,7 @@ click=7.1.2=py_0
 colorama=0.4.3=py_0
 cryptography=3.1.1=py37h7a1dbc1_0
 flask=1.1.2=py_0
+flask-cors=3.0.9=py_0
 flask-restx=0.2.0=py_0
 flask-sqlalchemy=2.4.4=py_0
 importlib-metadata=1.7.0=py37_0
