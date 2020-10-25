@@ -25,6 +25,7 @@ quote_model = api.model(
         "l": fields.Float,
         "c": fields.Float,
         "pc": fields.Float,
+        "t": fields.Integer,
     },
 )
 base_symbol_model = api.model(
@@ -36,14 +37,16 @@ base_symbol_model = api.model(
         "name": fields.String,
     },
 )
-symbol_model = api.model(
-    "Symbol",
+details_model = api.model(
+    "Details",
     {
         "type": fields.String,
         "symbol": fields.String,
         "name": fields.String,
-        "exchage": fields.String,
-        "marketCapitalization": fields.Integer,
+        "industry": fields.String,
+        "exchange": fields.String,
+        "logo": fields.String,
+        "marketCapitalization": fields.Float,
         "quote": fields.Nested(quote_model, skip_none=False),
     },
 )
@@ -51,30 +54,16 @@ symbol_model = api.model(
 
 @api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
-    response_fields = [
-        "type",
-        "symbol",
-        "name",
-        "industry",
-        "exchange",
-        "logo",
-        "marketCapitalization",
-        "quote",
-    ]
-
-    @api.marshal_with(symbol_model)
     @api.param("stock_symbol", "Stock or crypto symbol to be searched")
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
-    @api.doc(description="Gets details for the specified stock",)
-    def get(self, stock_symbol: str = "APPL"):
+    @api.doc(
+        model="Details", description="Gets details for the specified stock",
+    )
+    def get(self, stock_symbol: str = "AAPL"):
         # Since we are fetching from finnhub we need to fetch anyway, so why hit the DB at all?
-        details = requests.get(
-            search(source_api="finnhub", query="profile", arg=stock_symbol)
-        ).json()
-        quote = requests.get(
-            search(source_api="finnhub", query="quote", arg=stock_symbol)
-        ).json()
+        details = search(source_api="finnhub", query="profile", arg=stock_symbol)
+        quote = search(source_api="finnhub", query="quote", arg=stock_symbol)
         print(details)
         # This can be STOCK or CRYPTO, for now only handle STOCK
         stockType = "STOCK"
