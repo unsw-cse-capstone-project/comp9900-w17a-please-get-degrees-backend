@@ -50,9 +50,13 @@ class User(db.Model):
 
 
 class Watchlist(db.Model):
+    __tablename__ = 'watchlist'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # stock_id = db.Column(db.Integer, db.ForeignKey('stock.id'))
     stock_symbol = db.Column(db.Integer, db.ForeignKey('stock.symbol'))
+
+    stock = db.relationship("Stock", back_populates="watchlist")
     timestamp = db.Column(db.DateTime, default=datetime.now,)
 
 
@@ -60,6 +64,7 @@ class Stock(db.Model):
     #TODO: Need to confirm max length of symbol, light research suggests 6
     #TODO: Need to confirm max length of name
     #TODO: Handle crypto currencies codes
+    __tablename__ = "stock"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     symbol = db.Column(db.String(15), nullable=False,)
     display_symbol = db.Column(db.String(10), nullable=False,)
@@ -67,6 +72,8 @@ class Stock(db.Model):
     currency = db.Column(db.String(20), nullable=False)
     exchange = db.Column(db.String(200), nullable=False)
     type = db.Column(db.String(10), default="stock", nullable=False)
+
+    watchlist = db.relationship("Watchlist", back_populates="stock")
 
     #CHANGE: I think these two can be deleted.
     industry = db.Column(db.String(120),)
@@ -112,3 +119,4 @@ class Exchanges(db.Model):
     code = db.Column(db.String(10), primary_key=True,)
     name = db.Column(db.String(60),)
     is_crypto = db.Column(db.Boolean, default=False, nullable=False)
+    priority = db.Column(db.Integer,)

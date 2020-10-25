@@ -1,6 +1,6 @@
 from simvestr.models import db
 from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
-
+from simvestr.helpers.search import search
 
 from pathlib import Path
 import pandas as pd
@@ -60,18 +60,15 @@ def populate_stocks():
 
     db = get_db()
 
-    non_crypto_exchanges = Exchanges.query.with_entities(Exchanges.code).filter_by(is_crypto=False).all()
-    crypto_exchanges = Exchanges.query.with_entities(Exchanges.code).filter_by(is_crypto=True).all()
-    SYMBOL_ALL_API = lambda \
-            ex: f"https://finnhub.io/api/v1/stock/symbol?exchange={ex}&" \
-                f"token={current_app.config['FINNHUB_API_KEY']}"
-    CRYPTO_SYMBOL_ALL_API = lambda \
-            ex: f"https://finnhub.io/api/v1/crypto/symbol?exchange={ex}&" \
-                f"token={current_app.config['FINNHUB_API_KEY']}"
+    non_crypto_exchanges = Exchanges.query.with_entities(Exchanges.code).filter(
+        Exchanges.is_crypto==False, Exchanges.priority != None).all()
+    crypto_exchanges = Exchanges.query.with_entities(Exchanges.code).filter(
+        Exchanges.is_crypto==True, Exchanges.priority != None).all()
+
     non_crypto_exchanges = [x[0] for x in non_crypto_exchanges]
     crypto_exchanges = [x[0] for x in crypto_exchanges]
     for exchange in non_crypto_exchanges:
-        r = requests.get(SYMBOL_ALL_API(exchange))
+        r = search("finnhub", )
         df = pd.DataFrame.from_records(r.json())
         df["is_crypto"] = False
         df["exchange"] = exchange

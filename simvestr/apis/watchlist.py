@@ -1,12 +1,11 @@
 from simvestr.models import db, User, Watchlist, Stock
 from simvestr.helpers.auth import requires_auth, get_email
-
+from simvestr.helpers.search import search
 from collections import defaultdict
 import requests
 
 from flask_restx import Resource, Namespace, abort
 from flask import current_app, request
-
 
 authorizations = {
     "TOKEN-BASED": {
@@ -38,13 +37,25 @@ class WatchlistAll(Resource):
             email = get_email()
         except Exception as e:
             abort(401, e)
-        user_id = User.query.filter_by(email_id=email).first()
-        watchlist = Watchlist.query.filter_by(user_id=user_id.id, ).all()
+        print(email)
+        user = User.query.filter_by(email_id=email).first()
+        print(user)
+        # watchlist = Watchlist.query.filter_by(user_id=user_id.id).all()
+        watchlist = Watchlist.query.filter_by(
+            user_id=user.id
+        ).join(
+            Stock,
+            isouter=True,
+        ).all()
+        print(watchlist)
         watchlist_list = []
         for stock in watchlist:
+            print(stock)
             watchlist_list.append(
                 {
-                    "symbol": stock.stock_symbol
+                    "symbol": stock.stock_symbol,
+                    "name": stock.name,
+                    "quote": search("finnhub", "quote", stock.stock_symbol)
                 }
             )
         # Use this logic if we allow users to have multiple watch lsits.
@@ -56,6 +67,7 @@ class WatchlistAll(Resource):
         #         }
         #     )
         return watchlist_list
+
 
 def in_watchlist(symbol, user) -> bool:
     watched_stock = Watchlist.query.filter_by(user_id=user.id, stock_symbol=symbol).first()
@@ -91,8 +103,8 @@ class WatchlistPost(Resource):
             db.session.commit()
 
             return {
-                "message": f"{symbol} added to watchlist"
-            }, 201
+                       "message": f"{symbol} added to watchlist"
+                   }, 201
         else:
             return
 
