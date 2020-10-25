@@ -36,7 +36,6 @@ jobs:
     - name: Commit build files
       run:
         git config --global user.name "Github Action"
-#        git config --global user.email "KhanMechAI@users.noreply.github.com"
         git commit -m "Build distribution" -a
         git push
 
@@ -48,4 +47,4 @@ jobs:
 #      with:
 #        github_token: ${{ secrets.GITHUB_TOKEN }}
 #        branch: ${{ github.ref }}
-
+#        git config --global user.email "KhanMechAI@users.noreply.github.com"
