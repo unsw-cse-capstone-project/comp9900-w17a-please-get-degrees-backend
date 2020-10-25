@@ -36,7 +36,7 @@ jobs:
     - name: Commit build files
       run:
         git config --global user.name "Github Action"
-        git commit -m "Build distribution" -a
+        git commit -m "Build distribution"
         git push
 
 #    - name: GitHub Push
