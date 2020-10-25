@@ -36,9 +36,9 @@ jobs:
     - name: Commit build files
       run:
         git config --global user.name "Github Action"
-        git config --global user.email "KhanMechAI@users.noreply.github.com"
-#        git commit -m "Build distribution" -a
-#        git push
+#        git config --global user.email "KhanMechAI@users.noreply.github.com"
+        git commit -m "Build distribution" -a
+        git push
 
 #    - name: GitHub Push
 #      uses: ad-m/github-push-action@v0.6.0
