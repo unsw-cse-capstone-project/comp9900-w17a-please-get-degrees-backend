@@ -34,9 +34,10 @@ jobs:
         python setup.py sdist bdist_wheel
 
     - name: Commit build files
-      run:
+      run: |
         git config --global user.name "Github Action"
-        git commit -m "Build distribution"
+        git config --global user.email "KhanMechAI@users.noreply.github.com"
+        git commit -am "Build distribution"
         git push
 
 #    - name: GitHub Push
