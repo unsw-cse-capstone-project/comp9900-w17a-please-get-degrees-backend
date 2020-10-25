@@ -96,9 +96,6 @@ class Token(Resource):
         token = auth.generate_token(user.email_id)
         resp = make_response()
         resp.set_cookie("token", value=token, httponly=True)
-        # resp.headers["Access-Control-Allow-Credentials"] = True
-        # resp.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
-        # resp.headers["Access-Control-Allow-Headers"] = "http://localhost:3000"
         return resp
 
 
