@@ -34,8 +34,8 @@ jobs:
 
     - name: Commit build files
       run:
-        git config --local user.email "khan.schroderturner@gmail.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.email
+        git config --local user.name
         git commit -m "Build distribution" -a
 
     - name: GitHub Push
