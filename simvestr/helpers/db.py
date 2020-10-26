@@ -164,7 +164,7 @@ def load_dummy():
 
         port_df = df_map['portfolio']
         port_df = port_df[port_df.user_id == user.id]
-        port = Portfolio(portfolio_name=port_df["portfolio_name"].values)
+        port = Portfolio(portfolio_name=port_df.to_dict(orient="records")[0]["portfolio_name"])
         port.transactions = []
         # port.portfolio_prices = []
 

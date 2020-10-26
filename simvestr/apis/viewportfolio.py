@@ -2,6 +2,7 @@ from flask_restx import Resource, Namespace
 from ..models import User, Watchlist, Stock, Portfolio, PortfolioPrice
 api = Namespace('view portfolios', description = 'Api for viewing Portfolios')
 
+#TODO: Need to protect this endpoint from non-users
 @api.route("")
 class PortfoliosQuery(Resource):
     @api.response(200, 'Successful')
@@ -17,14 +18,14 @@ class PortfoliosQuery(Resource):
         data = {
                     p.id:dict(
                         id=p.id,
-                        user_id=p.user_id,
+                        user_id=p.user.id,
                         portfolio_name=p.portfolio_name
                     ) for p in portfolio_users
                 }
         payload = dict(
             data=data
         )
-        return payload
+        return payload, 200
     
 @api.route('/<int:portfolio_id>')
 class PortfolioQuery(Resource):
@@ -41,7 +42,7 @@ class PortfolioQuery(Resource):
         data = {
                     p.id:dict(
                         id=p.id,
-                        user_id=p.user_id,
+                        user_id=p.user.id,
                         portfolio_name=p.portfolio_name
                     )
                 }
