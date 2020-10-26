@@ -1,10 +1,12 @@
 from simvestr.models import db, User, Watchlist, Stock
 from simvestr.helpers.auth import requires_auth, get_email
 from simvestr.helpers.search import search
+
 from collections import defaultdict
 import requests
+import heapq
 
-from flask_restx import Resource, Namespace, abort
+from flask_restx import Resource, Namespace, abort, fields
 from flask import current_app, request
 
 authorizations = {
@@ -19,6 +21,37 @@ api = Namespace(
     authorizations=authorizations,
     security="TOKEN-BASED",
     description="Query , add and remove stocks from a users watch list."
+)
+
+watchlist_item_model = api.model(
+    'WatchlistItem',
+    dict(
+        symbol=fields.String(
+            required=True,
+            description="Stock symbol in watchlist",
+            example="AAPL"
+        ),
+
+    )
+)
+
+watchlist_query_model = api.inherit(
+    'WatchlistQueryItem',
+    watchlist_item_model,
+    dict(
+        quote=fields.Float(
+            required=True,
+            description="Quote price per share of stock",
+            example="1200"
+        ),
+    )
+)
+
+watchlist_model = api.model(
+    'Watchlist',
+    dict(
+        watchlist=fields.List(fields.Nested(watchlist_query_model)),
+    )
 )
 
 
@@ -41,37 +74,26 @@ class WatchlistAll(Resource):
         user = User.query.filter_by(email_id=email).first()
         print(user)
         # watchlist = Watchlist.query.filter_by(user_id=user_id.id).all()
-        watchlist = Watchlist.query.filter_by(
-            user_id=user.id
-        ).join(
-            Stock,
-            isouter=True,
-        ).all()
+        watchlist = Watchlist.query.filter_by(user_id=user.id).all()
         print(watchlist)
         watchlist_list = []
-        for stock in watchlist:
+        for stock in user.watchlist.stocks:
             print(stock)
+            print(stock.symbol)
             watchlist_list.append(
                 {
-                    "symbol": stock.stock_symbol,
+                    "symbol": stock.symbol,
                     "name": stock.name,
-                    "quote": search("finnhub", "quote", stock.stock_symbol)
+                    "quote": search(query="quote", arg=stock.symbol)
                 }
             )
-        # Use this logic if we allow users to have multiple watch lsits.
-        # watchlist_list = defaultdict(list)
-        # for stock in watchlist:
-        #     watchlist_list[stock.id].append(
-        #         {
-        #             "symbol": stock.stock_symbol
-        #         }
-        #     )
         return watchlist_list
 
 
 def in_watchlist(symbol, user) -> bool:
-    watched_stock = Watchlist.query.filter_by(user_id=user.id, stock_symbol=symbol).first()
-    if watched_stock:
+    stock = [s.symbol for s in user.watchlist.stocks if s.symbol == symbol]
+    print(stock)
+    if stock:
         return True
     return False
 
@@ -79,7 +101,7 @@ def in_watchlist(symbol, user) -> bool:
 @api.route('/symbol/<string:symbol>')
 class WatchlistPost(Resource):
     # @api.param('symbol', 'Stock or crypto symbol to be searched')
-
+    @api.marshal_with(watchlist_item_model, envelope='resource')
     @api.response(200, "Entry in watchlist")
     @api.response(201, "Entry created")
     @api.response(404, "Symbol not found")
@@ -93,22 +115,20 @@ class WatchlistPost(Resource):
             email = get_email()
         except Exception as e:
             abort(401, e)
+        symbol = symbol.upper()
         user = User.query.filter_by(email_id=email).first()
         if not in_watchlist(symbol, user):
-            watchlist = Watchlist(
-                user_id=user.id,
-                stock_symbol=symbol.upper()
+            user.watchlist.stocks.append(
+                Stock.query.filter_by(symbol=symbol.upper()).first()
             )
-            db.session.add(watchlist)
             db.session.commit()
-
-            return {
-                       "message": f"{symbol} added to watchlist"
-                   }, 201
+            print(symbol.upper())
+            return {"symbol": symbol}, 201
         else:
-            return
+            return {"symbol": symbol}, 200
 
-    @api.response(200, "Success")
+    @api.response(200, "Not in watchlist")
+    @api.response(200, "Removed from watchlist")
     @api.response(404, "Symbol not found")
     @api.doc(
         description="Gets details for the specified stock",
@@ -120,34 +140,17 @@ class WatchlistPost(Resource):
             email = get_email()
         except Exception as e:
             abort(401, e)
+        symbol = symbol.upper()
         user = User.query.filter_by(email_id=email).first()
-        watchlist = Watchlist.query.filter_by(user_id=user.id, stock_symbol=symbol).first()
-        if watchlist:
-            db.session.delete(watchlist)
+        # watchlist = Watchlist.query.filter_by(user_id=user.id, stock_symbol=symbol).first()
+        stock = Stock.query.filter_by(symbol=symbol.upper()).first()
+
+        if not stock:
+            return {"symbol": None}, 404
+
+        if stock in user.watchlist.stocks:
+            user.watchlist.stocks.remove(stock)
             db.session.commit()
-            return f"{symbol} deleted from watchlist", 200
+            return {"symbol": symbol}, 201
         else:
-            return f"{symbol} not in watchlist", 404
-
-# @api.route('/<string:watchlist_id>/<string:symbol>')
-# class WatchlistSingle(Resource):
-#     @api.param('stock_symbol', 'Stock or crypto symbol to be searched')
-#     @api.response(200, "Success")
-#     @api.response(404, "Symbol not found")
-#     @api.doc(description="Gets details for the specified stock", )
-#     @requires_auth
-#     def post(self, exchange: str = 'US'):
-#
-#         return
-#
-#     def delete(self, exchange: str = 'US'):
-#
-#         return
-
-
-# @api.route('/<integer:watchlist_id>/<string:stock_symbol>')
-# class WatchlistGlobal(Resource):
-#     @requires_auth
-#     def post(self, stock_symbol: str='APPL'):
-#
-#         return
+            return {"symbol": symbol}, 200

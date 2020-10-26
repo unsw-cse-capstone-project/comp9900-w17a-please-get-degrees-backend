@@ -66,7 +66,7 @@ class StockDetails(Resource):
     @api.param("stock_symbol", "Stock or crypto symbol to be searched")
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
-    @api.doc(description="Gets details for the specified stock",)
+    @api.doc(description="Gets details for the specified stock", )
     def get(self, stock_symbol: str = "APPL"):
         # Since we are fetching from finnhub we need to fetch anyway, so why hit the DB at all?
         details = requests.get(
@@ -100,21 +100,24 @@ class StockDetails(Resource):
             )
 
 
-# @api.route("/<string:name>")
-# class StockSearch(Resource):
-#     def get(self, name: str = "APPL"):
-#         stock_q = Stock.query.filter(Stock.display_symbol.ilike(name + "%")).all()
-#         return [
-#             dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
-#             for s in stock_q
-#         ]
+@api.route("/<string:name>")
+class StockSearch(Resource):
+    def get(self, name: str = "APPL"):
+        stock_q = Stock.query.filter(
+            Stock.display_symbol.ilike(name + "%") or \
+            Stock.name.ilike(name + "%")
+        ).all()
+        return [
+            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
+            for s in stock_q
+        ]
 
 
 @api.route("/symbols")
 class StockSymbols(Resource):
-    def get(self, exchange: str = "US"):
+    def get(self):
         stock_q = Stock.query.all()
         return [
-            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name,)
+            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
             for s in stock_q
         ]

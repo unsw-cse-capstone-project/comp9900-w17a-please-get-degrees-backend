@@ -39,7 +39,7 @@ class User(db.Model):
     validated = db.Column(db.Boolean, default=False)
     role = db.Column(ChoiceType(ROLE_CHOICES), default = 'user')
     
-    watchlist = db.relationship("Watchlist", backref='user', lazy='dynamic', cascade="all, delete-orphan",)#need similar for portfolio, except it will be 1-m
+    watchlist = db.relationship("Watchlist", backref=db.backref("user", lazy="select", uselist=False), lazy='select', cascade="all, delete-orphan",uselist=False)#need similar for portfolio, except it will be 1-m
     
     portfolio = db.relationship("Portfolio", back_populates="user")
     portfolioprice = db.relationship("PortfolioPrice", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
@@ -49,14 +49,17 @@ class User(db.Model):
         return '<User %r>' % self.email_id
 
 
+wl_stock = db.Table('watchlist_stock',
+    db.Column('watchlist_id', db.Integer, db.ForeignKey('watchlist.id')),
+    db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
+)
+
 class Watchlist(db.Model):
-    __tablename__ = 'watchlist'
+    __tablename__ = "watchlist"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # stock_id = db.Column(db.Integer, db.ForeignKey('stock.id'))
-    stock_symbol = db.Column(db.Integer, db.ForeignKey('stock.symbol'))
 
-    stock = db.relationship("Stock", back_populates="watchlist")
+    stocks = db.relationship("Stock", secondary=wl_stock, backref=db.backref("watchlist", lazy="select",), lazy="joined")
     timestamp = db.Column(db.DateTime, default=datetime.now,)
 
 
@@ -65,15 +68,15 @@ class Stock(db.Model):
     #TODO: Need to confirm max length of name
     #TODO: Handle crypto currencies codes
     __tablename__ = "stock"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    symbol = db.Column(db.String(15), nullable=False,)
+    # id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    symbol = db.Column(db.String(15), primary_key=True, nullable=False)
     display_symbol = db.Column(db.String(10), nullable=False,)
     name = db.Column(db.String(200), nullable=False)
     currency = db.Column(db.String(20), nullable=False)
     exchange = db.Column(db.String(200), nullable=False)
     type = db.Column(db.String(10), default="stock", nullable=False)
 
-    watchlist = db.relationship("Watchlist", back_populates="stock")
+    watchlists = db.relationship("Watchlist", secondary=wl_stock, backref=db.backref("stock", lazy="select", ), lazy="joined")
 
     #CHANGE: I think these two can be deleted.
     industry = db.Column(db.String(120),)
@@ -108,7 +111,7 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
-    symbol = db.Column(db.String(6), nullable=False)
+    symbol = db.Column(db.String(6), nullable=False) #Should be foreign key in stock table
     quote = db.Column(db.Integer, nullable=False)
     trade_type = db.Column(ChoiceType(TRADE_CHOICES))
     timestamp = db.Column(db.DateTime, default=datetime.now,)
