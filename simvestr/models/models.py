@@ -39,11 +39,40 @@ class User(db.Model):
     validated = db.Column(db.Boolean, default=False)
     role = db.Column(ChoiceType(ROLE_CHOICES), default = 'user')
     
-    watchlist = db.relationship("Watchlist", backref=db.backref("user", lazy="select", uselist=False), lazy='select', cascade="all, delete-orphan",uselist=False)#need similar for portfolio, except it will be 1-m
-    
-    portfolio = db.relationship("Portfolio", back_populates="user")
-    portfolioprice = db.relationship("PortfolioPrice", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
-    transaction = db.relationship("Transaction", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
+    watchlist = db.relationship(
+        "Watchlist",
+        backref=db.backref("user", lazy="select", uselist=False),
+        lazy='select',
+        cascade="all, delete-orphan",
+        uselist=False
+    )
+
+    portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
+    portfolio = db.relationship(
+        "Portfolio",
+        backref=db.backref("user", lazy="select", uselist=False),
+        lazy='select',
+        uselist=False
+    )
+
+    # #not necessary but leaving alone
+    # portfolioprice = db.relationship(
+    #     "PortfolioPrice",
+    #     backref=db.backref("user", lazy="select", uselist=False),
+    #     lazy='select',
+    #     cascade="all, delete-orphan",
+    # )
+    #
+    # # not necessary but leaving alone - can be accessed through portfolio
+    # transaction = db.relationship(
+    #     "Transaction",
+    #     backref=db.backref("user", lazy="select", uselist=False),
+    #     lazy='select',
+    #     cascade="all, delete-orphan",
+    # )
+
+    # portfolioprice = db.relationship("PortfolioPrice", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
+    # transaction = db.relationship("Transaction", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
     
     def __repr__(self):
         return '<User %r>' % self.email_id
@@ -51,6 +80,11 @@ class User(db.Model):
 
 wl_stock = db.Table('watchlist_stock',
     db.Column('watchlist_id', db.Integer, db.ForeignKey('watchlist.id')),
+    db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
+)
+
+p_stock = db.Table('portfolio_stock',
+    db.Column('portfolio_id', db.Integer, db.ForeignKey('portfolio.id')),
     db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
 )
 
@@ -73,30 +107,46 @@ class Stock(db.Model):
     display_symbol = db.Column(db.String(10), nullable=False,)
     name = db.Column(db.String(200), nullable=False)
     currency = db.Column(db.String(20), nullable=False)
-    exchange = db.Column(db.String(200), nullable=False)
+    exchange = db.Column(db.String(200), nullable=False) #make foreign key in exchanges table or build relationship properly
     type = db.Column(db.String(10), default="stock", nullable=False)
 
     watchlists = db.relationship("Watchlist", secondary=wl_stock, backref=db.backref("stock", lazy="select", ), lazy="joined")
+    portfolios = db.relationship("Portfolio", secondary=p_stock, backref=db.backref("stock", lazy="select", ), lazy="joined")
+    transactions = db.relationship("Transaction", backref=db.backref("stock", lazy="select", ), lazy="joined")
 
     #CHANGE: I think these two can be deleted.
     industry = db.Column(db.String(120),)
     country = db.Column(db.String(120),)
 
 
+
+
 class Portfolio(db.Model):
     __tablename__ = 'portfolio'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_name = db.Column(db.String(30), nullable=False)
-    portfolio_price = db.relationship("PortfolioPrice", backref='portfolio', lazy='dynamic', cascade="all, delete-orphan",)
-    transaction = db.relationship("Transaction", backref='portfolio', lazy='dynamic', cascade="all, delete-orphan",)
+
+
+
+    transactions = db.relationship("Transaction", backref=db.backref("portfolio", lazy="select", ), lazy='select', cascade="all, delete-orphan",)
+
+    stocks = db.relationship("Stock", secondary=p_stock, backref=db.backref("portfolio", lazy="select", ), lazy="joined")
         
-    user = db.relationship("User", back_populates="portfolio", foreign_keys=[user_id])
+    # user = db.relationship(
+    #     "User",
+    #     backref=db.backref("portfolio", lazy="select", uselist=False),
+    #     foreign_keys=[user_id],
+    #     uselist=False,
+    #     cascade="all, delete-orphan",
+    # )
     
 class PortfolioPrice(db.Model):
+    __tablename__ = 'portfolioprice'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    portfolio_prices = db.relationship("Portfolio", backref=db.backref("portfolioprice", lazy="select", uselist=True), lazy='select', uselist=False)
     close_balance = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.now,)
     
@@ -109,10 +159,10 @@ class Transaction(db.Model):
     )
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
-    symbol = db.Column(db.String(6), nullable=False) #Should be foreign key in stock table
-    quote = db.Column(db.Integer, nullable=False)
+    symbol = db.Column(db.String(6), db.ForeignKey('stock.symbol')) #Should be foreign key in stock table
+    quote = db.Column(db.Float, nullable=False)
     trade_type = db.Column(ChoiceType(TRADE_CHOICES))
     timestamp = db.Column(db.DateTime, default=datetime.now,)
     quantity = db.Column(db.Integer, nullable=False)

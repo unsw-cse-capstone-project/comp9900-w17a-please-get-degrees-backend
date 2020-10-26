@@ -159,15 +159,52 @@ def load_dummy():
         db.session.add(watchlist)
 
         user.watchlist = watchlist
-        db.session.commit()
-        # db.session.add(watchlist)
 
-        # for idx, wl_row in watch_df.iterrows():
-        #     wl_data = wl_row[wl_row.index.difference(["symbol"])]
-        #     watchlist = Watchlist(**wl_data.to_dict())
-        #
-        #     stocks = Stock.query.filter(Stock.symbol.in_(list(watch_df["symbol"].values))).all()
-        #     watchlist.stocks = stocks
+        db.session.commit()
+
+        port_df = df_map['portfolio']
+        port_df = port_df[port_df.user_id == user.id]
+        port = Portfolio(portfolio_name=port_df["portfolio_name"].values)
+        port.transactions = []
+        # port.portfolio_prices = []
+
+
+        db.session.add(port)
+
+        user.portfolio = port
+
+        db.session.commit()
+
+        portprice_df = df_map['portfolioprice']
+        portprice_df = portprice_df[portprice_df.user_id == user.id]
+        portprice = PortfolioPrice(
+            **portprice_df[portprice_df.columns.difference(["user_id","portfolio_id"])].to_dict(orient='records')[0]
+        )
+
+        db.session.add(portprice)
+
+        port.portfolioprice.append(portprice)
+
+        db.session.commit()
+
+        trans_df = df_map['transaction']
+        trans_df = trans_df[trans_df.user_id == user.id]
+        trans_df = trans_df[trans_df.columns.difference(["user_id", "portfolio_id"])]
+
+        stocks = Stock.query.filter(Stock.symbol.in_(list(trans_df["symbol"].unique()))).all()
+        stock_dict = {s.symbol:s for s in stocks}
+        for _, trans_row in trans_df.iterrows():
+            trans_data = trans_row[trans_row.index.difference(["symbol"])]
+            trans = Transaction(
+                **trans_data[trans_data.index.difference(["user_id", "portfolio_id"])].to_dict()
+            )
+
+            trans.stock = stock_dict[trans_row["symbol"]]
+            port.transactions.append(trans)
+
+            db.session.add(trans)
+            db.session.commit()
+
 
 
     # for sheet, model in load_mapping.items():

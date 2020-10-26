@@ -72,14 +72,8 @@ class WatchlistAll(Resource):
             abort(401, e)
         print(email)
         user = User.query.filter_by(email_id=email).first()
-        print(user)
-        # watchlist = Watchlist.query.filter_by(user_id=user_id.id).all()
-        watchlist = Watchlist.query.filter_by(user_id=user.id).all()
-        print(watchlist)
         watchlist_list = []
         for stock in user.watchlist.stocks:
-            print(stock)
-            print(stock.symbol)
             watchlist_list.append(
                 {
                     "symbol": stock.symbol,
@@ -92,7 +86,6 @@ class WatchlistAll(Resource):
 
 def in_watchlist(symbol, user) -> bool:
     stock = [s.symbol for s in user.watchlist.stocks if s.symbol == symbol]
-    print(stock)
     if stock:
         return True
     return False
@@ -122,7 +115,6 @@ class WatchlistPost(Resource):
                 Stock.query.filter_by(symbol=symbol.upper()).first()
             )
             db.session.commit()
-            print(symbol.upper())
             return {"symbol": symbol}, 201
         else:
             return {"symbol": symbol}, 200
