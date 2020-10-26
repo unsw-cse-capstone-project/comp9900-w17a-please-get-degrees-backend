@@ -3,7 +3,7 @@ import requests
 from flask_restx import Resource, Namespace, reqparse, fields
 from flask import jsonify, current_app
 
-from simvestr.models import User, Watchlist, Stock
+from simvestr.models import User, Watchlist, Stock, db
 from simvestr.helpers.search import search, STOCK_TYPE_MAP
 
 api = Namespace("search", description="Search stocks")
@@ -103,10 +103,10 @@ class StockDetails(Resource):
 @api.route("/<string:name>")
 class StockSearch(Resource):
     def get(self, name: str = "APPL"):
-        stock_q = Stock.query.filter(
-            Stock.display_symbol.ilike(name + "%") or \
+        stock_q = Stock.query.filter(db.or_(
+            Stock.display_symbol.ilike(name + "%"),
             Stock.name.ilike(name + "%")
-        ).all()
+        )).all()
         return [
             dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
             for s in stock_q
