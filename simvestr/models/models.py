@@ -54,25 +54,6 @@ class User(db.Model):
         lazy='select',
         uselist=False
     )
-
-    # #not necessary but leaving alone
-    # portfolioprice = db.relationship(
-    #     "PortfolioPrice",
-    #     backref=db.backref("user", lazy="select", uselist=False),
-    #     lazy='select',
-    #     cascade="all, delete-orphan",
-    # )
-    #
-    # # not necessary but leaving alone - can be accessed through portfolio
-    # transaction = db.relationship(
-    #     "Transaction",
-    #     backref=db.backref("user", lazy="select", uselist=False),
-    #     lazy='select',
-    #     cascade="all, delete-orphan",
-    # )
-
-    # portfolioprice = db.relationship("PortfolioPrice", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
-    # transaction = db.relationship("Transaction", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
     
     def __repr__(self):
         return '<User %r>' % self.email_id
@@ -128,7 +109,6 @@ class Portfolio(db.Model):
     portfolio_name = db.Column(db.String(30), nullable=False)
 
 
-
     transactions = db.relationship(
         "Transaction",
         backref=db.backref("portfolio", lazy="select", ),
@@ -156,9 +136,8 @@ class PortfolioPrice(db.Model):
         backref=db.backref("portfolioprice", lazy="select", uselist=True, order_by="PortfolioPrice.timestamp"),
         lazy='select',
         uselist=False,
-
-
     )
+    
     close_balance = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.now,)
     
@@ -171,7 +150,6 @@ class Transaction(db.Model):
     )
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
     symbol = db.Column(db.String(6), db.ForeignKey('stock.symbol')) #Should be foreign key in stock table
     quote = db.Column(db.Float, nullable=False)
