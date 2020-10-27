@@ -17,26 +17,26 @@ from .leaderboard import api as ns13
 
 from flask import Blueprint
 
-blueprint = Blueprint('api', __name__, url_prefix='/api/v1')
+blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 
 api = Api(blueprint,
-    title='SimvestrAPI',
-    version='0.01',
-    description='Simvestr api',
+    title="SimvestrAPI",
+    version="0.01",
+    description="Simvestr api",
     # All API metadatas
 )
 
 #Register each new namespace here
-api.add_namespace(ns1, path='/user')
-api.add_namespace(ns2, path='/signup')
-api.add_namespace(ns3, path='/token')
-api.add_namespace(ns4, path='/verifytoken')
-api.add_namespace(ns5, path='/forgotuser')
-api.add_namespace(ns6, path='/search')
-api.add_namespace(ns7, path='/marketorder')
-api.add_namespace(ns8, path='/viewstocksowned')
-api.add_namespace(ns9, path='/viewportfolio')
-api.add_namespace(ns10, path='/viewbalance')
-api.add_namespace(ns11, path='/viewtransaction')
-api.add_namespace(ns12, path='/changedetails')
-api.add_namespace(ns13, path='/leaderboard')
+api.add_namespace(ns1, path="/user")
+api.add_namespace(ns2, path="/signup")
+api.add_namespace(ns3, path="/token")
+api.add_namespace(ns4, path="/verifytoken")
+api.add_namespace(ns5, path="/forgotuser")
+api.add_namespace(ns6, path="/search")
+api.add_namespace(ns7, path="/marketorder")
+api.add_namespace(ns8, path="/viewstocksowned")
+api.add_namespace(ns9, path="/viewportfolio")
+api.add_namespace(ns10, path="/viewbalance")
+api.add_namespace(ns11, path="/viewtransaction")
+api.add_namespace(ns12, path="/changedetails")
+api.add_namespace(ns13, path="/leaderboard")
