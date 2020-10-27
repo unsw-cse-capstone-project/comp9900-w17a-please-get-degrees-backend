@@ -1,6 +1,7 @@
 from flask_restx import Resource, Namespace
 
-from simvestr.helpers.auth import get_user
+from simvestr.helpers.auth import get_user, requires_auth
+from simvestr.helpers.portfolio import all_stocks_balance
 from simvestr.models import User
 
 api = Namespace('view user details', description='Demo api for querying users')
@@ -8,6 +9,7 @@ api = Namespace('view user details', description='Demo api for querying users')
 
 @api.route('/all')
 class UsersQuery(Resource):
+    @requires_auth
     def get(self):
         user = User.query.all()
         data = {u.id: dict
@@ -25,15 +27,28 @@ class UsersQuery(Resource):
 
 @api.route('/details')
 class UserQuery(Resource):
-    def get(self,):
+    @requires_auth
+    def get(self, ):
         user = get_user()
         watch = user.watchlist
         port = user.portfolio
         transact = user.portfolio.transactions.all()
-        data = dict(email=user.email_id,
-                    watchlist=[s.stock_symbol for s in watch],
-                    portfolio=[p.portfolio_name for p in port],
-                    transaction=[(t.symbol, t.trade_type, t.quantity) for t in transact])
+        data = dict(
+            email=user.email_id,
+            watchlist=[s.symbol for s in watch.stocks],
+            portfolio={
+                "name": port.portfolio_name,
+                "portfolio": all_stocks_balance(user)
+            },
+            transaction={
+                t.symbol: {
+                    "quantity": t.quantity,
+                    "quote": t.quote,
+                    "date": str(t.timestamp),
+                } for t in transact
+            }
+        )
+        print(data)
         payload = dict(
             data=data
         )
