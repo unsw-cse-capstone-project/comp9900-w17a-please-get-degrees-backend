@@ -4,7 +4,7 @@ from sqlalchemy import func, and_, join
 from flask import jsonify
 from flask_restx import Resource, Namespace
 from sqlalchemy.sql import select
-from ..models import User, Watchlist, Stock, Portfolio, PortfolioPrice
+from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice
 
 api = Namespace("leader board", description="Leaderboard")
 
