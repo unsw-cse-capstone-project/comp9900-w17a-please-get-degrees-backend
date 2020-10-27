@@ -1,7 +1,3 @@
-from simvestr.models import db
-from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
-from simvestr.helpers.search import search
-
 from pathlib import Path
 import pandas as pd
 import heapq
@@ -15,11 +11,19 @@ from flask.cli import with_appcontext
 
 from werkzeug.security import generate_password_hash
 
+from simvestr.models import db
+from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
+from simvestr.helpers.search import search
+
+
 SALT_SIZE = 6
+
+
 def make_salt():
     valid_pw_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY0123456789!@#$%^&*()-_=+<>,./?:;{}[]`~"
 
-    return "".join(np.random.choice(list(valid_pw_chars),size=SALT_SIZE))
+    return "".join(np.random.choice(list(valid_pw_chars), size=SALT_SIZE))
+
 
 # Defines setup and tear down the database
 
@@ -61,14 +65,12 @@ def bulk_add_from_df(df, db, model):
 
 
 def populate_stocks():
-
-
-    db = get_db()
+    # local db = get_db()
 
     non_crypto_exchanges = Exchanges.query.filter(
-        Exchanges.is_crypto==False, Exchanges.priority != None).all()
+        Exchanges.is_crypto == False, Exchanges.priority != None).all()
     crypto_exchanges = Exchanges.query.filter(
-        Exchanges.is_crypto==True, Exchanges.priority != None).all()
+        Exchanges.is_crypto == True, Exchanges.priority != None).all()
 
     exchanges = {
         "stock": {
@@ -89,7 +91,6 @@ def populate_stocks():
         # },
     }
 
-
     exchange_stocks = []
     heapq.heapify(exchange_stocks)
     for ex_type, exchange_dict in exchanges.items():
@@ -103,7 +104,7 @@ def populate_stocks():
                 df['display_symbol'] = df.currency
             heapq.heappush(
                 exchange_stocks,
-                (exchange.priority,  {exchange: df})
+                (exchange.priority, {exchange: df})
             )
 
     while exchange_stocks:
@@ -134,24 +135,27 @@ def load_dummy():
         users=User,
     )
 
-    df_map = {k:pd.read_excel(data_path, sheet_name=k) for k in load_mapping.keys()}
+    df_map = {k: pd.read_excel(data_path, sheet_name=k) for k in load_mapping.keys()}
 
-    bulk_add_from_df(df_map['exchanges'], db, Exchanges)
-    bulk_add_from_df(df_map['portfolioprice'], db, PortfolioPrice)
-    bulk_add_from_df(df_map['transaction'], db, Transaction)
+    df_map["users"]['salt'] = [make_salt() for _ in range(len(df_map["users"]))]
+    df_map["users"].password = df_map["users"].password + df_map["users"].salt
+    df_map["users"].password = df_map["users"].password.apply(generate_password_hash, method="sha256")
+
+    bulk_add_from_df(df_map["exchanges"], db, Exchanges)
+    # bulk_add_from_df(df_map["portfolioprice"], db, PortfolioPrice)
+    bulk_add_from_df(df_map["transaction"], db, Transaction)
 
     populate_stocks()
 
-
     for idx, user_row in df_map['users'].iterrows():
+
         user = User(**user_row.dropna().to_dict())
         db.session.add(user)
         db.session.commit()
 
         watch_df = df_map['watchlist']
-        watch_df = watch_df[watch_df.user_id==user.id]
+        watch_df = watch_df[watch_df.user_id == user.id]
         watchlist = Watchlist(user_id=user.id)
-
 
         stocks = Stock.query.filter(Stock.symbol.in_(list(watch_df["symbol"].values))).all()
         watchlist.stocks = stocks
@@ -168,7 +172,6 @@ def load_dummy():
         port.transactions = []
         # port.portfolio_prices = []
 
-
         db.session.add(port)
 
         user.portfolio = port
@@ -178,7 +181,7 @@ def load_dummy():
         portprice_df = df_map['portfolioprice']
         portprice_df = portprice_df[portprice_df.user_id == user.id]
         portprice = PortfolioPrice(
-            **portprice_df[portprice_df.columns.difference(["user_id","portfolio_id"])].to_dict(orient='records')[0]
+            **portprice_df[portprice_df.columns.difference(["user_id", "portfolio_id"])].to_dict(orient='records')[0]
         )
 
         db.session.add(portprice)
@@ -192,20 +195,15 @@ def load_dummy():
         trans_df = trans_df[trans_df.columns.difference(["user_id", "portfolio_id"])]
 
         stocks = Stock.query.filter(Stock.symbol.in_(list(trans_df["symbol"].unique()))).all()
-        stock_dict = {s.symbol:s for s in stocks}
-        for _, trans_row in trans_df.iterrows():
-            trans_data = trans_row[trans_row.index.difference(["symbol"])]
-            trans = Transaction(
-                **trans_data[trans_data.index.difference(["user_id", "portfolio_id"])].to_dict()
-            )
+        stock_dict = {s.symbol: s for s in stocks}
+        transactions = Transaction.query.filter_by(portfolio_id=user.portfolio.id).all()
+        for trans in transactions:
 
-            trans.stock = stock_dict[trans_row["symbol"]]
+            trans.stock = stock_dict[trans.symbol]
             port.transactions.append(trans)
 
             db.session.add(trans)
             db.session.commit()
-
-
 
     # for sheet, model in load_mapping.items():
     #     df = pd.read_excel(data_path, sheet_name=sheet)
@@ -217,6 +215,11 @@ def load_dummy():
     #     bulk_add_from_df(df, db, model)
     # db.session.close()
 
+#
+# db.session.query(
+#             PortfolioPrice.user_id,
+#             func.max(PortfolioPrice.timestamp).label("maxdate")
+#         ).group_by(PortfolioPrice.user_id).subquery("t2")
 
 @click.command("init-db")
 @with_appcontext

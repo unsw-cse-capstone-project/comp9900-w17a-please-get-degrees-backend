@@ -66,6 +66,7 @@ class Token(Resource):
         password = args.get("password")
         print(password)
         user = User.query.filter_by(email_id=email_id).first()
+        print(user)
         if not user:
             return (
                 {"error": True, "message": "User doesn't exist"},

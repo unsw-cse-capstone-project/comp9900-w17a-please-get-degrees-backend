@@ -129,7 +129,12 @@ class Portfolio(db.Model):
 
 
 
-    transactions = db.relationship("Transaction", backref=db.backref("portfolio", lazy="select", ), lazy='select', cascade="all, delete-orphan",)
+    transactions = db.relationship(
+        "Transaction",
+        backref=db.backref("portfolio", lazy="select", ),
+        lazy='dynamic',
+        cascade="all, delete-orphan",
+    )
 
     stocks = db.relationship("Stock", secondary=p_stock, backref=db.backref("portfolio", lazy="select", ), lazy="joined")
         
@@ -146,7 +151,14 @@ class PortfolioPrice(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
     # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    portfolio_prices = db.relationship("Portfolio", backref=db.backref("portfolioprice", lazy="select", uselist=True), lazy='select', uselist=False)
+    portfolio_prices = db.relationship(
+        "Portfolio",
+        backref=db.backref("portfolioprice", lazy="select", uselist=True, order_by="PortfolioPrice.timestamp"),
+        lazy='select',
+        uselist=False,
+
+
+    )
     close_balance = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.now,)
     
@@ -163,7 +175,7 @@ class Transaction(db.Model):
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
     symbol = db.Column(db.String(6), db.ForeignKey('stock.symbol')) #Should be foreign key in stock table
     quote = db.Column(db.Float, nullable=False)
-    trade_type = db.Column(ChoiceType(TRADE_CHOICES))
+    # trade_type = db.Column(ChoiceType(TRADE_CHOICES))
     timestamp = db.Column(db.DateTime, default=datetime.now,)
     quantity = db.Column(db.Integer, nullable=False)
     fee = db.Column(db.Integer, default=0)

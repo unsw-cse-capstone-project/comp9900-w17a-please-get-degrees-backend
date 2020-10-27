@@ -9,6 +9,7 @@ import heapq
 from flask_restx import Resource, Namespace, abort, fields
 from flask import current_app, request
 
+
 authorizations = {
     "TOKEN-BASED": {
         "name": "API-TOKEN",
@@ -81,6 +82,14 @@ class WatchlistAll(Resource):
                     "quote": search(query="quote", arg=stock.symbol)
                 }
             )
+        # Use this logic if we allow users to have multiple watch lsits.
+        # watchlist_list = defaultdict(list)
+        # for stock in watchlist:
+        #     watchlist_list[stock.id].append(
+        #         {
+        #             "symbol": stock.stock_symbol
+        #         }
+        #     )
         return watchlist_list
 
 

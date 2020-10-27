@@ -53,7 +53,7 @@ class TransactionQuery(Resource):
                 portfolio_id=t.portfolio_id,
                 symbol=t.symbol,
                 quote=t.quote,
-                trade_type=t.trade_type,
+                # trade_type=t.trade_type,
                 timestamp=str(t.timestamp),
                 quantity=t.quantity,
                 fee=t.fee
