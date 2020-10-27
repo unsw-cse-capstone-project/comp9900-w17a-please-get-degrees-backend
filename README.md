@@ -1,4 +1,4 @@
-# Investr
+# Simvestr
 
 Back end of the investment simulator project for COMP9900
 
@@ -8,7 +8,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 [comment]: <> (TODO: expand on this as we go)
-All pre-requisites are listed in [requirements.txt](requirements.txt). They have also been packaged in the distribution if that is teh prefered method for building.
+All pre-requisites are listed in [requirements.txt](requirements.txt). They have also been packaged in the distribution if that is teh preferred method for building.
 
 
 ### Dev Setup

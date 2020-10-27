@@ -1,8 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-# from simvestr.helpers.db import make_salt
-db = SQLAlchemy()
 
+db = SQLAlchemy()
 
 
 # from here: https://stackoverflow.com/questions/6262943/sqlalchemy-how-to-make-django-choices-using-sqlalchemy
@@ -20,7 +19,8 @@ class ChoiceType(db.TypeDecorator):
     def process_result_value(self, value, dialect):
         return self.choices[value]
 
-#TODO: Implement a table of permissions for each role.
+
+# TODO: Implement a table of permissions for each role.
 class User(db.Model):
     __tablename__ = 'user'
     ROLE_CHOICES = dict(
@@ -37,8 +37,8 @@ class User(db.Model):
     date_joined = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     validated = db.Column(db.Boolean, default=False)
-    role = db.Column(ChoiceType(ROLE_CHOICES), default = 'user')
-    
+    role = db.Column(ChoiceType(ROLE_CHOICES), default='user')
+
     watchlist = db.relationship(
         "Watchlist",
         backref=db.backref("user", lazy="select", uselist=False),
@@ -55,79 +55,60 @@ class User(db.Model):
         uselist=False
     )
 
-    # #not necessary but leaving alone
-    # portfolioprice = db.relationship(
-    #     "PortfolioPrice",
-    #     backref=db.backref("user", lazy="select", uselist=False),
-    #     lazy='select',
-    #     cascade="all, delete-orphan",
-    # )
-    #
-    # # not necessary but leaving alone - can be accessed through portfolio
-    # transaction = db.relationship(
-    #     "Transaction",
-    #     backref=db.backref("user", lazy="select", uselist=False),
-    #     lazy='select',
-    #     cascade="all, delete-orphan",
-    # )
-
-    # portfolioprice = db.relationship("PortfolioPrice", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
-    # transaction = db.relationship("Transaction", backref='user', lazy='dynamic', cascade="all, delete-orphan",)
-    
     def __repr__(self):
         return '<User %r>' % self.email_id
 
 
 wl_stock = db.Table('watchlist_stock',
-    db.Column('watchlist_id', db.Integer, db.ForeignKey('watchlist.id')),
-    db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
-)
+                    db.Column('watchlist_id', db.Integer, db.ForeignKey('watchlist.id')),
+                    db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
+                    )
 
 p_stock = db.Table('portfolio_stock',
-    db.Column('portfolio_id', db.Integer, db.ForeignKey('portfolio.id')),
-    db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
-)
+                   db.Column('portfolio_id', db.Integer, db.ForeignKey('portfolio.id')),
+                   db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
+                   )
+
 
 class Watchlist(db.Model):
     __tablename__ = "watchlist"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    stocks = db.relationship("Stock", secondary=wl_stock, backref=db.backref("watchlist", lazy="select",), lazy="joined")
-    timestamp = db.Column(db.DateTime, default=datetime.now,)
+    stocks = db.relationship("Stock", secondary=wl_stock, backref=db.backref("watchlist", lazy="select", ),
+                             lazy="joined")
+    timestamp = db.Column(db.DateTime, default=datetime.now, )
 
 
 class Stock(db.Model):
-    #TODO: Need to confirm max length of symbol, light research suggests 6
-    #TODO: Need to confirm max length of name
-    #TODO: Handle crypto currencies codes
+    # TODO: Need to confirm max length of symbol, light research suggests 6
+    # TODO: Need to confirm max length of name
+    # TODO: Handle crypto currencies codes
     __tablename__ = "stock"
     # id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     symbol = db.Column(db.String(15), primary_key=True, nullable=False)
-    display_symbol = db.Column(db.String(10), nullable=False,)
+    display_symbol = db.Column(db.String(10), nullable=False, )
     name = db.Column(db.String(200), nullable=False)
     currency = db.Column(db.String(20), nullable=False)
-    exchange = db.Column(db.String(200), nullable=False) #make foreign key in exchanges table or build relationship properly
+    exchange = db.Column(db.String(200),
+                         nullable=False)  # make foreign key in exchanges table or build relationship properly
     type = db.Column(db.String(10), default="stock", nullable=False)
 
-    watchlists = db.relationship("Watchlist", secondary=wl_stock, backref=db.backref("stock", lazy="select", ), lazy="joined")
-    portfolios = db.relationship("Portfolio", secondary=p_stock, backref=db.backref("stock", lazy="select", ), lazy="joined")
+    watchlists = db.relationship("Watchlist", secondary=wl_stock, backref=db.backref("stock", lazy="select", ),
+                                 lazy="joined")
+    portfolios = db.relationship("Portfolio", secondary=p_stock, backref=db.backref("stock", lazy="select", ),
+                                 lazy="joined")
     transactions = db.relationship("Transaction", backref=db.backref("stock", lazy="select", ), lazy="joined")
 
-    #CHANGE: I think these two can be deleted.
-    industry = db.Column(db.String(120),)
-    country = db.Column(db.String(120),)
-
-
+    # CHANGE: I think these two can be deleted.
+    industry = db.Column(db.String(120), )
+    country = db.Column(db.String(120), )
 
 
 class Portfolio(db.Model):
     __tablename__ = 'portfolio'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_name = db.Column(db.String(30), nullable=False)
-
-
 
     transactions = db.relationship(
         "Transaction",
@@ -136,52 +117,43 @@ class Portfolio(db.Model):
         cascade="all, delete-orphan",
     )
 
-    stocks = db.relationship("Stock", secondary=p_stock, backref=db.backref("portfolio", lazy="select", ), lazy="joined")
-        
-    # user = db.relationship(
-    #     "User",
-    #     backref=db.backref("portfolio", lazy="select", uselist=False),
-    #     foreign_keys=[user_id],
-    #     uselist=False,
-    #     cascade="all, delete-orphan",
-    # )
-    
+    stocks = db.relationship("Stock", secondary=p_stock, backref=db.backref("portfolio", lazy="select", ),
+                             lazy="joined")
+
+
 class PortfolioPrice(db.Model):
     __tablename__ = 'portfolioprice'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_prices = db.relationship(
         "Portfolio",
         backref=db.backref("portfolioprice", lazy="select", uselist=True, order_by="PortfolioPrice.timestamp"),
         lazy='select',
         uselist=False,
 
-
     )
     close_balance = db.Column(db.Integer)
-    timestamp = db.Column(db.DateTime, default=datetime.now,)
-    
-    
+    timestamp = db.Column(db.DateTime, default=datetime.now, )
+
+
 class Transaction(db.Model):
     TRADE_CHOICES = dict(
         buy='buy',
         sell='sell',
         settled='settled'
     )
-    
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
-    symbol = db.Column(db.String(6), db.ForeignKey('stock.symbol')) #Should be foreign key in stock table
+    symbol = db.Column(db.String(6), db.ForeignKey('stock.symbol'))  # Should be foreign key in stock table
     quote = db.Column(db.Float, nullable=False)
-    # trade_type = db.Column(ChoiceType(TRADE_CHOICES))
-    timestamp = db.Column(db.DateTime, default=datetime.now,)
+    timestamp = db.Column(db.DateTime, default=datetime.now, )
     quantity = db.Column(db.Integer, nullable=False)
     fee = db.Column(db.Integer, default=0)
 
+
 class Exchanges(db.Model):
-    code = db.Column(db.String(10), primary_key=True,)
-    name = db.Column(db.String(60),)
+    code = db.Column(db.String(10), primary_key=True, )
+    name = db.Column(db.String(60), )
     is_crypto = db.Column(db.Boolean, default=False, nullable=False)
-    priority = db.Column(db.Integer,)
+    priority = db.Column(db.Integer, )

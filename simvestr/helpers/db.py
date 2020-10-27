@@ -2,7 +2,6 @@ from pathlib import Path
 import pandas as pd
 import heapq
 import click
-import requests
 
 import numpy as np
 
@@ -56,7 +55,6 @@ def delete_db():
 def bulk_add_from_df(df, db, model):
     df = df.replace({np.nan: None})
     df.columns = df.columns.str.lower()
-    # mapping = df.to_dict(orient="records")
     db.session.bulk_insert_mappings(
         model,
         df.to_dict(orient="records")
@@ -65,7 +63,6 @@ def bulk_add_from_df(df, db, model):
 
 
 def populate_stocks():
-    # local db = get_db()
 
     non_crypto_exchanges = Exchanges.query.filter(
         Exchanges.is_crypto == False, Exchanges.priority != None).all()
@@ -142,7 +139,6 @@ def load_dummy():
     df_map["users"].password = df_map["users"].password.apply(generate_password_hash, method="sha256")
 
     bulk_add_from_df(df_map["exchanges"], db, Exchanges)
-    # bulk_add_from_df(df_map["portfolioprice"], db, PortfolioPrice)
     bulk_add_from_df(df_map["transaction"], db, Transaction)
 
     populate_stocks()
@@ -204,22 +200,6 @@ def load_dummy():
 
             db.session.add(trans)
             db.session.commit()
-
-    # for sheet, model in load_mapping.items():
-    #     df = pd.read_excel(data_path, sheet_name=sheet)
-    #     if sheet == "users":
-    #         df['salt'] = [make_salt() for _ in range(len(df))]
-    #         df.password = df.password + df.salt
-    #         df.password = df.password.apply(generate_password_hash, method="sha256")
-    #
-    #     bulk_add_from_df(df, db, model)
-    # db.session.close()
-
-#
-# db.session.query(
-#             PortfolioPrice.user_id,
-#             func.max(PortfolioPrice.timestamp).label("maxdate")
-#         ).group_by(PortfolioPrice.user_id).subquery("t2")
 
 @click.command("init-db")
 @with_appcontext

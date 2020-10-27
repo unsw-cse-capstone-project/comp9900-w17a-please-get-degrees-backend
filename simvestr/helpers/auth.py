@@ -8,10 +8,14 @@ Created on Thu Oct 22 12:07:31 2020
 # eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbF9pZCI6Imsuc2Nocm9kZXItdHVybmVyQHN0dWRlbnQudW5zdy5lZHUuYXUiLCJleHAiOjE2MDM2MDkzODh9.40_crwz6fdnYEZsWN5XfSJqybHRFQVeSurfOUYt3Fh4
 
 import numpy as np
-from flask_restx import abort, reqparse
+
 from functools import wraps
 import datetime
 import jwt
+
+from flask_restx import abort, reqparse
+
+from simvestr.models import User
 
 SECRET_KEY = "thisismysecretkeydonotstealit"
 EXPIRES_IN = 86400  # 24 Hours
@@ -19,12 +23,6 @@ EXPIRES_IN = 86400  # 24 Hours
 token_parser = reqparse.RequestParser()
 token_parser.add_argument('token', location='cookies')
 
-# def validate_passed_token(cookie):
-#     try:
-#         decoded_token_email_id = auth.validate_token(cookie)
-#     except Exception as e:
-#         return False, e
-#     return True, decoded_token_email_id
 
 class AuthenticationToken:
     SECRET_KEY = "thisismysecretkeydonotstealit"
@@ -83,5 +81,19 @@ def get_email():
     if passed:
         return param
     return False
+
+
+def get_user():
+    try:
+        email = get_email()
+    except Exception as e:
+        abort(401, e)
+
+    user = User.query.filter_by(email_id=email).first()
+    if not user:
+        abort(449, "User doesn't exist")
+
+    return user
+
 
 auth = AuthenticationToken(SECRET_KEY, EXPIRES_IN)

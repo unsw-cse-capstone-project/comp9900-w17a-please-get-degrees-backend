@@ -5,9 +5,11 @@ Created on Mon Oct 14 11:23:31 2020
 @author: Kovid
 """
 
-from flask_restx import Resource, fields, reqparse, Namespace, abort
-from simvestr.models import db, User, Portfolio, PortfolioPrice, Transaction
-from simvestr.helpers.auth import requires_auth, get_email
+from flask_restx import Resource, fields, reqparse, Namespace
+
+from simvestr.helpers.auth import requires_auth, get_user
+from simvestr.helpers.portfolio import stock_balance
+from simvestr.models import db, Transaction
 
 api = Namespace(
     "marketorder",
@@ -56,22 +58,6 @@ trade_parser.add_argument("trade_type", type=str)
 trade_parser.add_argument("quantity", type=int)
 
 
-def commit_transaction(
-        user_id, portfolio_id, symbol, quote, trade_type, total_quantity, fee
-):
-    new_transaction = Transaction(
-        # user_id=user_id,
-        portfolio_id=portfolio_id,
-        symbol=symbol,
-        quote=quote,
-        # trade_type=trade_type,
-        quantity=total_quantity,
-        fee=fee,
-    )
-    db.session.add(new_transaction)
-    db.session.commit()
-
-
 @api.route("")
 class TradeStock(Resource):
     @api.response(200, "Successful")
@@ -93,15 +79,7 @@ class TradeStock(Resource):
         quantity = args.get("quantity")
         symbol = symbol.upper()
         # get user details from token
-        try:
-            email = get_email()
-        except Exception as e:
-            abort(401, e)
-
-        user = User.query.filter_by(email_id=email).first()
-
-        if not user:  # Users have a portfolio by default, therefore the bottom two lines are redundant. This shouldnt even hit, bc it requires auth to get to this point.
-            return "User doesn't exist", 449
+        user = get_user()
 
         fee = 0
 
@@ -115,12 +93,7 @@ class TradeStock(Resource):
 
         # --------------- Sell --------------- #
         elif quantity < 0:  # check if user owns this stock first, then the quantity he's
-            check_stock = user.portfolio.transactions.with_entities(
-                db.func.sum(Transaction.quantity).label("balance"),
-                Transaction.symbol
-            ).filter_by(
-                symbol=symbol
-            ).group_by("symbol").first()
+            check_stock = stock_balance(user, symbol)
 
             print(check_stock)
 
