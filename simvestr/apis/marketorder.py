@@ -87,7 +87,7 @@ class TradeStock(Resource):
         if quantity > 0:  # check if user even has enough money to buy this stock quantity
             balance_adjustment = ((quote * quantity) + fee)
             if user.portfolio.portfolioprice[0].close_balance - balance_adjustment < 0:
-                return "Insufficiant funds", 650
+                return {"message": "Insufficiant funds"}, 650
 
         # ------------- Buy-ends ------------- #
 
@@ -98,14 +98,14 @@ class TradeStock(Resource):
             print(check_stock)
 
             if not check_stock:
-                return "You currently don't own this stock", 603
+                return {"message": "You currently don't own this stock"}, 603
 
             if check_stock[0] + quantity < 0:
-                return "Insufficient quantity of stock to sell", 651
+                return {"message": "Insufficient quantity of stock to sell"}, 651
 
             balance_adjustment = (quote * quantity) + fee
         else:
-            return f"Invalid quantity. Quantity must be a non zero integer. Received {quantity}", 422
+            return {"message": f"Invalid quantity. Quantity must be a non zero integer. Received {quantity}"}, 422
 
         user.portfolio.portfolioprice[0].close_balance -= balance_adjustment  # update user's balance after trade
         # -------------- Sell-ends ----------- #

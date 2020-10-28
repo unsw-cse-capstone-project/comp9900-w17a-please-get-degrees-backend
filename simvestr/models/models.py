@@ -130,8 +130,8 @@ class PortfolioPrice(db.Model):
         backref=db.backref("portfolioprice", lazy="select", uselist=True, order_by="PortfolioPrice.timestamp"),
         lazy='select',
         uselist=False,
-
     )
+    
     close_balance = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.now, )
 
