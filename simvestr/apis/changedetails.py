@@ -34,7 +34,6 @@ changenames_model = api.model(
     },
 )
 changenames_parser = reqparse.RequestParser()
-changenames_parser.add_argument("email_id", type=str)
 changenames_parser.add_argument("first_name", type=str)
 changenames_parser.add_argument("last_name", type=str)
 
@@ -46,7 +45,6 @@ changepwd_model = api.model(
     },
 )
 changepwd_parser = reqparse.RequestParser()
-changepwd_parser.add_argument("email_id", type=str)
 changepwd_parser.add_argument("password", type=str)
 
 
@@ -58,7 +56,6 @@ class ChangeNames(Resource):
     @requires_auth
     def put(self):
         args = changenames_parser.parse_args()
-        email_id = args.get("email_id")
         first_name = args.get("first_name")
         last_name = args.get("last_name")
 
