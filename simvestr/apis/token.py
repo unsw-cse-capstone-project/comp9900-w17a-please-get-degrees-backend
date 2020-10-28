@@ -11,11 +11,10 @@ from werkzeug.security import check_password_hash
 import jwt
 import datetime
 
-from simvestr_email import send_email
 
-# from simvestr import create_app
-from ..models import User
-
+from simvestr.models import User
+from simvestr.helpers.simvestr_email import send_email
+from simvestr.helpers.auth import auth
 
 api = Namespace(
     "generate token",
@@ -26,37 +25,29 @@ api = Namespace(
 )
 
 
-class AuthenticationToken:
-    def __init__(self, secret_key, expires_in):
-        self.secret_key = secret_key
-        self.expires_in = expires_in
-
-    def generate_token(self, email_id):
-        info = {
-            "email_id": email_id,
-            "exp": datetime.datetime.utcnow()
-            + datetime.timedelta(seconds=self.expires_in),
-        }
-        token_value = jwt.encode(info, self.secret_key)
-        return token_value.decode("utf-8")
-
-    def validate_token(self, token):
-        info = jwt.decode(token, self.secret_key)
-        return info["email_id"]
-
-
-secret_key = "thisismysecretkeydonotstealit"
-expires_in = 86400  # 24 Hours
-auth = AuthenticationToken(secret_key, expires_in)
-
 # ---------------- Create Token -------------- #
 credential_model = api.model(
-    "Credential", {"email": fields.String, "password": fields.String}
+    "Credential",
+    {
+        "email": fields.String(
+            required=True,
+            description="User email",
+            example="simon@unsw.edu.au"
+        ),
+        "password": fields.String(
+            required=True,
+            description="User password",
+            example="pass1234"
+        )
+    }
 )
 credential_parser = reqparse.RequestParser()
 credential_parser.add_argument("email", type=str)
 credential_parser.add_argument("password", type=str)
 
+def validate_password(user, test_password):
+    test_password = "".join([test_password, user.salt])
+    return (user.password, test_password)
 
 @api.route("")
 class Token(Resource):
@@ -73,13 +64,15 @@ class Token(Resource):
         args = credential_parser.parse_args()
         email_id = args.get("email")
         password = args.get("password")
+        print(password)
         user = User.query.filter_by(email_id=email_id).first()
+        print(user)
         if not user:
             return (
                 {"error": True, "message": "User doesn't exist"},
                 449,
             )
-        if not check_password_hash(user.password, password):
+        if not validate_password(user, password):
             return (
                 {"error": True, "message": "Incorrect password, retry"},
                 442,

@@ -3,14 +3,17 @@ import requests
 from flask_restx import Resource, Namespace, reqparse, fields
 from flask import jsonify, current_app
 
-from simvestr.models import User, Watchlist, Stock
+from simvestr.models import User, Watchlist, Stock, db
 from simvestr.helpers.search import search, STOCK_TYPE_MAP
+from simvestr.helpers.auth import requires_auth
 
 api = Namespace("search", description="Search stocks")
 
 
 @api.route("/exchange/<string:exchange>")
 class ExchangeList(Resource):
+
+    @requires_auth
     def get(self, exchange: str = "US"):
         uri = search(source_api="finnhub", query="exchange", arg=exchange)
         r = requests.get(uri)
@@ -54,6 +57,7 @@ details_model = api.model(
 
 @api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
+    @requires_auth
     @api.param("stock_symbol", "Stock or crypto symbol to be searched")
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
@@ -88,21 +92,26 @@ class StockDetails(Resource):
             )
 
 
-# @api.route("/<string:name>")
-# class StockSearch(Resource):
-#     def get(self, name: str = "APPL"):
-#         stock_q = Stock.query.filter(Stock.display_symbol.ilike(name + "%")).all()
-#         return [
-#             dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
-#             for s in stock_q
-#         ]
+@api.route("/<string:name>")
+class StockSearch(Resource):
+    @requires_auth
+    def get(self, name: str = "APPL"):
+        stock_q = Stock.query.filter(db.or_(
+            Stock.display_symbol.ilike(name + "%"),
+            Stock.name.ilike(name + "%")
+        )).all()
+        return [
+            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
+            for s in stock_q
+        ]
 
 
 @api.route("/symbols")
 class StockSymbols(Resource):
-    def get(self, exchange: str = "US"):
+    @requires_auth
+    def get(self):
         stock_q = Stock.query.all()
         return [
-            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name,)
+            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
             for s in stock_q
         ]

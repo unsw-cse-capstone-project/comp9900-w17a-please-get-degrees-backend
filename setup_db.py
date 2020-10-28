@@ -1,5 +1,5 @@
 from simvestr import create_app
-from simvestr.db import init_db, load_dummy, delete_db
+from simvestr.helpers.db import init_db, load_dummy, delete_db
 app = create_app()
 
 
