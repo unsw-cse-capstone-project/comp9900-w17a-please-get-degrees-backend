@@ -93,7 +93,7 @@ class StockDetails(Resource):
 @api.route("/<string:name>")
 class StockSearch(Resource):
     @requires_auth
-    def get(self, name: str = "APPL"):
+    def get(self, name: str = "AAPL"):
         stock_q = Stock.query.filter(db.or_(
             Stock.display_symbol.ilike(name + "%"),
             Stock.name.ilike(name + "%")
