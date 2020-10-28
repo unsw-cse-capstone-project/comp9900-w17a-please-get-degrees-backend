@@ -29,7 +29,6 @@ def app():
     shutil.rmtree(temp_dir)
 
 
-
 @pytest.fixture
 def client(app):
     return app.test_client()
@@ -38,6 +37,7 @@ def client(app):
 @pytest.fixture
 def runner(app):
     return app.test_cli_runner()
+
 
 @pytest.fixture
 def test_db(app):

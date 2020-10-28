@@ -20,7 +20,6 @@ from flask import Blueprint
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 
-
 api = Api(
     blueprint,
     title="SimvestrAPI",
@@ -29,7 +28,7 @@ api = Api(
     # All API metadatas
 )
 
-#Register each new namespace here
+# Register each new namespace here
 api.add_namespace(ns1, path="/user")
 api.add_namespace(ns2, path="/signup")
 api.add_namespace(ns3, path="/token")

@@ -6,7 +6,7 @@ Created on Mon Sep 28 12:27:41 2020
 """
 
 from flask_restx import Resource, fields, reqparse, Namespace
-from flask import make_response
+from flask import make_response, after_this_request
 from werkzeug.security import check_password_hash
 import jwt
 import datetime
@@ -87,9 +87,15 @@ class Token(Resource):
 
         # set cookie in browser
         token = auth.generate_token(user.email_id)
-        resp = make_response()
-        resp.set_cookie("token", value=token, httponly=True)
-        return resp
-
+        
+        @after_this_request
+        def set_cookie_value(response):
+            response.set_cookie('token', value = token, httponly = True, domain="127.0.0.1")
+            return response        
+      
+        return (
+                {"error": False, "message": "Login successful"},
+                200,
+        )
 
 # ---------------- Create Token -------------- #

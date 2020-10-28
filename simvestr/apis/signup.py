@@ -8,10 +8,7 @@ Created on Mon Sep 28 12:27:41 2020
 from flask_restx import Resource, fields, reqparse, Namespace
 from werkzeug.security import generate_password_hash
 
-
-
-# from simvestr import create_app
-from ..models import User, Portfolio, PortfolioPrice
+from simvestr.models import User, Portfolio, PortfolioPrice
 from simvestr.models import db
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.db import make_salt
@@ -93,20 +90,18 @@ class Signup(Resource):
         db.session.add(new_user)
         db.session.commit()
 
-        user = User.query.filter_by(email_id=email_id).first()
         new_portfolio = Portfolio(
-            user_id=user.id,
             portfolio_name=fname + '\'s Portfolio'  # make a portfolio for new user
         )
+        new_user.portfolio = new_portfolio
         db.session.add(new_portfolio)
         db.session.commit()
 
-        port = Portfolio.query.filter_by(user_id=user.id).first()
         new_portfolioprice = PortfolioPrice(
-            user_id=user.id,
-            portfolio_id=port.id,
-            close_balance=100000  # give dummy amount of 100k to new user
+            portfolio_id=new_user.portfolio.id,
+            close_balance=100000  # give dummy amount of 100k to new user. Value should be imported from a config file.
         )
+        new_user.portfolio.portfolioprice.append(new_portfolioprice)
         db.session.add(new_portfolioprice)
         db.session.commit()
 

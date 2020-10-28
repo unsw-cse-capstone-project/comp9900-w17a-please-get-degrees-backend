@@ -1,11 +1,10 @@
 import requests
+from flask import jsonify
+from flask_restx import Resource, Namespace, fields
 
-from flask_restx import Resource, Namespace, reqparse, fields
-from flask import jsonify, current_app
-
-from simvestr.models import User, Watchlist, Stock, db
-from simvestr.helpers.search import search, STOCK_TYPE_MAP
 from simvestr.helpers.auth import requires_auth
+from simvestr.helpers.search import search
+from simvestr.models import Stock, db
 
 api = Namespace("search", description="Search stocks")
 
@@ -85,7 +84,6 @@ class StockDetails(Resource):
         else:
             return (
                 {
-                    "error": True,
                     "message": "Symbol not found. Incorrect symbol, check spelling.",
                 },
                 404,
@@ -95,7 +93,7 @@ class StockDetails(Resource):
 @api.route("/<string:name>")
 class StockSearch(Resource):
     @requires_auth
-    def get(self, name: str = "APPL"):
+    def get(self, name: str = "AAPL"):
         stock_q = Stock.query.filter(db.or_(
             Stock.display_symbol.ilike(name + "%"),
             Stock.name.ilike(name + "%")

@@ -1,6 +1,7 @@
-from flask_restx import Resource, Namespace, abort
-from simvestr.models import User, Watchlist, Stock, Transaction
-from simvestr.helpers.auth import get_email
+from flask_restx import Resource, Namespace
+
+from simvestr.helpers.auth import get_user
+from simvestr.models import Transaction
 
 api = Namespace(
     "view transactions",
@@ -41,11 +42,7 @@ class TransactionsQuery(Resource):
 @api.route('/user/')
 class TransactionQuery(Resource):
     def get(self, ):
-        try:
-            email = get_email()
-        except Exception as e:
-            abort(401, e)
-        user = User.query.filter_by(email_id=email).first()
+        user = get_user()
         transactions = user.portfolio.transactions
         data = {
             t.id: dict(

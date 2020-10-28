@@ -1,14 +1,8 @@
-from simvestr.models import db, User, Watchlist, Stock
-from simvestr.helpers.auth import requires_auth, get_email
+from flask_restx import Resource, Namespace, fields
+
+from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.search import search
-
-from collections import defaultdict
-import requests
-import heapq
-
-from flask_restx import Resource, Namespace, abort, fields
-from flask import current_app, request
-
+from simvestr.models import db, Stock
 
 authorizations = {
     "TOKEN-BASED": {
@@ -43,7 +37,7 @@ watchlist_query_model = api.inherit(
         quote=fields.Float(
             required=True,
             description="Quote price per share of stock",
-            example="1200"
+            example=1200
         ),
     )
 )
@@ -66,13 +60,7 @@ class WatchlistAll(Resource):
     )
     @requires_auth
     def get(self):
-        # get user details from token
-        try:
-            email = get_email()
-        except Exception as e:
-            abort(401, e)
-        print(email)
-        user = User.query.filter_by(email_id=email).first()
+        user = get_user()
         watchlist_list = []
         for stock in user.watchlist.stocks:
             watchlist_list.append(
@@ -82,15 +70,8 @@ class WatchlistAll(Resource):
                     "quote": search(query="quote", arg=stock.symbol)
                 }
             )
-        # Use this logic if we allow users to have multiple watch lsits.
-        # watchlist_list = defaultdict(list)
-        # for stock in watchlist:
-        #     watchlist_list[stock.id].append(
-        #         {
-        #             "symbol": stock.stock_symbol
-        #         }
-        #     )
-        return watchlist_list
+
+        return watchlist_list, 200
 
 
 def in_watchlist(symbol, user) -> bool:
@@ -113,12 +94,11 @@ class WatchlistPost(Resource):
     )
     @requires_auth
     def post(self, symbol: str):
-        try:
-            email = get_email()
-        except Exception as e:
-            abort(401, e)
+
         symbol = symbol.upper()
-        user = User.query.filter_by(email_id=email).first()
+
+        user = get_user()
+
         if not in_watchlist(symbol, user):
             user.watchlist.stocks.append(
                 Stock.query.filter_by(symbol=symbol.upper()).first()
@@ -137,13 +117,9 @@ class WatchlistPost(Resource):
     )
     @requires_auth
     def delete(self, symbol: str):
-        try:
-            email = get_email()
-        except Exception as e:
-            abort(401, e)
+        user = get_user()
         symbol = symbol.upper()
-        user = User.query.filter_by(email_id=email).first()
-        # watchlist = Watchlist.query.filter_by(user_id=user.id, stock_symbol=symbol).first()
+
         stock = Stock.query.filter_by(symbol=symbol.upper()).first()
 
         if not stock:
