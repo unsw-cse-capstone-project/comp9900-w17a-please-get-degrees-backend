@@ -33,7 +33,7 @@ class PortfoliosQuery(Resource):
         return payload, 200
 
 
-@api.route("user")
+@api.route("/user")
 class PortfolioQuery(Resource):
     @api.response(200, "Successful")
     @api.response(601, "Portfolio doesn't exist")
