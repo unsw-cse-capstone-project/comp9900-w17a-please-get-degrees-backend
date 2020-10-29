@@ -39,7 +39,7 @@ class TransactionsQuery(Resource):
         return payload
 
 
-@api.route('/user/')
+@api.route("/user/")
 class TransactionQuery(Resource):
     def get(self, ):
         user = get_user()
@@ -50,7 +50,6 @@ class TransactionQuery(Resource):
                 portfolio_id=t.portfolio_id,
                 symbol=t.symbol,
                 quote=t.quote,
-                # trade_type=t.trade_type,
                 timestamp=str(t.timestamp),
                 quantity=t.quantity,
                 fee=t.fee

@@ -11,7 +11,6 @@ from werkzeug.security import check_password_hash
 import jwt
 import datetime
 
-
 from simvestr.models import User
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.auth import auth
@@ -23,7 +22,6 @@ api = Namespace(
     title="Simvestr",
     description="Generates a JWT, sets a cookie in browser",
 )
-
 
 # ---------------- Create Token -------------- #
 credential_model = api.model(
@@ -45,9 +43,11 @@ credential_parser = reqparse.RequestParser()
 credential_parser.add_argument("email", type=str)
 credential_parser.add_argument("password", type=str)
 
+
 def validate_password(user, test_password):
     test_password = "".join([test_password, user.salt])
     return (user.password, test_password)
+
 
 @api.route("")
 class Token(Resource):
@@ -64,38 +64,37 @@ class Token(Resource):
         args = credential_parser.parse_args()
         email_id = args.get("email")
         password = args.get("password")
-        print(password)
         user = User.query.filter_by(email_id=email_id).first()
-        print(user)
         if not user:
             return (
-                {"error": True, "message": "User doesn't exist"},
+                {"message": "User doesn't exist"},
                 449,
             )
         if not validate_password(user, password):
             return (
-                {"error": True, "message": "Incorrect password, retry"},
+                {"message": "Incorrect password, retry"},
                 442,
             )
 
-        message_content = (
-            "You have logged into Simvestr. Login will expire after 24 hours!"
-        )
-        send_email(
-            user.email_id, "Log in successful", message_content
-        )  # sends a logged in email to the user
+        # message_content = (
+        #     "You have logged into Simvestr. Login will expire after 24 hours!"
+        # )
+
+        # send_email(
+        #     user.email_id, "Log in successful", message_content
+        # )  # sends a logged in email to the user
 
         # set cookie in browser
         token = auth.generate_token(user.email_id)
-        
+
         @after_this_request
         def set_cookie_value(response):
-            response.set_cookie('token', value = token, httponly = True)
-            return response        
-      
+            response.set_cookie("token", value=token, httponly=True, domain="127.0.0.1")
+            return response
+
         return (
-                {"error": False, "message": "Login successful"},
-                200,
+            {"message": "Login successful"},
+            200,
         )
 
 # ---------------- Create Token -------------- #

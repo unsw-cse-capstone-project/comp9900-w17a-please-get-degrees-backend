@@ -1,10 +1,9 @@
-from simvestr.models import db
-from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import func, and_, join
 from flask import jsonify
 from flask_restx import Resource, Namespace
-from sqlalchemy.sql import select
-from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice
+from sqlalchemy import func, and_
+
+from simvestr.models import Portfolio, PortfolioPrice
+from simvestr.models import db
 
 api = Namespace("leader board", description="Leaderboard")
 

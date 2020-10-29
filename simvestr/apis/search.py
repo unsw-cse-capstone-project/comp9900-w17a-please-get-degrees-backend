@@ -57,7 +57,7 @@ details_model = api.model(
 @api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
     @requires_auth
-    @api.param("stock_symbol", "Stock or crypto symbol to be searched")
+    # @api.param("stock_symbol", "Stock or crypto symbol to be searched") #this hangs the search and I dont know why
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
     @api.doc(

@@ -14,7 +14,6 @@ from simvestr.models import db
 from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
 from simvestr.helpers.search import search
 
-
 SALT_SIZE = 6
 
 
@@ -42,7 +41,7 @@ def close_db(e=None):
 
 
 def init_db():
-    db = get_db()
+    # db = get_db()
     db.create_all()
 
 
@@ -63,7 +62,6 @@ def bulk_add_from_df(df, db, model):
 
 
 def populate_stocks():
-
     non_crypto_exchanges = Exchanges.query.filter(
         Exchanges.is_crypto == False, Exchanges.priority != None).all()
     crypto_exchanges = Exchanges.query.filter(
@@ -149,7 +147,7 @@ def load_dummy():
         db.session.add(user)
         db.session.commit()
 
-        watch_df = df_map['watchlist']
+        watch_df = df_map["watchlist"]
         watch_df = watch_df[watch_df.user_id == user.id]
         watchlist = Watchlist(user_id=user.id)
 
@@ -162,11 +160,10 @@ def load_dummy():
 
         db.session.commit()
 
-        port_df = df_map['portfolio']
+        port_df = df_map["portfolio"]
         port_df = port_df[port_df.user_id == user.id]
         port = Portfolio(portfolio_name=port_df.to_dict(orient="records")[0]["portfolio_name"])
         port.transactions = []
-        # port.portfolio_prices = []
 
         db.session.add(port)
 
@@ -174,7 +171,7 @@ def load_dummy():
 
         db.session.commit()
 
-        portprice_df = df_map['portfolioprice']
+        portprice_df = df_map["portfolioprice"]
         portprice_df = portprice_df[portprice_df.user_id == user.id]
         portprice = PortfolioPrice(
             **portprice_df[portprice_df.columns.difference(["user_id", "portfolio_id"])].to_dict(orient='records')[0]
@@ -186,7 +183,7 @@ def load_dummy():
 
         db.session.commit()
 
-        trans_df = df_map['transaction']
+        trans_df = df_map["transaction"]
         trans_df = trans_df[trans_df.user_id == user.id]
         trans_df = trans_df[trans_df.columns.difference(["user_id", "portfolio_id"])]
 
@@ -194,12 +191,12 @@ def load_dummy():
         stock_dict = {s.symbol: s for s in stocks}
         transactions = Transaction.query.filter_by(portfolio_id=user.portfolio.id).all()
         for trans in transactions:
-
             trans.stock = stock_dict[trans.symbol]
             port.transactions.append(trans)
 
             db.session.add(trans)
             db.session.commit()
+
 
 @click.command("init-db")
 @with_appcontext

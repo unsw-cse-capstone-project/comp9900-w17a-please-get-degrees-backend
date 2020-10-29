@@ -33,7 +33,7 @@ trade_model = api.model(
         "quote": fields.Float(
             required=True,
             description="Quote price per share of stock",
-            example="1200"
+            example=1200
         ),
         "trade_type": fields.String(
             required=True,
@@ -47,7 +47,7 @@ trade_model = api.model(
         "quantity": fields.Integer(
             required=True,
             description="Quote price per share of stock",
-            example="5"
+            example=5
         ),
     },
 )
@@ -75,19 +75,20 @@ class TradeStock(Resource):
         args = trade_parser.parse_args()
         symbol: str = args.get("symbol")
         quote = args.get("quote")
-        trade_type = args.get("trade_type")  # redundant
+        trade_type = args.get("trade_type")
         quantity = args.get("quantity")
-        symbol = symbol.upper()
-        # get user details from token
-        user = get_user()
+        symbol = symbol.upper()  # TODO: Need wrapper function to automaticlly uppercase the input
+
+        user = get_user()  # get user details from token
 
         fee = 0
+        quantity = -quantity if trade_type == "sell" else quantity
 
         # --------------- Buy ---------------- #
         if quantity > 0:  # check if user even has enough money to buy this stock quantity
             balance_adjustment = ((quote * quantity) + fee)
             if user.portfolio.portfolioprice[0].close_balance - balance_adjustment < 0:
-                return {"message": "Insufficiant funds"}, 650
+                return {"message": "Insufficient funds"}, 650
 
         # ------------- Buy-ends ------------- #
 
@@ -111,11 +112,9 @@ class TradeStock(Resource):
         # -------------- Sell-ends ----------- #
 
         new_transaction = Transaction(
-            # user_id=user.id,
             portfolio_id=user.portfolio.id,
             symbol=symbol,
             quote=quote,
-            # trade_type=trade_type,
             quantity=quantity,
             fee=fee,
         )
@@ -123,4 +122,4 @@ class TradeStock(Resource):
         db.session.add(new_transaction)
         db.session.commit()
 
-        return dict(symbol=symbol, quote=quote, quantity=quantity,), 200
+        return dict(symbol=symbol, quote=quote, quantity=quantity, ), 200

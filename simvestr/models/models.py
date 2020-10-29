@@ -1,5 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
@@ -22,16 +23,18 @@ class ChoiceType(db.TypeDecorator):
 
 # TODO: Implement a table of permissions for each role.
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = "user"
     ROLE_CHOICES = dict(
-        admin='admin',
-        user='user'
+        admin="admin",
+        user="user"
     )
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email_id = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(30))
-    salt = db.Column(db.String(6), default='mysalt')
+
+    salt = db.Column(db.String(6), nullable=False)
+
     first_name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
     date_joined = db.Column(db.DateTime, default=datetime.now)
@@ -42,12 +45,12 @@ class User(db.Model):
     watchlist = db.relationship(
         "Watchlist",
         backref=db.backref("user", lazy="select", uselist=False),
-        lazy='select',
+        lazy="select",
         cascade="all, delete-orphan",
         uselist=False
     )
 
-    portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
+    portfolio_id = db.Column(db.Integer, db.ForeignKey("portfolio.id"))
     portfolio = db.relationship(
         "Portfolio",
         backref=db.backref("user", lazy="select", uselist=False),
@@ -59,14 +62,14 @@ class User(db.Model):
         return '<User %r>' % self.email_id
 
 
-wl_stock = db.Table('watchlist_stock',
-                    db.Column('watchlist_id', db.Integer, db.ForeignKey('watchlist.id')),
-                    db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
+wl_stock = db.Table("watchlist_stock",
+                    db.Column("watchlist_id", db.Integer, db.ForeignKey("watchlist.id")),
+                    db.Column("stock_symbol", db.String, db.ForeignKey("stock.symbol"))
                     )
 
-p_stock = db.Table('portfolio_stock',
-                   db.Column('portfolio_id', db.Integer, db.ForeignKey('portfolio.id')),
-                   db.Column('stock_symbol', db.String, db.ForeignKey('stock.symbol'))
+p_stock = db.Table("portfolio_stock",
+                   db.Column("portfolio_id", db.Integer, db.ForeignKey("portfolio.id")),
+                   db.Column("stock_symbol", db.String, db.ForeignKey("stock.symbol"))
                    )
 
 
@@ -106,14 +109,14 @@ class Stock(db.Model):
 
 
 class Portfolio(db.Model):
-    __tablename__ = 'portfolio'
+    __tablename__ = "portfolio"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     portfolio_name = db.Column(db.String(30), nullable=False)
 
     transactions = db.relationship(
         "Transaction",
         backref=db.backref("portfolio", lazy="select", ),
-        lazy='dynamic',
+        lazy="dynamic",
         cascade="all, delete-orphan",
     )
 
@@ -137,15 +140,10 @@ class PortfolioPrice(db.Model):
 
 
 class Transaction(db.Model):
-    TRADE_CHOICES = dict(
-        buy='buy',
-        sell='sell',
-        settled='settled'
-    )
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolio.id'))
-    symbol = db.Column(db.String(6), db.ForeignKey('stock.symbol'))  # Should be foreign key in stock table
+    portfolio_id = db.Column(db.Integer, db.ForeignKey("portfolio.id"))
+    symbol = db.Column(db.String(6), db.ForeignKey("stock.symbol"))  # Should be foreign key in stock table
     quote = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.now, )
     quantity = db.Column(db.Integer, nullable=False)
