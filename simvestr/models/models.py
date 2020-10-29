@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-
+from simvestr.helpers.db import make_salt
 db = SQLAlchemy()
 
 
@@ -31,7 +31,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email_id = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(30))
-    salt = db.Column(db.String(6))
+    salt = db.Column(db.String(6), nullable=False)
     first_name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
     date_joined = db.Column(db.DateTime, default=datetime.now)

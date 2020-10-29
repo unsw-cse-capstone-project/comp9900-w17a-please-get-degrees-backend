@@ -1,5 +1,7 @@
 from flask_restx import Resource, Namespace
-from ..models import User, Watchlist, Stock, Portfolio, PortfolioPrice
+from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice
+from simvestr.helpers.portfolio import all_stocks_balance
+from simvestr.helpers.auth import get_user
 api = Namespace('view portfolios', description = 'Api for viewing Portfolios')
 
 #TODO: Need to protect this endpoint from non-users
@@ -27,25 +29,24 @@ class PortfoliosQuery(Resource):
         )
         return payload, 200
     
-@api.route('/<int:portfolio_id>')
+@api.route('/user')
 class PortfolioQuery(Resource):
     @api.response(200, 'Successful')
     @api.response(601, 'Portfolio doesn\'t exist')
     def get(self, portfolio_id: int):
-        portfolio_users = Portfolio.query.filter_by(id = portfolio_id).first()
-        p = portfolio_users
-        if not portfolio_users:
-            return (
-                {"error": True, "message": "Portfolio doesn\'t exist"}, 
-                601,
-            )
+        user = get_user()
+        # if not portfolio_users: #redundant
+        #     return (
+        #         {"error": True, "message": "Portfolio doesn\'t exist"},
+        #         601,
+        #     )
         data = {
-                    p.id:dict(
-                        id=p.id,
-                        user_id=p.user.id,
-                        portfolio_name=p.portfolio_name
-                    )
-                }
+            user.id: dict(
+                portfolio_name=user.portfolio.portfolio_name,
+                balance=user.portfolio.portfolioprice[-1].close_balance,
+                portfolio=all_stocks_balance(user)
+            )
+        }
         payload = dict(
             data=data
         )

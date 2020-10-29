@@ -64,17 +64,15 @@ class Token(Resource):
         args = credential_parser.parse_args()
         email_id = args.get("email")
         password = args.get("password")
-        print(password)
         user = User.query.filter_by(email_id=email_id).first()
-        print(user)
         if not user:
             return (
-                {"error": True, "message": "User doesn't exist"},
+                {"message": "User doesn't exist"},
                 449,
             )
         if not validate_password(user, password):
             return (
-                {"error": True, "message": "Incorrect password, retry"},
+                {"message": "Incorrect password, retry"},
                 442,
             )
 
@@ -94,7 +92,7 @@ class Token(Resource):
             return response        
       
         return (
-                {"error": False, "message": "Login successful"},
+                {"message": "Login successful"},
                 200,
         )
 

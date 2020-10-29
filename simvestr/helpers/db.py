@@ -42,7 +42,7 @@ def close_db(e=None):
 
 
 def init_db():
-    db = get_db()
+    # db = get_db()
     db.create_all()
 
 
