@@ -1,6 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from simvestr.helpers.db import make_salt
+
+from flask_sqlalchemy import SQLAlchemy
+
 db = SQLAlchemy()
 
 

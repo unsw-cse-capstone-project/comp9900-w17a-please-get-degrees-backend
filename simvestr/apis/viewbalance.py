@@ -1,4 +1,5 @@
-from flask_restx import Resource, Namespace, abort
+from flask_restx import Resource, Namespace
+
 from simvestr.helpers.auth import requires_auth, get_user
 
 api = Namespace('view closing balance', description='Api for viewing closing balance for a User')

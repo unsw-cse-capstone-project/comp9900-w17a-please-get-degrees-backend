@@ -1,7 +1,9 @@
 from flask_restx import Resource, Namespace
-from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice
-from simvestr.helpers.portfolio import all_stocks_balance
+
 from simvestr.helpers.auth import get_user
+from simvestr.helpers.portfolio import all_stocks_balance
+from simvestr.models import Portfolio
+
 api = Namespace('view portfolios', description = 'Api for viewing Portfolios')
 
 #TODO: Need to protect this endpoint from non-users
