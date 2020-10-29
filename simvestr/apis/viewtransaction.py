@@ -39,7 +39,7 @@ class TransactionsQuery(Resource):
         return payload
 
 
-@api.route('/user/')
+@api.route("/user/")
 class TransactionQuery(Resource):
     def get(self, ):
         user = get_user()

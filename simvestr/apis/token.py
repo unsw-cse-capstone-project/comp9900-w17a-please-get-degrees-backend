@@ -11,7 +11,6 @@ from werkzeug.security import check_password_hash
 import jwt
 import datetime
 
-
 from simvestr.models import User
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.auth import auth
@@ -23,7 +22,6 @@ api = Namespace(
     title="Simvestr",
     description="Generates a JWT, sets a cookie in browser",
 )
-
 
 # ---------------- Create Token -------------- #
 credential_model = api.model(
@@ -45,9 +43,11 @@ credential_parser = reqparse.RequestParser()
 credential_parser.add_argument("email", type=str)
 credential_parser.add_argument("password", type=str)
 
+
 def validate_password(user, test_password):
     test_password = "".join([test_password, user.salt])
     return (user.password, test_password)
+
 
 @api.route("")
 class Token(Resource):
@@ -86,15 +86,15 @@ class Token(Resource):
 
         # set cookie in browser
         token = auth.generate_token(user.email_id)
-        
+
         @after_this_request
         def set_cookie_value(response):
-            response.set_cookie('token', value = token, httponly = True, domain="127.0.0.1")
-            return response        
-      
+            response.set_cookie("token", value=token, httponly=True, domain="127.0.0.1")
+            return response
+
         return (
-                {"message": "Login successful"},
-                200,
+            {"message": "Login successful"},
+            200,
         )
 
 # ---------------- Create Token -------------- #

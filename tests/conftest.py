@@ -9,13 +9,13 @@ from pathlib import Path
 
 @pytest.fixture
 def app():
-    temp_dir = tempfile.mkdtemp(prefix='temp_test_db_', dir=Path.cwd())
+    temp_dir = tempfile.mkdtemp(prefix="temp_test_db_", dir=Path.cwd())
     db_fd, db_path = tempfile.mkstemp(suffix=".db", dir=temp_dir)
     db_path = Path(db_path)
     test_config = dict(
         TESTING=True,
-        DATABASE=db_path.with_suffix('.sqlite'),
-        SQLALCHEMY_DATABASE_URI=f'sqlite:///{db_path}'
+        DATABASE=db_path.with_suffix(".sqlite"),
+        SQLALCHEMY_DATABASE_URI=f"sqlite:///{db_path}"
     )
 
     app = create_app(test_config)

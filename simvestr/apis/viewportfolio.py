@@ -1,22 +1,22 @@
 from flask_restx import Resource, Namespace
 
 from simvestr.helpers.auth import get_user
-from simvestr.helpers.portfolio import all_stocks_balance, portfolio_value
+from simvestr.helpers.portfolio import portfolio_value
 from simvestr.models import Portfolio
 
-api = Namespace('view portfolios', description='Api for viewing Portfolios')
+api = Namespace("view portfolios", description="Api for viewing Portfolios")
 
 
 # TODO: Need to protect this endpoint from non-users
 @api.route("")
 class PortfoliosQuery(Resource):
-    @api.response(200, 'Successful')
-    @api.response(601, 'Portfolio doesn\'t exist')
+    @api.response(200, "Successful")
+    @api.response(601, "Portfolio doesn\'t exist")
     def get(self):
         portfolio_users = Portfolio.query.all()
         if not portfolio_users:
             return (
-                {"error": True, "message": "Portfolio doesn\'t exist"},
+                {"error": True, "message": "Portfolio doesn't exist"},
                 601,
             )
 
@@ -33,10 +33,10 @@ class PortfoliosQuery(Resource):
         return payload, 200
 
 
-@api.route('/user')
+@api.route("user")
 class PortfolioQuery(Resource):
-    @api.response(200, 'Successful')
-    @api.response(601, 'Portfolio doesn\'t exist')
+    @api.response(200, "Successful")
+    @api.response(601, "Portfolio doesn't exist")
     def get(self):
         user = get_user()
         portfolio = portfolio_value(user)

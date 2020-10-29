@@ -25,7 +25,7 @@ def create_new_user(email_id, first_name, last_name, password):
     db.session.commit()
 
     new_portfolio = Portfolio(
-        portfolio_name=first_name + '\'s Portfolio'  # make a portfolio for new user
+        portfolio_name=first_name + "'s Portfolio"  # make a portfolio for new user
     )
     new_user.portfolio = new_portfolio
     db.session.add(new_portfolio)

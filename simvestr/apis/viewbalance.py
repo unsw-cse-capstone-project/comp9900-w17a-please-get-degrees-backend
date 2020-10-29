@@ -11,7 +11,6 @@ class PortfolioPriceUsersQuery(Resource):
     @api.response(602, 'Portfolio for this user doesn\'t exist')
     @requires_auth
     def get(self):
-
         user = get_user()
 
         data = dict(
@@ -27,11 +26,10 @@ class PortfolioPriceUsersQuery(Resource):
         return payload
 
 
-
-@api.route('/user/')
+@api.route("/user/")
 class PortfolioPriceQuery(Resource):
-    @api.response(200, 'Successful')
-    @api.response(602, 'Portfolio for this user doesn\'t exist')
+    @api.response(200, "Successful")
+    @api.response(602, "Portfolio for this user doesn't exist")
     @requires_auth
     def get(self, ):
         user = get_user()
@@ -49,14 +47,13 @@ class PortfolioPriceQuery(Resource):
         return payload
 
 
-@api.route('/user/detailed')
+@api.route("/user/detailed")
 class PortfolioPriceUserQuery(Resource):
-    @api.response(200, 'Successful')
-    @api.response(602, 'Portfolio for this user doesn\'t exist')
+    @api.response(200, "Successful")
+    @api.response(602, "Portfolio for this user doesn't exist")
     @requires_auth
     def get(self):
         user = get_user()
-
 
         data = dict(
             user_id=user.id,
