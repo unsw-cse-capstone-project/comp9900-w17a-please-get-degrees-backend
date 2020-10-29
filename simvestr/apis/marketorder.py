@@ -33,7 +33,7 @@ trade_model = api.model(
         "quote": fields.Float(
             required=True,
             description="Quote price per share of stock",
-            example="1200"
+            example=1200
         ),
         "trade_type": fields.String(
             required=True,
@@ -47,7 +47,7 @@ trade_model = api.model(
         "quantity": fields.Integer(
             required=True,
             description="Quote price per share of stock",
-            example="5"
+            example=5
         ),
     },
 )
@@ -75,13 +75,14 @@ class TradeStock(Resource):
         args = trade_parser.parse_args()
         symbol: str = args.get("symbol")
         quote = args.get("quote")
-        trade_type = args.get("trade_type")  # redundant
+        trade_type = args.get("trade_type")
         quantity = args.get("quantity")
         symbol = symbol.upper()
         # get user details from token
         user = get_user()
 
         fee = 0
+        quantity = -quantity if trade_type == "sell" else quantity
 
         # --------------- Buy ---------------- #
         if quantity > 0:  # check if user even has enough money to buy this stock quantity

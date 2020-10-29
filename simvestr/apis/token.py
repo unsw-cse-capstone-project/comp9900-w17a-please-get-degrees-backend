@@ -76,12 +76,13 @@ class Token(Resource):
                 442,
             )
 
-        message_content = (
-            "You have logged into Simvestr. Login will expire after 24 hours!"
-        )
-        send_email(
-            user.email_id, "Log in successful", message_content
-        )  # sends a logged in email to the user
+        # message_content = (
+        #     "You have logged into Simvestr. Login will expire after 24 hours!"
+        # )
+
+        # send_email(
+        #     user.email_id, "Log in successful", message_content
+        # )  # sends a logged in email to the user
 
         # set cookie in browser
         token = auth.generate_token(user.email_id)
