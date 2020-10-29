@@ -89,7 +89,7 @@ class Token(Resource):
         
         @after_this_request
         def set_cookie_value(response):
-            response.set_cookie('token', value = token, httponly = True, domain="127.0.0.1")
+            response.set_cookie('token', value = token, httponly = True)
             return response        
       
         return (
