@@ -15,6 +15,7 @@ from .viewtransaction import api as ns11
 from .changedetails import api as ns12
 from .watchlist import api as ns13
 from .leaderboard import api as ns14
+from .logout import api as ns15
 
 from flask import Blueprint
 
@@ -42,4 +43,5 @@ api.add_namespace(ns10, path="/viewbalance")
 api.add_namespace(ns11, path="/viewtransaction")
 api.add_namespace(ns12, path="/changedetails")
 api.add_namespace(ns13, path="/watchlist")
-api.add_namespace(ns13, path="/leaderboard")
+api.add_namespace(ns14, path="/leaderboard")
+api.add_namespace(ns15, path="/logout")
