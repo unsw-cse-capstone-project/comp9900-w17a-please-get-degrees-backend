@@ -45,7 +45,14 @@ class VerifyToken(Resource):
     def get(self):
         args = token_parser.parse_args() # From http cookies
         token = args.get("token")
-        # token = request.headers.get('API-TOKEN')
+        if token == None:
+            return (
+            {
+                "error": True,
+                "message": "Cookie token not found, login again",
+            },
+            405,
+            )
         passed, param =  auth.validate_passed_token(token)
         
         if passed:
