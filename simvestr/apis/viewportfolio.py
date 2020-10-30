@@ -11,7 +11,7 @@ api = Namespace("view portfolios", description="Api for viewing Portfolios")
 @api.route("")
 class PortfoliosQuery(Resource):
     @api.response(200, "Successful")
-    @api.response(601, "Portfolio doesn\'t exist")
+    @api.response(601, "Portfolio doesn't exist")
     def get(self):
         portfolio_users = Portfolio.query.all()
         if not portfolio_users:
@@ -21,15 +21,10 @@ class PortfoliosQuery(Resource):
             )
 
         data = {
-            p.id: dict(
-                id=p.id,
-                user_id=p.user.id,
-                portfolio_name=p.portfolio_name
-            ) for p in portfolio_users
+            p.id: dict(id=p.id, user_id=p.user.id, portfolio_name=p.portfolio_name)
+            for p in portfolio_users
         }
-        payload = dict(
-            data=data
-        )
+        payload = dict(data=data)
         return payload, 200
 
 
@@ -41,15 +36,10 @@ class PortfolioQuery(Resource):
         user = get_user()
         portfolio = portfolio_value(user)
 
-        data = {
-            user.id: dict(
-                portfolio_name=user.portfolio.portfolio_name,
-                balance=user.portfolio.portfolioprice[-1].close_balance,
-                total_value=sum([x["value"] for x in portfolio.values()]),
-                portfolio=portfolio
-            )
-        }
         payload = dict(
-            data=data
+            portfolio_name=user.portfolio.portfolio_name,
+            balance=user.portfolio.portfolioprice[-1].close_balance,
+            total_value=sum([x["value"] for x in portfolio.values()]),
+            portfolio=portfolio,
         )
         return payload, 200
