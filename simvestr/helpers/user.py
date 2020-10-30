@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
 
-from simvestr.models import User, Portfolio, PortfolioPrice, db
+from simvestr.models import User, Portfolio, PortfolioPrice, Watchlist, db
 from simvestr.helpers.db import make_salt
 
 
@@ -22,6 +22,13 @@ def create_new_user(email_id, first_name, last_name, password):
         password=generate_password_hash(pw, method="sha256")
     )
     db.session.add(new_user)
+    db.session.commit()
+
+    new_watch= Watchlist(
+        user_id=new_user.id
+    )
+    new_user.watchlist = new_watch
+    db.session.add(new_watch)
     db.session.commit()
 
     new_portfolio = Portfolio(
