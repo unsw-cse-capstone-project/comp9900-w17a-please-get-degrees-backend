@@ -14,6 +14,8 @@ from simvestr.models import db
 from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
 from simvestr.helpers.search import search
 
+from pathlib import Path
+
 SALT_SIZE = 6
 
 
@@ -48,7 +50,8 @@ def init_db():
 def delete_db():
     curr_dir = Path.cwd()
     db_path = curr_dir / "instance" / "simvestr.db"
-    db_path.unlink()
+    if db_path.is_file():
+        db_path.unlink()
 
 
 def bulk_add_from_df(df, db, model):

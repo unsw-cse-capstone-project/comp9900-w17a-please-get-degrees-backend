@@ -45,15 +45,20 @@ class VerifyToken(Resource):
     def get(self):
         args = token_parser.parse_args() # From http cookies
         token = args.get("token")
-        # token = request.headers.get('API-TOKEN')
+        if token == None:
+            return (
+            {
+                "message": "Cookie token not found, login again",
+            },
+            405,
+            )
         passed, param =  auth.validate_passed_token(token)
         
         if passed:
             user = User.query.filter_by(email_id = param).first()
 
             return (
-                {"error" : False, 
-                 "first_name" : user.first_name,
+                {"first_name" : user.first_name,
                  "last_name" : user.last_name,
                  "email_id" : user.email_id,
                  "message": "Authenticated with cookie set in browser"},
@@ -62,7 +67,6 @@ class VerifyToken(Resource):
         
         return (
             {
-                "error": True,
                 "message": param,
             },
             401,

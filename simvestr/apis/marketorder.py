@@ -53,7 +53,7 @@ trade_model = api.model(
         "timestamp": fields.Integer(
             required=True,
             description="Current timestamp of the stock",
-            example=1606135833 # setting a time 23 Nov for testing
+            example=1606135833 # setting time to 23 Nov
         ),
     },
 )
@@ -64,18 +64,14 @@ trade_parser.add_argument("trade_type", type=str)
 trade_parser.add_argument("quantity", type=int)
 trade_parser.add_argument("timestamp", type=int)
 
-import json
-
 def check_price(symbol, quote, timestamp):
     stock_details = StockDetails.get(symbol)
-
-    stock_details = json.loads(json.dumps((stock_details)))
     
-    current_time = stock_details["quote"]["t"]
+    current_time = stock_details.json["quote"]["t"]
     time_diff = current_time - timestamp
     allowed_time_diff = 10 # seconds
     
-    current_quote = stock_details["quote"]["c"]
+    current_quote = stock_details.json["quote"]["c"]
     cost_diff = abs(current_quote - quote)
     allowed_cost_diff = 0.0005 * quote
     
