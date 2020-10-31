@@ -49,7 +49,7 @@ class Signup(Resource):
     @api.doc(model="Signup", body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
-        email_id = args.get("email_id")
+        email_id = (args.get("email_id")).lower()
         password = args.get("password")
         fname = args.get("first_name")
         lname = args.get("last_name")
