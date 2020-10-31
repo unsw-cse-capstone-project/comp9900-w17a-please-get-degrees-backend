@@ -59,8 +59,7 @@ class VerifyToken(Resource):
             user = User.query.filter_by(email_id = param).first()
 
             return (
-                {"error" : False, 
-                 "first_name" : user.first_name,
+                {"first_name" : user.first_name,
                  "last_name" : user.last_name,
                  "email_id" : user.email_id,
                  "message": "Authenticated with cookie set in browser"},
@@ -69,7 +68,6 @@ class VerifyToken(Resource):
         
         return (
             {
-                "error": True,
                 "message": param,
             },
             401,
