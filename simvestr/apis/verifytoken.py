@@ -48,7 +48,6 @@ class VerifyToken(Resource):
         if token == None:
             return (
             {
-                "error": True,
                 "message": "Cookie token not found, login again",
             },
             405,
