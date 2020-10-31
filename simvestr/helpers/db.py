@@ -14,7 +14,7 @@ from simvestr.models import db
 from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
 from simvestr.helpers.search import search
 
-import os.path
+from pathlib import Path
 
 SALT_SIZE = 6
 
@@ -50,7 +50,7 @@ def init_db():
 def delete_db():
     curr_dir = Path.cwd()
     db_path = curr_dir / "instance" / "simvestr.db"
-    if os.path.isfile(db_path):
+    if db_path.is_file():
         db_path.unlink()
 
 
