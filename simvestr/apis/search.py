@@ -63,7 +63,7 @@ class StockDetails(Resource):
     @api.doc(
         model="Details", description="Gets details for the specified stock",
     )
-    def get(self, stock_symbol: str = "AAPL"):
+    def get(self, stock_symbol):
         # Since we are fetching from finnhub we need to fetch anyway, so why hit the DB at all?
         details = search(source_api="finnhub", query="profile", arg=stock_symbol)
         quote = search(source_api="finnhub", query="quote", arg=stock_symbol)
