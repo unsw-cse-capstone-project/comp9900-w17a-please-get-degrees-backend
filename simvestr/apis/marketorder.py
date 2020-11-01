@@ -59,7 +59,7 @@ trade_parser.add_argument("trade_type", type=str)
 trade_parser.add_argument("quantity", type=int)
 
 def check_price(symbol, quote):
-    stock_details = StockDetails.get(symbol)
+    stock_details = StockDetails.get("", symbol)
 
     current_quote = stock_details.json["quote"]["c"]
     cost_diff = abs(current_quote - quote)
