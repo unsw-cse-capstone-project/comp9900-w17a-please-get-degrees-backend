@@ -72,9 +72,9 @@ def check_price(symbol, quote):
     # if the cost hasn't changed more than 0.05%
     # otherwise if quote is same as current price, commit transaction
     if (cost_diff <= allowed_cost_diff or current_quote == quote) :
-        return True, cost_diff
+        return False, cost_diff
     
-    return False, cost_diff
+    return True, cost_diff
 
 @api.route("")
 class TradeStock(Resource):
@@ -110,7 +110,7 @@ class TradeStock(Resource):
                 return {"message": "Insufficient funds"}, 650
             
             variation, slippage = check_price(symbol, quote)
-            if not variation:
+            if variation:
                 return {"message": "Current price has changed, can't commit this transaction"}, 652
 
         # ------------- Buy-ends ------------- #
@@ -126,7 +126,7 @@ class TradeStock(Resource):
                 return {"message": "Insufficient quantity of stock to sell"}, 651
             
             variation, slippage = check_price(symbol, quote)
-            if not variation:
+            if variation:
                 return {"message": "Current price has changed, can't commit this transaction"}, 652
 
             balance_adjustment = (quote * quantity) + fee
