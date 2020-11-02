@@ -42,10 +42,10 @@ signup_parser.add_argument("last_name", type=str)
 @api.route("")
 class Signup(Resource):
     @api.response(200, "Successful")
-    @api.response(444, "User already exists")
-    @api.response(445, "Email ID already exists")
-    @api.response(446, "Username should be at least 8 characters")
-    @api.response(447, "Password should be at least 8 characters")
+    @api.response(403, "Already exists")
+    # @api.response(403, "Email ID already exists")
+    @api.response(422, "Unprocessable entity")
+    # @api.response(422, "Password should be at least 8 characters")
     @api.doc(model="Signup", body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
@@ -53,17 +53,27 @@ class Signup(Resource):
         password = args.get("password")
         fname = args.get("first_name")
         lname = args.get("last_name")
+
+        if len(email_id) < 1:
+            return (
+                {"message": "Email is required"},
+                422,
+            )
+
         user = User.query.filter_by(email_id=email_id).first()
+
         if user:
             return (
                 {"message": "User already exists"},
-                444,
+                403,
             )
+
+
 
         if len(password) < 8:
             return (
                 {"message": "Password should be at least 8 characters", },
-                447,
+                422,
             )
 
         create_new_user(

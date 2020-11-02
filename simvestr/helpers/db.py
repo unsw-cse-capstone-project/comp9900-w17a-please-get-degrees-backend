@@ -13,6 +13,7 @@ from werkzeug.security import generate_password_hash
 from simvestr.models import db
 from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
 from simvestr.helpers.search import search
+from simvestr.helpers.portfolio import all_stocks_balance
 
 from pathlib import Path
 
@@ -165,7 +166,7 @@ def load_dummy():
 
         port_df = df_map["portfolio"]
         port_df = port_df[port_df.user_id == user.id]
-        port = Portfolio(portfolio_name=port_df.to_dict(orient="records")[0]["portfolio_name"])
+        port = Portfolio(**port_df[["portfolio_name", "balance"]].to_dict(orient="records")[0])
         port.transactions = []
 
         db.session.add(port)
@@ -199,6 +200,13 @@ def load_dummy():
 
             db.session.add(trans)
             db.session.commit()
+
+        curr_balance = all_stocks_balance(user)
+        stock_list = Stock.query.filter(Stock.symbol.in_(list(curr_balance))).all()
+        user.portfolio.stocks.extend(stock_list)
+
+        db.session.commit()
+
 
 
 @click.command("init-db")

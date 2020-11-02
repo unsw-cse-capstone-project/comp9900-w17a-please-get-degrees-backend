@@ -43,7 +43,7 @@ def create_app(test_config=None):
     def index():
         return "Simvestr App"
 
-    from .models import db
+    from simvestr.models import db
 
     db.init_app(app)
 

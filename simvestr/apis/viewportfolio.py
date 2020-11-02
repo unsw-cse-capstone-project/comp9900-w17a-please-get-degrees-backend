@@ -1,6 +1,6 @@
 from flask_restx import Resource, Namespace
 
-from simvestr.helpers.auth import get_user
+from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.portfolio import portfolio_value
 from simvestr.models import Portfolio
 
@@ -32,13 +32,14 @@ class PortfoliosQuery(Resource):
 class PortfolioQuery(Resource):
     @api.response(200, "Successful")
     @api.response(601, "Portfolio doesn't exist")
+    @requires_auth
     def get(self):
         user = get_user()
         portfolio = portfolio_value(user)
 
         payload = dict(
             portfolio_name=user.portfolio.portfolio_name,
-            balance=user.portfolio.portfolioprice[-1].close_balance,
+            balance=user.portfolio.balance,
             total_value=sum([x["value"] for x in portfolio.values()]),
             portfolio=portfolio,
         )

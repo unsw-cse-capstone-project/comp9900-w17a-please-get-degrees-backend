@@ -1,6 +1,7 @@
 from flask_restx import Resource, Namespace
 
 from simvestr.helpers.auth import requires_auth, get_user
+from simvestr.helpers.portfolio import calculate_all_portfolios_values
 
 api = Namespace('view closing balance', description='Api for viewing closing balance for a User')
 
@@ -37,9 +38,9 @@ class PortfolioPriceQuery(Resource):
 
         data = dict(
             name=user.portfolio.portfolio_name,
-            portfolio_id=user.portfolio.portfolioprice[-1].id,
-            balance=user.portfolio.portfolioprice[-1].close_balance,
-            time=str(user.portfolio.portfolioprice[-1].timestamp),
+            portfolio_id=user.portfolio.id,
+            balance=user.portfolio.balance,
+            time=str(user.portfolio.portfolioprice[-1].timestamp), # Do we need the time?
 
         )
         payload = dict(
