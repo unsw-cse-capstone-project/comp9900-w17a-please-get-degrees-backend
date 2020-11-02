@@ -55,11 +55,13 @@ def portfolio_value(user: User, use_stored=False):
 
 
 def calculate_all_portfolios_values(query_limit=60):
+    # First, query only the stocks that are in users portfolios
     portfolio_stocks = Stock.query.join(Portfolio, Stock.portfolios).all()
     allowance_per_call = S_PER_MIN/query_limit
 
     processing_start = time.time()
     # Time logic is to limit our calls per minute to the bandwidth available
+    # Get current quote price for the portfolio stocks
     for stock in portfolio_stocks:
         start_t = time.time()
 
@@ -75,6 +77,8 @@ def calculate_all_portfolios_values(query_limit=60):
 
         if pause_time > 0:
             time.sleep(pause_time)
+
+    #For every user, create a portfolio price entry and commit it to the db
     all_users = User.query.all()
     for user in all_users:
         portfolio = portfolio_value(user, use_stored=True)
