@@ -7,7 +7,7 @@ RUN_COMMAND = "flask run"
 if __name__ == '__main__':
     os.environ["FLASK_APP"] = "simvestr"
     os.environ["FLASK_ENV"] = "development"
-    if sys.platform == "darwin":
+    if sys.platform == "darwin" or sys.platform.lower() == "linux":
         os.system(RUN_COMMAND)
     else:
         subprocess.run(RUN_COMMAND)
