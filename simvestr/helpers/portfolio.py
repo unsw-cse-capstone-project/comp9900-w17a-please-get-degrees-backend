@@ -2,11 +2,61 @@ import time
 from datetime import datetime
 
 import pandas as pd
+import numpy as np
 
 from simvestr.models import User, Transaction, Stock, Portfolio, PortfolioPrice, db
 from simvestr.helpers.search import search
 
 S_PER_MIN = 60
+
+
+def weighted_avg(df: pd.DataFrame, grouped=False):
+    '''Expects a dataframe that has symbol, quote, quantity columns'''
+    df["total"] = df.quote * df.quantity
+    grouped_df = df.groupby("symbol").sum()
+
+    grouped_df["weighted_average"] = grouped_df.total / grouped_df.quantity
+    grouped_df["weighted_average_fee"] = grouped_df.fee / grouped_df.quantity
+    grouped_df = grouped_df[["weighted_average_fee", "weighted_average",]]
+    return grouped_df
+
+# Source: https://stackoverflow.com/questions/50686238/pandas-groupby-with-fifo
+def FiFo(dfg):
+    if dfg[dfg["CS"] < 0]["quantity"].count():
+        subT = dfg[dfg["CS"] < 0]["CS"].iloc[-1]
+        dfg["quantity"] = np.where((dfg["CS"] + subT) <= 0, 0, dfg["quantity"])
+        dfg = dfg[dfg["quantity"] > 0]
+        if (len(dfg) > 0):
+            dfg["quantity"].iloc[0] = dfg["CS"].iloc[0] + subT
+    return dfg
+
+
+def average_price(user: User, mode="moving"):
+    trans_df = pd.read_sql(user.portfolio.transactions.subquery(), db.session.bind)
+
+    buy_df = trans_df[trans_df.quantity > 0]
+    sell_df = trans_df[trans_df.quantity < 0]
+    if mode == "alltime":
+        buy_df = weighted_avg(buy_df)
+        sell_df = weighted_avg(sell_df)
+        payload = dict(
+            buy=buy_df.to_dict(orient="index"),
+            sell=sell_df.to_dict(orient="index")
+        )
+    elif mode == "moving":
+        trans_df["PN"] = np.where(trans_df["quantity"] > 0, "P", "N")
+        trans_df["CS"] = trans_df.groupby(["symbol", "PN"])["quantity"].cumsum()
+        fifo_trans_df = trans_df.groupby(["symbol"])\
+            .apply(FiFo)\
+            .drop(["CS", "PN", "id", "portfolio_id", "timestamp",], axis=1)\
+            .reset_index(drop=True)
+        moving_avg_df = weighted_avg(fifo_trans_df, grouped=True)
+        payload = dict(
+            buy=moving_avg_df.to_dict(orient="index"),
+            sell={}
+        )
+    return payload
+
 
 def all_stocks_balance(user: User):
     all_stocks = user.portfolio.transactions.with_entities(
@@ -14,10 +64,13 @@ def all_stocks_balance(user: User):
         Transaction.symbol
     ).group_by("symbol").all()
 
+
+
     return {n: q for (q, n) in all_stocks if q > 0}
 
 
 def stock_balance(user: User, symbol):
+    average_price(user, )
     return user.portfolio.transactions.with_entities(
         db.func.sum(Transaction.quantity).label("balance"),
         Transaction.symbol
@@ -26,8 +79,10 @@ def stock_balance(user: User, symbol):
     ).group_by("symbol").first()
 
 
-def portfolio_value(user: User, use_stored=False):
+def portfolio_value(user: User, use_stored=False, average_mode="moving"):
     balance = all_stocks_balance(user)
+    avgs = average_price(user, mode=average_mode)
+
     p_value = dict()
 
     if use_stored:
@@ -40,7 +95,7 @@ def portfolio_value(user: User, use_stored=False):
         quote_df.set_index(["symbol"], inplace=True)
         portfolio_df = balance_df.join(quote_df)
         portfolio_df["value"] = portfolio_df.quote * portfolio_df.quantity
-        p_value = portfolio_df.to_dict(orient="index",)
+        p_value = portfolio_df.to_dict(orient="index", )
     else:
         for stock, quant in balance.items():
             quote = search("quote", stock)["c"]
@@ -49,15 +104,17 @@ def portfolio_value(user: User, use_stored=False):
                 quote=quote,
                 value=quote * quant,
             )
+    for trade_type, stock_statistics in avgs.items():
+        for stock, statistics in stock_statistics.items():
+            p_value[stock][trade_type] = statistics
+
     return p_value
-
-
 
 
 def calculate_all_portfolios_values(query_limit=60):
     # First, query only the stocks that are in users portfolios
     portfolio_stocks = Stock.query.join(Portfolio, Stock.portfolios).all()
-    allowance_per_call = S_PER_MIN/query_limit
+    allowance_per_call = S_PER_MIN / query_limit
 
     processing_start = time.time()
     # Time logic is to limit our calls per minute to the bandwidth available
@@ -70,7 +127,6 @@ def calculate_all_portfolios_values(query_limit=60):
         stock.last_quote = quote["c"]
         stock.last_quote_time = datetime.now()
 
-
         end_t = time.time()
         duration = end_t - start_t
         pause_time = allowance_per_call - duration
@@ -78,13 +134,13 @@ def calculate_all_portfolios_values(query_limit=60):
         if pause_time > 0:
             time.sleep(pause_time)
 
-    #For every user, create a portfolio price entry and commit it to the db
+    # For every user, create a portfolio price entry and commit it to the db
     all_users = User.query.all()
     for user in all_users:
         portfolio = portfolio_value(user, use_stored=True)
         if not portfolio:
             continue
-        portfolio_df = pd.DataFrame.from_dict(portfolio, orient="index",)
+        portfolio_df = pd.DataFrame.from_dict(portfolio, orient="index", )
         investment_value = portfolio_df["value"].sum()
         cash_balance = user.portfolio.balance
         portfolioprice = PortfolioPrice(
@@ -94,8 +150,3 @@ def calculate_all_portfolios_values(query_limit=60):
         user.portfolio.portfolioprice.append(portfolioprice)
 
         db.session.commit()
-
-
-
-
-

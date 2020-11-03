@@ -4,14 +4,14 @@ from simvestr.helpers.auth import get_user
 from simvestr.models import Transaction
 
 api = Namespace(
-    "view transactions",
+    "transactions",
     authorizations={
         "TOKEN-BASED": {"name": "API-TOKEN", "in": "header", "type": "apiKey"}
     },
     security="TOKEN-BASED",
     default="Buying and selling stocks",
     title="Simvestr",
-    description="Demo api for querying transactions",
+    description="View transactions for a user",
 )
 
 

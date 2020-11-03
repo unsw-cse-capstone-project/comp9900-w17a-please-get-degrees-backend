@@ -4,6 +4,7 @@ Created on Mon Oct 14 11:23:31 2020
 
 @author: Kovid
 """
+from datetime import datetime
 
 from flask_restx import Resource, fields, reqparse, Namespace
 
@@ -98,7 +99,7 @@ class TradeStock(Resource):
         symbol = symbol.upper()  # TODO: Need wrapper function to automaticlly uppercase the input
 
         user = get_user()  # get user details from token
-        stock = Stock.query.filter_by(symbol=symbol)
+        stock = Stock.query.filter_by(symbol=symbol).first()
         fee = 0
         quantity = -quantity if trade_type == "sell" else quantity
         slippage = 0
@@ -139,7 +140,7 @@ class TradeStock(Resource):
             return {"message": f"Invalid quantity. Quantity must be a non zero integer. Received {quantity}"}, 422
 
         stock.last_quote = quote
-        stock.last_quote_time = timestamp
+        stock.last_quote_time = datetime.utcfromtimestamp(timestamp)
 
         user.portfolio.balance -= balance_adjustment  # update user's balance after trade
         # -------------- Sell-ends ----------- #

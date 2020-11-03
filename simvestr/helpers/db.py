@@ -44,7 +44,6 @@ def close_db(e=None):
 
 
 def init_db():
-    # db = get_db()
     db.create_all()
 
 
@@ -124,7 +123,7 @@ def load_dummy():
     db = get_db()
     data_path = Path.cwd() / "resources" / "test_data_user.xlsx"
 
-    # Order of models matterss
+    # Order of models matters
     load_mapping = dict(
         exchanges=Exchanges,
         watchlist=Watchlist,

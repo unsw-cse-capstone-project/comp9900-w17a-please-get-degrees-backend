@@ -3,7 +3,7 @@ from flask_restx import Resource, Namespace
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.portfolio import calculate_all_portfolios_values
 
-api = Namespace('view closing balance', description='Api for viewing closing balance for a User')
+api = Namespace('balance', description='Api for viewing balance for a User')
 
 
 @api.route("")
