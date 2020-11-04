@@ -30,7 +30,7 @@ credential_model = api.model(
         "email": fields.String(
             required=True,
             description="User email",
-            example="simon@unsw.edu.au"
+            example="test@test.com"
         ),
         "password": fields.String(
             required=True,
