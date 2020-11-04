@@ -22,7 +22,7 @@ from sqlalchemy import func
 #
 def test_bulk_create_user(app):
     db = SQLAlchemy(app)
-    from simvestr.db import User
+    from simvestr.helpers.db import User
 
     user_data_path = Path.cwd() / 'test_data_user.xlsx'
     user_df = pd.read_excel(user_data_path)

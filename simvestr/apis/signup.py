@@ -5,15 +5,11 @@ Created on Mon Sep 28 12:27:41 2020
 @author: Kovid
 """
 
-from flask import jsonify
 from flask_restx import Resource, fields, reqparse, Namespace
-from werkzeug.security import generate_password_hash
 
-from simvestr_email import send_email
-
-# from simvestr import create_app
-from ..models import User
-from simvestr.models import db
+from simvestr.helpers.simvestr_email import send_email
+from simvestr.helpers.user import create_new_user
+from simvestr.models import User
 
 api = Namespace(
     "signup",
@@ -23,7 +19,7 @@ api = Namespace(
     security="TOKEN-BASED",
     default="User Login and Authentication",
     title="Simvestr",
-    description="Back-end API User signup and authentication",
+    description="Back-end API for new user signup",
 )
 
 # ---------------- Signup new user ----------- #
@@ -53,37 +49,36 @@ class Signup(Resource):
     @api.doc(model="Signup", body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
-        email_id = args.get("email_id")
+        email_id = (args.get("email_id")).lower()
         password = args.get("password")
         fname = args.get("first_name")
         lname = args.get("last_name")
         user = User.query.filter_by(email_id=email_id).first()
         if user:
             return (
-                {"error": True, "message": "User already exists"}, 
+                {"message": "User already exists"},
                 444,
             )
 
         if len(password) < 8:
             return (
-                {"error": True, "message": "Password should be at least 8 characters",},
+                {"message": "Password should be at least 8 characters", },
                 447,
             )
-        new_user = User(
+
+        create_new_user(
             email_id=email_id,
             first_name=fname,
             last_name=lname,
-            role="user",
-            password=generate_password_hash(password, method="sha256"),
+            password=password,
         )
-        db.session.add(new_user)
-        db.session.commit()
+
         message_content = "A new user from your email ID has signed-up for our free investing simulator. Please login to start investing"
         send_email(
             email_id, "User created successfully", message_content
         )  # sends a confirmation email to the user
         return (
-            {"error": False, "message": "New user created!"}, 
+            {"message": "New user created!"},
             200
         )
 # ---------------- Signup new user ----------- #
