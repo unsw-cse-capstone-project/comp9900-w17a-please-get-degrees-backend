@@ -24,6 +24,7 @@ def create_app(test_config=None):
     )
     config_yml = load_yaml_config()
     app.config["FINNHUB_API_KEY"] = config_yml["Finnhub API Key"]
+    app.config["START_BALANCE"] = config_yml["START_BALANCE"]
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
