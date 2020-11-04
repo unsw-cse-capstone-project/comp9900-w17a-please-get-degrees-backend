@@ -119,8 +119,8 @@ class StockSymbols(Resource):
 candle_parser = reqparse.RequestParser()
 candle_parser.add_argument("symbol", type=str, required=True, help="Stock symbol to search.")
 candle_parser.add_argument("resolution", type=str, help="Resolution of data", default="D")
-candle_parser.add_argument("from", type=float, help="UNIX timestamp. Interval initial value.")
-candle_parser.add_argument("to", type=float, help="UNIX timestamp. Interval end value.")
+candle_parser.add_argument("from", type=int, help="UNIX timestamp. Interval initial value.")
+candle_parser.add_argument("to", type=int, help="UNIX timestamp. Interval end value.")
 
 
 @api.route("/candle")
