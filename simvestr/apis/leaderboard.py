@@ -2,16 +2,15 @@ from flask import jsonify
 from flask_restx import Resource, Namespace
 from sqlalchemy import func, and_
 
-from simvestr.models import Portfolio, PortfolioPrice
-from simvestr.models import db
+from simvestr.models import Portfolio, PortfolioPrice, db
 
-api = Namespace("leader board", description="Leaderboard")
+api = Namespace("leaderboard", description="Leaderboard")
 
 
 @api.route("/position/<int:user_id>")
 class PortfolioQuery(Resource):
     @api.response(200, "Successful")
-    @api.response(602, "PortfolioPrice doesn\'t exist")
+    @api.response(602, "PortfolioPrice doesn't exist")
     def get(self, user_id: int):
         subq = db.session.query(
             PortfolioPrice.user_id,

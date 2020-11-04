@@ -8,10 +8,10 @@ from .verifytoken import api as ns4
 from .forgotuser import api as ns5
 from .search import api as ns6
 from .marketorder import api as ns7
-from .viewstocksowned import api as ns8
-from .viewportfolio import api as ns9
-from .viewbalance import api as ns10
-from .viewtransaction import api as ns11
+from .stocksowned import api as ns8
+from .portfolio import api as ns9
+from .balance import api as ns10
+from .transactions import api as ns11
 from .changedetails import api as ns12
 from .watchlist import api as ns13
 from .leaderboard import api as ns14

@@ -93,8 +93,9 @@ class Stock(db.Model):
     display_symbol = db.Column(db.String(10), nullable=False, )
     name = db.Column(db.String(200), nullable=False)
     currency = db.Column(db.String(20), nullable=False)
-    exchange = db.Column(db.String(200),
-                         nullable=False)  # make foreign key in exchanges table or build relationship properly
+    exchange = db.Column(db.String(200), nullable=False)  # make foreign key in exchanges table or build relationship properly
+    last_quote = db.Column(db.Float)
+    last_quote_time = db.Column(db.DateTime)
     type = db.Column(db.String(10), default="stock", nullable=False)
 
     watchlists = db.relationship("Watchlist", secondary=wl_stock, backref=db.backref("stock", lazy="select", ),
@@ -112,6 +113,8 @@ class Portfolio(db.Model):
     __tablename__ = "portfolio"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     portfolio_name = db.Column(db.String(30), nullable=False)
+
+    balance = db.Column(db.Float, nullable=False)
 
     transactions = db.relationship(
         "Transaction",
@@ -135,7 +138,8 @@ class PortfolioPrice(db.Model):
         uselist=False,
     )
     
-    close_balance = db.Column(db.Integer)
+    close_balance = db.Column(db.Float)
+    investment_value = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, default=datetime.now, )
 
 

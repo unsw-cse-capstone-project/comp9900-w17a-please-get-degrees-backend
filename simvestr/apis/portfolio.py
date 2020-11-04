@@ -1,10 +1,10 @@
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, reqparse
 
-from simvestr.helpers.auth import get_user
+from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.portfolio import portfolio_value
 from simvestr.models import Portfolio
 
-api = Namespace("view portfolios", description="Api for viewing Portfolios")
+api = Namespace("portfolios", description="Api for viewing Portfolios")
 
 
 # TODO: Need to protect this endpoint from non-users
@@ -28,17 +28,28 @@ class PortfoliosQuery(Resource):
         return payload, 200
 
 
+portfolio_query_parser = reqparse.RequestParser()
+portfolio_query_parser.add_argument(
+    "averagemode",
+    type=str,
+    help="Type of averaging for portfolio query. Options are 'alltime' or 'moving'.",
+    default="moving"
+)
+
 @api.route("/user")
 class PortfolioQuery(Resource):
     @api.response(200, "Successful")
     @api.response(601, "Portfolio doesn't exist")
+    @api.expect(portfolio_query_parser)
+    @requires_auth
     def get(self):
         user = get_user()
-        portfolio = portfolio_value(user)
+        args = portfolio_query_parser.parse_args()
+        portfolio = portfolio_value(user, average_mode=args["averagemode"].lower())
 
         payload = dict(
             portfolio_name=user.portfolio.portfolio_name,
-            balance=user.portfolio.portfolioprice[-1].close_balance,
+            balance=user.portfolio.balance,
             total_value=sum([x["value"] for x in portfolio.values()]),
             portfolio=portfolio,
         )

@@ -48,7 +48,6 @@ class UserQuery(Resource):
                 } for t in transact
             }
         )
-        print(data)
         payload = dict(
             data=data
         )

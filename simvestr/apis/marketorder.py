@@ -4,12 +4,13 @@ Created on Mon Oct 14 11:23:31 2020
 
 @author: Kovid
 """
+from datetime import datetime
 
 from flask_restx import Resource, fields, reqparse, Namespace
 
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.portfolio import stock_balance
-from simvestr.models import db, Transaction
+from simvestr.models import db, Transaction, Stock
 from simvestr.apis.search import StockDetails
 
 api = Namespace(
@@ -98,7 +99,7 @@ class TradeStock(Resource):
         symbol = symbol.upper()  # TODO: Need wrapper function to automaticlly uppercase the input
 
         user = get_user()  # get user details from token
-
+        stock = Stock.query.filter_by(symbol=symbol).first()
         fee = 0
         quantity = -quantity if trade_type == "sell" else quantity
         slippage = 0
@@ -106,12 +107,14 @@ class TradeStock(Resource):
         # --------------- Buy ---------------- #
         if quantity > 0:  # check if user even has enough money to buy this stock quantity
             balance_adjustment = ((quote * quantity) + fee)
-            if user.portfolio.portfolioprice[0].close_balance - balance_adjustment < 0:
+            if user.portfolio.balance - balance_adjustment < 0:
                 return {"message": "Insufficient funds"}, 650
             
             variation, slippage = check_price(symbol, quote)
             if variation:
                 return {"message": "Current price has changed, can't commit this transaction"}, 652
+            if stock not in user.portfolio.stocks:
+                user.portfolio.stocks.append(stock)
 
         # ------------- Buy-ends ------------- #
 
@@ -129,11 +132,17 @@ class TradeStock(Resource):
             if variation:
                 return {"message": "Current price has changed, can't commit this transaction"}, 652
 
+            if check_stock[0] + quantity == 0:
+                user.portfolio.stocks.remove(stock)
+
             balance_adjustment = (quote * quantity) + fee
         else:
             return {"message": f"Invalid quantity. Quantity must be a non zero integer. Received {quantity}"}, 422
 
-        user.portfolio.portfolioprice[0].close_balance -= balance_adjustment  # update user's balance after trade
+        stock.last_quote = quote
+        stock.last_quote_time = datetime.utcfromtimestamp(timestamp)
+
+        user.portfolio.balance -= balance_adjustment  # update user's balance after trade
         # -------------- Sell-ends ----------- #
 
         new_transaction = Transaction(

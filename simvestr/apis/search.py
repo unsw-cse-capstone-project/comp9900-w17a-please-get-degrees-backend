@@ -1,6 +1,6 @@
 import requests
 from flask import jsonify
-from flask_restx import Resource, Namespace, fields
+from flask_restx import Resource, Namespace, fields, reqparse
 
 from simvestr.helpers.auth import requires_auth
 from simvestr.helpers.search import search
@@ -15,8 +15,7 @@ class ExchangeList(Resource):
     @requires_auth
     def get(self, exchange: str = "US"):
         uri = search(source_api="finnhub", query="exchange", arg=exchange)
-        r = requests.get(uri)
-        return r.json()
+        return uri
 
 
 quote_model = api.model(
@@ -113,3 +112,24 @@ class StockSymbols(Resource):
             dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
             for s in stock_q
         ]
+
+candle_parser = reqparse.RequestParser()
+candle_parser.add_argument("symbol", type=str, required=True,help="Stock symbol to search.")
+candle_parser.add_argument("resolution", type=str, help="Resolution of data", default="D")
+candle_parser.add_argument("from", type=float, help="UNIX timestamp. Interval initial value.")
+candle_parser.add_argument("to", type=float, help="UNIX timestamp. Interval end value.")
+
+
+@api.route("/candle")
+@api.expect(candle_parser)
+class Candles(Resource):
+    @api.response(200, "Success")
+    @api.response(404, "Symbol not found")
+    @requires_auth
+    def get(self):
+        args = candle_parser.parse_args()
+        args["symbol"] = args["symbol"].upper()
+        candle = search(query="candle", arg=args)
+        if candle["s"] == "no_data":
+            return {"message": "Symbol not found, check inputs."}, 404
+        return candle, 200

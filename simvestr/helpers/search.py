@@ -11,6 +11,7 @@ QUERYS = dict(
         exchange="stock/symbol?exchange=",
         profile="stock/profile2?symbol=",
         quote="quote?symbol=",
+        candle="stock/candle?",
     ),
     crypto=dict(
         exchange="crypto/symbol?exchange=",
@@ -40,5 +41,8 @@ search_function = {"finnhub": finnhub_query}
 def search(query, arg, stock_type="stock", source_api="finnhub"):
     if source_api not in search_function:
         raise NotImplementedError("Api not supported")
+
+    if query == "candle":
+        arg = "&".join([f"{k}={v}" for k, v in arg.items()])
 
     return search_function[source_api](query, arg, stock_type)
