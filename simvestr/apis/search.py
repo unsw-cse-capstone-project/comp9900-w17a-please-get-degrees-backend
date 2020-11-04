@@ -1,4 +1,6 @@
 import requests
+import datetime
+
 from flask import jsonify
 from flask_restx import Resource, Namespace, fields, reqparse
 
@@ -113,8 +115,9 @@ class StockSymbols(Resource):
             for s in stock_q
         ]
 
+
 candle_parser = reqparse.RequestParser()
-candle_parser.add_argument("symbol", type=str, required=True,help="Stock symbol to search.")
+candle_parser.add_argument("symbol", type=str, required=True, help="Stock symbol to search.")
 candle_parser.add_argument("resolution", type=str, help="Resolution of data", default="D")
 candle_parser.add_argument("from", type=float, help="UNIX timestamp. Interval initial value.")
 candle_parser.add_argument("to", type=float, help="UNIX timestamp. Interval end value.")
@@ -129,7 +132,19 @@ class Candles(Resource):
     def get(self):
         args = candle_parser.parse_args()
         args["symbol"] = args["symbol"].upper()
+        current_unix_time = datetime.datetime.now().timestamp()
+
+        if not args["from"]:
+            args["from"] = int(current_unix_time - datetime.timedelta(weeks=1).total_seconds())
+
+        if not args["to"]:
+            args["to"] = int(current_unix_time)
+
+        if not args["resolution"]:
+            args["resolution"] = "60"
+        print(args)
         candle = search(query="candle", arg=args)
         if candle["s"] == "no_data":
-            return {"message": "Symbol not found, check inputs."}, 404
+            return {"message": "Symbol not found or data, check inputs."}, 404
+
         return candle, 200
