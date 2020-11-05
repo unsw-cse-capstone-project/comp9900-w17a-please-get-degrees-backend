@@ -18,7 +18,8 @@ class PortfolioPriceUsersQuery(Resource):
             plist=[dict(
                 portfolio_id=p.id,
                 name=user.portfolio.portfolio_name,
-                balance=p.close_balance,
+                close_balance=p.close_balance,
+                balance=user.portfolio.balance,
                 time=str(p.timestamp)
             ) for p in user.portfolio.portfolioprice]
         )
