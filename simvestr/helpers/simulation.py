@@ -9,12 +9,16 @@ import time
 from simvestr.helpers.portfolio import calculate_all_portfolios_values
     
 def update_portfolio():
-    for _ in range(10):
+    # for _ in range(10):
+    c = 0
+    while True:
+        time.sleep(20)
         # calculate_all_portfolios_values()
-        print('Portfolio updated')
+        c += 1
+        
+        print(f'Portfolio updated {c}')
         '''
             21600 =  6 hours   
             43200 = 12 hours
             86400 = 24 hours
         '''
-        time.sleep(2)
