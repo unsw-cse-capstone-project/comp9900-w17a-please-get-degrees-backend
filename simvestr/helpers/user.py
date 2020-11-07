@@ -7,7 +7,8 @@ from simvestr.helpers.db import make_salt
 
 def change_password(user: User, password: str):
     user.salt = make_salt()
-    user.password = generate_password_hash(password + user.salt, method="sha256")
+    user.password = generate_password_hash(
+        password + user.salt, method="sha256")
     db.session.commit()
 
 
@@ -25,7 +26,7 @@ def create_new_user(email_id, first_name, last_name, password):
     db.session.add(new_user)
     db.session.commit()
 
-    new_watch= Watchlist(
+    new_watch = Watchlist(
         user_id=new_user.id
     )
     new_user.watchlist = new_watch
@@ -35,6 +36,7 @@ def create_new_user(email_id, first_name, last_name, password):
     new_portfolio = Portfolio(
         portfolio_name=first_name + "'s Portfolio",  # make a portfolio for new user
         balance=current_app.config['START_BALANCE'],
+
     )
     new_user.portfolio = new_portfolio
     db.session.add(new_portfolio)
@@ -42,7 +44,9 @@ def create_new_user(email_id, first_name, last_name, password):
 
     new_portfolioprice = PortfolioPrice(
         portfolio_id=new_user.portfolio.id,
-        close_balance=current_app.config['START_BALANCE']  # give dummy amount of 100k to new user. Value should be imported from a config file.
+        # give dummy amount of 100k to new user. Value should be imported from a config file.
+        close_balance=current_app.config['START_BALANCE'],
+        investment_value=0.0,
     )
     new_user.portfolio.portfolioprice.append(new_portfolioprice)
     db.session.add(new_portfolioprice)
