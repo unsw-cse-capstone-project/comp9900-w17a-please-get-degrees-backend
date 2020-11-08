@@ -33,7 +33,11 @@ def FiFo(dfg):
 
 def average_price(user: User, mode="moving"):
     trans_df = pd.read_sql(user.portfolio.transactions.subquery(), db.session.bind)
-
+    if trans_df.empty:
+        return dict(
+            buy={},
+            sell={},
+        )
     buy_df = trans_df[trans_df.quantity > 0]
     sell_df = trans_df[trans_df.quantity < 0]
     if mode == "alltime":
@@ -133,7 +137,7 @@ def calculate_all_portfolios_values(query_limit=60):
 
         if pause_time > 0:
             time.sleep(pause_time)
-
+    db.session.commit()
     # For every user, create a portfolio price entry and commit it to the db
     all_users = User.query.all()
     for user in all_users:
