@@ -12,7 +12,7 @@ openpyxl
 flask-sqlalchemy>=2.4.4
 flask-cors>=3.0.9
 Werkzeug>=1.0.1
-numpy<=1.19.3
+numpy >=1.16.4, <=1.19.3
 pyyaml
 flask-restx
 pyjwt>=1.7.1
