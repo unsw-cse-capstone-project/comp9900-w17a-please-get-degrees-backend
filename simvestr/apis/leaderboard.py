@@ -23,6 +23,8 @@ api = Namespace(
     description="query for leaderboard"
 )
 
+ORDINAL_SUFFIXES = ["th", "st", "nd", "rd", "th"]
+
 
 def get_ordered_portfolios():
     # returns array of {"porfolio_id","value"} objects ordered by value of the portfolio (closing_balance + investment value)
@@ -38,25 +40,6 @@ def get_ordered_portfolios():
         close_balances.append(
             {"portfolio": p.portfolio_id, "value": value})
     return sorted(close_balances, key=lambda i: i["value"], reverse=True)
-
-
-def all_portfolios():
-    # returns array of {"id", "position", "user", "name", "value"}
-    balances_sorted = get_ordered_portfolios()
-    users = []
-    idAndBalance = {}
-    portfolios = []
-    num_ports = len(balances_sorted)
-    if(num_ports > 0):
-        for i in range(num_ports):
-            idAndBalance.update(
-                {balances_sorted[i]["portfolio"]: [balances_sorted[i]["value"], i+1]})
-            users.append(balances_sorted[i]["portfolio"])
-
-        for p in db.session.query(Portfolio).join(Portfolio.user).filter(Portfolio.id.in_(users)).all():
-            portfolios.append({"id": p.id, "position": idAndBalance[p.id][1], "user": p.user.first_name +
-                               " "+p.user.last_name, "name": p.portfolio_name, "value": idAndBalance[p.id][0]})
-    return portfolios
 
 
 @ api.route("/position")
@@ -75,7 +58,7 @@ class PortfolioQuery(Resource):
         pos = 1
         while (balances_sorted[pos - 1]["portfolio"] != portfolio_id):
             pos += 1
-        suffix = ["th", "st", "nd", "rd", "th"][min(pos % 10, 4)]
+        suffix = ORDINAL_SUFFIXES[min(pos % 10, 4)]
         if 11 <= (pos % 100) <= 13:
             suffix = "th"
         return jsonify(str(pos) + suffix)
@@ -86,21 +69,20 @@ class TopInvestorsAll(Resource):
     @api.response(200, "Successful")
     @api.response(602, "PortfolioPrice doesn\'t exist")
     @api.doc(
-        description="Gets basic details of all portfolios",
+        description="returns array of {'id', 'position', 'user', 'name', 'value'}",
     )
     def get(self):
-        return jsonify(all_portfolios())
-
-
-@api.route('/add/<port>/<balance>/<value>')
-class PortfolioQuery(Resource):
-    @api.response(200, 'Successful')
-    @api.response(602, 'PortfolioPrice doesn\'t exist')
-    @ api.doc(
-        description="test endpoint to change portfolio balances",
-    )
-    def put(self, port, balance, value):
-        portf = PortfolioPrice(
-            portfolio_id=port, close_balance=balance, investment_value=value)
-        db.session.add(portf)
-        db.session.commit()
+        balances_sorted = get_ordered_portfolios()
+        users = []
+        id_value_pos = {}
+        portfolios = []
+        num_ports = len(balances_sorted)
+        if(num_ports > 0):
+            for i in range(num_ports):
+                id_value_pos.update(
+                    {balances_sorted[i]["portfolio"]: [balances_sorted[i]["value"], i+1]})
+                users.append(balances_sorted[i]["portfolio"])
+            for p in db.session.query(Portfolio).join(Portfolio.user).filter(Portfolio.id.in_(users)).all():
+                portfolios.append({"id": p.id, "position": id_value_pos[p.id][1], "user": p.user.first_name +
+                                   " "+p.user.last_name, "name": p.portfolio_name, "value": id_value_pos[p.id][0]})
+        return jsonify(portfolios)
