@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 import subprocess
 import threading
 import signal
@@ -32,51 +31,6 @@ class ServiceExit(Exception):
 def service_shutdown(signum, frame):
     print("Caught signal %d \nExiting simultation! :)" % signum)
     raise ServiceExit
-
-
-# parser = argparse.ArgumentParser(
-#     description="Run tool for Simvestr app",
-# )
-#
-# parser.add_argument(
-#     "-s",
-#     "--simulation",
-#     type=str,
-#     default="n",
-#     help="Toggle simulation mode"
-# )
-# subparsers = parser.add_subparsers(help="sub-parser help")
-# sim_parser = subparsers.add_parser(
-#     "simulation",
-#     parents=[parser],
-#     description="Simulation parser",
-#     help="Manages simulation options"
-# )
-# sim_parser.add_argument(
-#     "-d",
-#     "--days",
-#     help="Duration of the simulation in days"
-# )
-# sim_parser.add_argument(
-#     "-h",
-#     "--hours",
-#     help="Duration of the simulation in hours"
-# )
-# sim_parser.add_argument(
-#     "-m",
-#     "--m",
-#     help="Duration of the simulation in minutes"
-# )
-# sim_parser.add_argument(
-#     "-s",
-#     "--s",
-#     help="Duration of the simulation in seconds"
-# )
-# sim_parser.add_argument(
-#     "-i",
-#     "--interval",
-#     help="interval of the "
-# )
 
 
 if __name__ == "__main__":
