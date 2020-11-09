@@ -9,10 +9,10 @@ from flask_restx import Resource, fields, reqparse, Namespace
 
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.portfolio import stock_balance
-from simvestr.models import db, Transaction
+from simvestr.models import db, Transaction, Stock
 from simvestr.apis.search import StockDetails
 from simvestr.apis.portfolio import PortfolioQuery
-from simvestr.helpers.portfolio import all_stocks_balance
+from simvestr.helpers.portfolio import portfolio_value
 
 import requests
 import xlsxwriter
@@ -28,7 +28,7 @@ api = Namespace(
     description="Back-end API for exporting portfolio to csv file",
 )
 
-def create_csv(user, portfolio_details):
+def create_csv(user, portfolio_details, portfolio_value_user):
     file_basename = f'{portfolio_details["portfolio_name"]}.xlsx'
     # path = 'simvestr\\helpers\\'
     path = ''
@@ -76,19 +76,23 @@ def create_csv(user, portfolio_details):
     worksheet.write(f'E{row}', 'Quantity', stock_heading_format)
     worksheet.write(f'F{row}', 'Quote', stock_heading_format)
     worksheet.write(f'G{row}', 'Value', stock_heading_format)
+    worksheet.write(f'H{row}', 'Weighted Avg Fee', stock_heading_format)
+    worksheet.write(f'I{row}', 'Weighted Average', stock_heading_format)
     
-    owned_stocks = portfolio_details["portfolio"]
-    
-
-    for symbol, details  in owned_stocks.items():
-        print(symbol, details["quantity"], details["quote"], details["value"])
+    for symbol, details  in portfolio_value_user.items():
         row += 1
-        # worksheet.write(f'C{row}', f'{symbol}', heading_format)
+        stock = Stock.query.filter_by(symbol=symbol).first()
+        worksheet.write(f'C{row}', f'{stock.name}')
         worksheet.write(f'D{row}', f'{symbol}')
         worksheet.write(f'E{row}', f'{details["quantity"]}')
-        worksheet.write(f'F{row}', f'{details["quote"]}', format1)
-        worksheet.write(f'G{row}', f'{details["value"]}', format2)
-        
+        if details["quote"] < details["buy"]["weighted_average"]:
+            worksheet.write(f'F{row}', f'{details["quote"]}', format1)
+            worksheet.write(f'I{row}', f'{details["buy"]["weighted_average"]}', format2)
+        else:
+            worksheet.write(f'F{row}', f'{details["quote"]}', format2)
+            worksheet.write(f'I{row}', f'{details["buy"]["weighted_average"]}', format1)
+        worksheet.write(f'G{row}', f'{details["value"]}')
+        worksheet.write(f'H{row}', f'{details["buy"]["weighted_average_fee"]}')
         
     workbook.close()
 
@@ -97,18 +101,11 @@ class ExportPortfolio(Resource):
     @api.response(200, "Successful")
     @requires_auth
     def get(self):
-
         user = get_user()  # get user details from token
         portfolio_details = PortfolioQuery.get(user.id)[0]
-        # stock_details = all_stocks_balance(user.id)
-        
-        # print(stock_details)
-        
-        create_csv(user, portfolio_details)
-        
-        # requests.get("http://127.0.0.1:5000/api/v1/exportfolio")
-        
-        # print(stock_details)
+        portfolio_value_user = portfolio_value(user) 
+                        
+        create_csv(user, portfolio_details, portfolio_value_user)
         
         return (
             {
