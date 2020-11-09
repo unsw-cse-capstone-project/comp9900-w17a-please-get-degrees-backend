@@ -34,9 +34,13 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
 
-    - name: Run the database setup
+    - name: Install applciation
       run: |
-        python setup_db.py
+        pip install dist\simvestr-0.0.1.tar.gz
+
+    - name: Test with pytest
+      run: |
+        pytest -v -h
 
     - name: Commit build files
       run: |
