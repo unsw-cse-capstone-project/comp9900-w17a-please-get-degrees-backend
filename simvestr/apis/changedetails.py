@@ -27,11 +27,6 @@ api = Namespace(
 changenames_model = api.model(
     "ChangeNames",
     {
-        "email_id": fields.String(
-            required=True,
-            description="User email",
-            example="test@gmail.com"
-        ),
         "first_name": fields.String(
             required=True,
             description="User first name",
@@ -51,11 +46,6 @@ changenames_parser.add_argument("last_name", type=str)
 changepwd_model = api.model(
     "ChangePwd",
     {
-        "email_id": fields.String(
-            required=True,
-            description="User email",
-            example="test@gmail.com"
-        ),
         "password": fields.String(
             required=True,
             description="User password",
