@@ -60,6 +60,7 @@ class Signup(Resource):
     @api.response(403, "Already exists")
     # @api.response(403, "Email ID already exists")
     @api.response(422, "Unprocessable entity")
+    @api.response(448, "Password cannot contain spaces")
     # @api.response(422, "Password should be at least 8 characters")
     @api.doc(model="Signup", body=signup_model, description="Creates a new user")
     def post(self):
@@ -87,6 +88,12 @@ class Signup(Resource):
             return (
                 {"message": "Password should be at least 8 characters", },
                 422,
+            )
+        
+        if " " in password:
+            return (
+                {"error": True, "message": "Password cannot contain spaces", },
+                448,
             )
 
         create_new_user(
