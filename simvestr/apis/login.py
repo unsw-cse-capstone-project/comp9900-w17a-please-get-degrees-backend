@@ -61,7 +61,7 @@ class Token(Resource):
     )
     def post(self):
         args = credential_parser.parse_args()
-        email_id = args.get("email")
+        email_id = (args.get("email_id")).lower()
         password = args.get("password")
         user = User.query.filter_by(email_id=email_id).first()
         if not user:
