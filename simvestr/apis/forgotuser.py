@@ -8,14 +8,14 @@ Created on Mon Sep 28 12:27:41 2020
 from flask_restx import Resource, fields, reqparse, Namespace
 from werkzeug.security import generate_password_hash
 
-from simvestr.helpers.simvestr_email import send_email
-# from simvestr import create_app
 from ..models import User
-import random
 from simvestr.models import db
 
+from simvestr.helpers.simvestr_email import send_email
+import random
+
 api = Namespace(
-    'forgotuser',
+    'forgot user password',
     security = 'TOKEN-BASED',
     default = 'User Login and Authentication',
     title = 'Simvestr',
@@ -23,13 +23,24 @@ api = Namespace(
 )
 
 
-# ---------------- Forgot User --------------- #
 forgotuser_model = api.model(
     'ForgotUser', 
     {
-        'email_id': fields.String,
-        'password': fields.String,
-        'OTP':fields.String
+        'email_id': fields.String(
+            required=True,
+            description="User email",
+            example="test@test.com"
+        ),
+        'password': fields.String(
+            required=True,
+            description="User password",
+            example="pass1234"
+        ),
+        'OTP':fields.String(
+            required=True,
+            description="One time password",
+            example="1234"
+        )
     }
 )
 
@@ -50,12 +61,13 @@ class ForgotUser(Resource):
     @api.response(200, 'Successful')
     @api.response(448, 'Bad OTP')
     @api.response(447, 'Password should be atleast 8 characters')
+    @api.response(448, "Password cannot contain spaces")
     @api.response(449, 'User doesn\'t exist')
     @api.doc(model="ForgotUser", description="Resets password for user using OTP")
     @api.expect(forgotuser_email_parser, validate=True)
     def get(self):
         args = forgotuser_email_parser.parse_args()
-        email_id = args.get('email_id')
+        email_id = (args.get("email_id")).lower()
         user = User.query.filter_by(email_id=email_id).first()
         if not user:
             return (
@@ -83,13 +95,20 @@ class ForgotUser(Resource):
                 449,
             )
         
-        global random_OTP
         if len(password) < 8:
             return (
                 {"error": True, "message": "Password should be atleast 8 characters"}, 
                 447,
             )
-
+        
+        if " " in password:
+            return (
+                {"error": True, "message": "Password cannot contain spaces", },
+                448,
+            )
+        
+        global random_OTP
+        
         if one_time_pass != str(random_OTP):
             return (
                 {"error": True, "message": "The OTP you entered is incorrect!"}, 
@@ -99,10 +118,10 @@ class ForgotUser(Resource):
         user.password = generate_password_hash(password, method='sha256')
         db.session.commit()
         
-        message_content = 'ALERT! Your password for Simvestr has been changed. Please contact us if this wasn\'t you.'
-        send_email(email_id, 'Password updated successfully', message_content) #sends a confirmation email to the user
+        message_content = "ALERT! Your password for Simvestr has been changed. Please contact us if this wasn\"t you."
+        #sends a confirmation email to the user
+        send_email(email_id, "Password updated successfully", message_content) 
         return (
             {"error": False, "message": "Password updated!"}, 
             200
         )
-# ---------------- Forgot User --------------- #
