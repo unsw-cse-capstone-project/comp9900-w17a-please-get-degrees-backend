@@ -40,6 +40,8 @@ base_symbol_model = api.model(
         "name": fields.String,
     },
 )
+
+#TODO: Give example values
 details_model = api.model(
     "Details",
     {
@@ -58,16 +60,22 @@ details_model = api.model(
 @api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
     @requires_auth
-    # @api.param("stock_symbol", "Stock or crypto symbol to be searched") #this hangs the search and I dont know why
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
     @api.doc(
-        model="Details", description="Gets details for the specified stock",
+        model="Details",
+        description="Gets details for the specified stock",
+        params={"stock_symbol": "The stock symbol associated with the company"},
     )
     def get(self, stock_symbol):
         # Since we are fetching from finnhub we need to fetch anyway, so why hit the DB at all?
-        details = search(source_api="finnhub", query="profile", arg=stock_symbol)
-        quote = search(source_api="finnhub", query="quote", arg=stock_symbol)
+        # Remebered why we need to hit db - we have to check the exchange the stock is in to make a choice between crypto and regular stock.
+
+        stock = Stock.query.filter_by(symbol=stock_symbol)
+
+        if not stock:
+            details = search(source_api="finnhub", query="profile", arg=stock_symbol)
+            quote = search(source_api="finnhub", query="quote", arg=stock_symbol)
         # This can be STOCK or CRYPTO, for now only handle STOCK
         stockType = "STOCK"
         if details and quote:
@@ -93,6 +101,9 @@ class StockDetails(Resource):
 
 @api.route("/<string:name>")
 class StockSearch(Resource):
+    @api.doc(
+        params={"name": "The name or partial name of the stock symbol or company name"},
+    )
     @requires_auth
     def get(self, name: str = "AAPL"):
         stock_q = Stock.query.filter(db.or_(

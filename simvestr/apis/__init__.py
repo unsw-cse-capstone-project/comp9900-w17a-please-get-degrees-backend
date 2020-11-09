@@ -1,4 +1,5 @@
 from flask_restx import Api
+from flask import Blueprint
 
 # Import the api variable from each of the namespaces (api files) and alias them
 from .signup import api as ns1

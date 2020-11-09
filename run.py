@@ -9,8 +9,7 @@ from datetime import timedelta
 
 from simvestr import create_app
 from simvestr.helpers.simulation import update_portfolio
-from simvestr.helpers.setup_db import setup_new_db
-from simvestr.helpers.db import db
+from simvestr.helpers.db import db, setup_new_db
 
 RUN_COMMAND = "flask run"
 
@@ -40,9 +39,11 @@ if __name__ == "__main__":
     # Setup a fresh database if it doesn"t exist
     curr_dir = Path.cwd()
     db_path = curr_dir / "instance" / "simvestr.db"
+
     if not db_path.is_file() or RUN_SETUP:
         print("Aah new installation!")
-        setup_new_db()
+        input_data = curr_dir / "resources" / "test_data_user.xlsx"
+        setup_new_db(input_data)
     else:
         print("Database file found, won\"t reset the db!")
 

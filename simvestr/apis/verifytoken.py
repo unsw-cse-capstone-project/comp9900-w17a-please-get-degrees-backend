@@ -22,7 +22,7 @@ api = Namespace(
 )
 
 
-
+#TODO: Move to config. Is this even used?
 secret_key = "thisismysecretkeydonotstealit"
 expires_in = 86400  # 24 Hours
 # auth = AuthenticationToken(secret_key, expires_in)
@@ -42,6 +42,7 @@ token_parser.add_argument('token', location='cookies')
 class VerifyToken(Resource):
     @api.response(200, "Successful")
     @api.response(401, "Unsuccessful")
+    @api.response(404, "Not Found")
     def get(self):
         args = token_parser.parse_args() # From http cookies
         token = args.get("token")
@@ -50,7 +51,7 @@ class VerifyToken(Resource):
             {
                 "message": "Cookie token not found, login again",
             },
-            405,
+            404,
             )
         passed, param =  auth.validate_passed_token(token)
         

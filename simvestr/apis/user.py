@@ -1,4 +1,4 @@
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, fields
 
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.portfolio import all_stocks_balance
@@ -6,6 +6,31 @@ from simvestr.models import User
 
 api = Namespace('view user details', description='Demo api for querying users')
 
+user_details_model = api.model(
+    "Signup",
+    {
+        "email": fields.String(
+            required=True,
+            description="User email",
+            example="test@gmail.com"
+        ),
+        "password": fields.String(
+            required=True,
+            description="User password",
+            example="pass1234"
+        ),
+        "first_name": fields.String(
+            required=True,
+            description="User first name",
+            example="Brett"
+        ),
+        "last_name": fields.String(
+            required=True,
+            description="User last name",
+            example="Lee"
+        ),
+    },
+)
 
 @api.route('/all')
 class UsersQuery(Resource):
@@ -48,7 +73,5 @@ class UserQuery(Resource):
                 } for t in transact
             }
         )
-        payload = dict(
-            data=data
-        )
-        return payload
+
+        return data

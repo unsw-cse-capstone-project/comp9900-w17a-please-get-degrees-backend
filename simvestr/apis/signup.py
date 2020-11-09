@@ -5,11 +5,12 @@ Created on Mon Sep 28 12:27:41 2020
 @author: Kovid
 """
 
-from flask_restx import Resource, fields, reqparse, Namespace
+from flask_restx import Resource, reqparse, Namespace
 
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.user import create_new_user
 from simvestr.models import User
+from simvestr.helpers.api_models import signup_model
 
 api = Namespace(
     "signup",
@@ -22,33 +23,10 @@ api = Namespace(
     description="Back-end API for new user signup",
 )
 
-signup_model = api.model(
-    "Signup",
-    {
-        "email_id": fields.String(
-            required=True,
-            description="User email",
-            example="test@gmail.com"
-        ),
-        "password": fields.String(
-            required=True,
-            description="User password",
-            example="pass1234"
-        ),
-        "first_name": fields.String(
-            required=True,
-            description="User first name",
-            example="Brett"    
-        ),
-        "last_name": fields.String(
-            required=True,
-            description="User last name",
-            example="Lee"    
-        ),
-    },
-)
+api.models[signup_model.name] = signup_model
+
 signup_parser = reqparse.RequestParser()
-signup_parser.add_argument("email_id", type=str)
+signup_parser.add_argument("email", type=str)
 signup_parser.add_argument("password", type=str)
 signup_parser.add_argument("first_name", type=str)
 signup_parser.add_argument("last_name", type=str)
@@ -60,12 +38,12 @@ class Signup(Resource):
     @api.response(403, "Already exists")
     # @api.response(403, "Email ID already exists")
     @api.response(422, "Unprocessable entity")
-    @api.response(448, "Password cannot contain spaces")
+    # @api.response(448, "Password cannot contain spaces")
     # @api.response(422, "Password should be at least 8 characters")
-    @api.doc(model="Signup", body=signup_model, description="Creates a new user")
+    @api.doc(id="create_new_user", model="Signup", body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
-        email_id = (args.get("email_id")).lower()
+        email_id = (args.get("email")).lower()
         password = args.get("password")
         fname = args.get("first_name")
         lname = args.get("last_name")
