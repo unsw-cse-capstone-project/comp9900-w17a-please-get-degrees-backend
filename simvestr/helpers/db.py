@@ -15,8 +15,6 @@ from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, T
 from simvestr.helpers.search import search
 from simvestr.helpers.portfolio import all_stocks_balance
 
-from pathlib import Path
-
 SALT_SIZE = 6
 
 
