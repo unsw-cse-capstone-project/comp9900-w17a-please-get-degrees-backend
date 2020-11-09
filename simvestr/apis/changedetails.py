@@ -24,13 +24,24 @@ api = Namespace(
     description="Back-end API for changing user details - Name and Password",
 )
 
-# ------------ Change user details ----------- #
 changenames_model = api.model(
     "ChangeNames",
     {
-        "email_id": fields.String,
-        "first_name": fields.String,
-        "last_name": fields.String
+        "email_id": fields.String(
+            required=True,
+            description="User email",
+            example="test@gmail.com"
+        ),
+        "first_name": fields.String(
+            required=True,
+            description="User first name",
+            example="Brett"    
+        ),
+        "last_name": fields.String(
+            required=True,
+            description="User last name",
+            example="Lee" 
+        )
     },
 )
 changenames_parser = reqparse.RequestParser()
@@ -40,8 +51,16 @@ changenames_parser.add_argument("last_name", type=str)
 changepwd_model = api.model(
     "ChangePwd",
     {
-        "email_id": fields.String,
-        "password": fields.String
+        "email_id": fields.String(
+            required=True,
+            description="User email",
+            example="test@gmail.com"
+        ),
+        "password": fields.String(
+            required=True,
+            description="User password",
+            example="pass1234"
+        )
     },
 )
 changepwd_parser = reqparse.RequestParser()
@@ -84,6 +103,7 @@ class ChangeNames(Resource):
 class ChangePwd(Resource):
     @api.response(200, "Successful")
     @api.response(447, "Password should be at least 8 characters")
+    @api.response(448, "Password cannot contain spaces")
     @api.doc(model="ChangePwd", body=changepwd_model, description="Resets password")
     @api.expect(changepwd_parser, validate=True)
     @requires_auth
@@ -92,21 +112,27 @@ class ChangePwd(Resource):
         password = args.get("password")
 
         user = get_user()
-
-        # Need to add check for invalid characters
+            
         if len(password) < 8:
             return (
                 {"error": True, "message": "Password should be at least 8 characters", },
                 447,
             )
+        
+        if " " in password:
+            return (
+                {"error": True, "message": "Password cannot contain spaces", },
+                448,
+            )
+        
         change_password(user, password)
-
+        
         message_content = "You have succesfully changed your password. Let us know if this wasn\'t you."
+        # sends a confirmation email to the user
         send_email(
             user.email_id, "User details have been changed", message_content
-        )  # sends a confirmation email to the user
+        )  
         return (
             {"error": False, "message": "Password changed!"},
             200
         )
-# ------------ Change user details ----------- #
