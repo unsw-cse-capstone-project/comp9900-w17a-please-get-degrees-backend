@@ -22,14 +22,29 @@ api = Namespace(
     description="Back-end API for new user signup",
 )
 
-# ---------------- Signup new user ----------- #
 signup_model = api.model(
     "Signup",
     {
-        "email_id": fields.String,
-        "password": fields.String,
-        "first_name": fields.String,
-        "last_name": fields.String,
+        "email_id": fields.String(
+            required=True,
+            description="User email",
+            example="test@gmail.com"
+        ),
+        "password": fields.String(
+            required=True,
+            description="User password",
+            example="pass1234"
+        ),
+        "first_name": fields.String(
+            required=True,
+            description="User first name",
+            example="Brett"    
+        ),
+        "last_name": fields.String(
+            required=True,
+            description="User last name",
+            example="Lee"    
+        ),
     },
 )
 signup_parser = reqparse.RequestParser()
@@ -68,8 +83,6 @@ class Signup(Resource):
                 403,
             )
 
-
-
         if len(password) < 8:
             return (
                 {"message": "Password should be at least 8 characters", },
@@ -84,11 +97,12 @@ class Signup(Resource):
         )
 
         message_content = "A new user from your email ID has signed-up for our free investing simulator. Please login to start investing"
+        # sends a confirmation email to the user
         send_email(
             email_id, "User created successfully", message_content
-        )  # sends a confirmation email to the user
+        )
+        
         return (
             {"message": "New user created!"},
             200
         )
-# ---------------- Signup new user ----------- #
