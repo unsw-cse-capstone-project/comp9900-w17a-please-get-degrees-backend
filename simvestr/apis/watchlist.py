@@ -3,6 +3,7 @@ from flask_restx import Resource, Namespace, fields
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.search import search
 from simvestr.models import db, Stock
+from simvestr.helpers.api_models import watchlist_item_model
 
 authorizations = {
     "TOKEN-BASED": {
@@ -18,17 +19,7 @@ api = Namespace(
     description="Query , add and remove stocks from a users watch list."
 )
 
-watchlist_item_model = api.model(
-    'WatchlistItem',
-    dict(
-        symbol=fields.String(
-            required=True,
-            description="Stock symbol in watchlist",
-            example="AAPL"
-        ),
-
-    )
-)
+api.models[watchlist_item_model.name] = watchlist_item_model
 
 watchlist_query_model = api.inherit(
     'WatchlistQueryItem',
@@ -48,7 +39,6 @@ watchlist_model = api.model(
         watchlist=fields.List(fields.Nested(watchlist_query_model)),
     )
 )
-
 
 @api.route('/')
 class WatchlistAll(Resource):
