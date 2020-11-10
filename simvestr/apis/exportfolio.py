@@ -5,6 +5,7 @@ Created on Sun Nov  1 01:08:54 2020
 """
 
 from flask_restx import Resource, Namespace
+from flask import after_this_request, send_file
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.models import Stock
 from simvestr.apis.portfolio import PortfolioQuery
@@ -23,10 +24,7 @@ api = Namespace(
 )
 
 
-def create_csv(user, portfolio_details, portfolio_value_user):
-    file_basename = f'{portfolio_details["portfolio_name"]}.xlsx'
-    # path = 'simvestr\\helpers\\'
-    path = ''
+def create_csv(path, file_basename, user, portfolio_details, portfolio_value_user):
     workbook = xlsxwriter.Workbook(f'{path + file_basename}')
     worksheet = workbook.add_worksheet()
 
@@ -40,7 +38,7 @@ def create_csv(user, portfolio_details, portfolio_value_user):
     worksheet.write('B1', f'{user.first_name} {user.last_name}', cell_format_1)
 
     worksheet.write('A2', 'Date Joined', heading_format_2)
-    worksheet.write('B2', f'{(user.date_joined).date()}', cell_format_2)
+    worksheet.write('B2', f'{user.date_joined.date()}', cell_format_2)
 
     worksheet.write('A3', 'Balance', heading_format_1)
     worksheet.write('B3', f'{portfolio_details["balance"]}', cell_format_1)
@@ -95,7 +93,15 @@ class ExportPortfolio(Resource):
         portfolio_details = PortfolioQuery.get(user.id)[0]
         portfolio_value_user = portfolio_value(user)
 
-        create_csv(user, portfolio_details, portfolio_value_user)
+        # path = 'simvestr\\helpers\\'
+        path = ''
+        file_basename = f'{portfolio_details["portfolio_name"]}.xlsx'
+
+        create_csv(path, file_basename, user, portfolio_details, portfolio_value_user)
+
+        @after_this_request
+        def download_file():
+            return send_file(filename=file_basename, as_attachment=True)
 
         return (
             {
