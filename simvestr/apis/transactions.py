@@ -1,7 +1,9 @@
 from flask_restx import Resource, Namespace
 
-from simvestr.helpers.auth import get_user
+from simvestr.helpers.transactions import get_transactions
 from simvestr.models import Transaction
+from simvestr.helpers.auth import get_user, requires_auth
+from simvestr.helpers.api_models import transactions_model, transaction_model
 
 api = Namespace(
     "transactions",
@@ -14,44 +16,28 @@ api = Namespace(
     description="View transactions for a user",
 )
 
+api.models[transaction_model.name] = transaction_model
+api.models[transactions_model.name] = transactions_model
 
 @api.route("")
 class TransactionsQuery(Resource):
+    @requires_auth
     def get(self):
-        transaction = Transaction.query.all()
-        data = {
-            t.id: dict(
-                portfolio_id=t.portfolio_id,
-                symbol=t.symbol,
-                quote=t.quote,
-                timestamp=str(t.timestamp),
-                quantity=t.quantity,
-                fee=t.fee
-            )
-            for t in transaction
-        }
-
-        payload = dict(
-            data=data
-        )
-        return payload
+        user = get_user()
+        data = get_transactions(user)
+        return data
 
 
 @api.route("/user/")
 class TransactionQuery(Resource):
+    @api.response(200, "Success")
+    @api.doc(
+        model=transactions_model,
+        description="All transactions for a user"
+    )
+    @api.marshal_with(transactions_model)
+    @requires_auth
     def get(self, ):
         user = get_user()
-        transactions = user.portfolio.transactions
-        data = {
-            t.id: dict(
-                user_id=user.id,
-                portfolio_id=t.portfolio_id,
-                symbol=t.symbol,
-                quote=t.quote,
-                timestamp=str(t.timestamp),
-                quantity=t.quantity,
-                fee=t.fee
-            ) for t in transactions
-        }
-
-        return data
+        data = get_transactions(user)
+        return data, 200

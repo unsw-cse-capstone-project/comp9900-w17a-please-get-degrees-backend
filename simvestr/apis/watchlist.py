@@ -1,9 +1,9 @@
-from flask_restx import Resource, Namespace, fields
+from flask_restx import Resource, Namespace
 
 from simvestr.helpers.auth import requires_auth, get_user
-from simvestr.helpers.search import search
+from simvestr.helpers.watchlist import get_watchlist, in_watchlist
 from simvestr.models import db, Stock
-from simvestr.helpers.api_models import watchlist_item_model
+from simvestr.helpers.api_models import watchlist_item_model, watchlist_model
 
 authorizations = {
     "TOKEN-BASED": {
@@ -20,55 +20,28 @@ api = Namespace(
 )
 
 api.models[watchlist_item_model.name] = watchlist_item_model
+api.models[watchlist_model.name] = watchlist_model
 
-watchlist_query_model = api.inherit(
-    'WatchlistQueryItem',
-    watchlist_item_model,
-    dict(
-        quote=fields.Float(
-            required=True,
-            description="Quote price per share of stock",
-            example=1200
-        ),
-    )
-)
 
-watchlist_model = api.model(
-    'Watchlist',
-    dict(
-        watchlist=fields.List(fields.Nested(watchlist_query_model)),
-    )
-)
-
+# Delete?
 @api.route('/')
-class WatchlistAll(Resource):
+class Watchlist(Resource):
     # @api.param('watchlist_id', 'Stock or crypto symbol to be searched')
     @api.response(200, "Success")
     @api.doc(
         description="Gets details for the specified stock",
-        security=["TOKEN-BASED"]
+        security=["TOKEN-BASED"],
+        model=watchlist_model,
     )
+    @api.marshal_with(watchlist_model)
     @requires_auth
     def get(self):
         user = get_user()
-        watchlist_list = []
-        for stock in user.watchlist.stocks:
-            watchlist_list.append(
-                {
-                    "symbol": stock.symbol,
-                    "name": stock.name,
-                    "quote": search(query="quote", arg=stock.symbol)
-                }
-            )
-
+        watchlist_list = get_watchlist(user)
         return watchlist_list, 200
 
 
-def in_watchlist(symbol, user) -> bool:
-    stock = [s.symbol for s in user.watchlist.stocks if s.symbol == symbol]
-    if stock:
-        return True
-    return False
+
 
 
 @api.route('/symbol/<string:symbol>')
@@ -80,7 +53,7 @@ class WatchlistPost(Resource):
     @api.response(404, "Symbol not found")
     @api.doc(
         description="Gets details for the specified stock",
-        security=["TOKEN-BASED"]
+        security=["TOKEN-BASED"],
     )
     @requires_auth
     def post(self, symbol: str):

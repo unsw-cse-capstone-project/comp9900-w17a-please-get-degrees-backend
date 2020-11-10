@@ -1,158 +1,205 @@
 from flask_restx import Model, fields
 
-signup_model = Model(
-    "Signup",
+# field definitions here
+
+email = fields.String(
+    required=True,
+    description="User email",
+    example="test@test.com"
+)
+
+password = fields.String(
+    required=True,
+    description="User password",
+    example="pass1234"
+)
+
+first_name = fields.String(
+    required=True,
+    description="User first name",
+    example="Brett"
+)
+
+last_name = fields.String(
+    required=True,
+    description="User last name",
+    example="Lee"
+)
+
+otp = fields.String(
+    required=True,
+    description="One time password",
+    example="1234"
+)
+
+symbol = fields.String(
+    required=True,
+    description="Stock symbol",
+    example="AAPL"
+)
+
+stock_type = fields.String(
+    required=True,
+    description="Stock type",
+    example="STOCK",
+    enum=(
+        "STOCK",
+        "CRYPTO",
+    )
+)
+
+simple_quote = fields.Float(
+    required=True,
+    description="Quote price of the stock",
+    example=100.0,
+)
+
+simple_quantity = fields.Integer(
+    description="Number of stocks",
+    example=5,
+)
+
+timestamp = fields.Integer(
+    description="Unix timestamp",
+    example=1569297600,
+)
+
+# Models here
+forgotuser_email_model = Model(
+    "Forgot User Email",
     {
-        "email": fields.String(
-            required=True,
-            description="User email",
-            example="test@gmail.com"
-        ),
-        "password": fields.String(
-            required=True,
-            description="User password",
-            example="pass1234"
-        ),
-        "first_name": fields.String(
-            required=True,
-            description="User first name",
-            example="Brett"
-        ),
-        "last_name": fields.String(
-            required=True,
-            description="User last name",
-            example="Lee"
-        ),
+        "email": email
+    }
+)
+
+changepwd_model = Model(
+    "Change Password",
+    {
+        "password": password
+    },
+)
+
+changenames_model = Model(
+    "Change Names",
+    {
+        "first_name": first_name,
+        "last_name": last_name
     },
 )
 
 login_model = Model(
     "Login",
     {
-        "email": fields.String(
-            required=True,
-            description="User email",
-            example="test@test.com"
-        ),
-        "password": fields.String(
-            required=True,
-            description="User password",
-            example="pass1234"
-        )
+        "email": email,
+        "password": password,
     }
 )
 
-forgotuser_model = Model(
-    'ForgotUser', 
+signup_model = login_model.clone(
+    "Signup",
     {
-        'email_id': fields.String(
-            required=True,
-            description="User email",
-            example="test@test.com"
-        ),
-        'password': fields.String(
-            required=True,
-            description="User password",
-            example="pass1234"
-        ),
-        'OTP':fields.String(
-            required=True,
-            description="One time password",
-            example="1234"
-        )
+        "first_name": first_name,
+        "last_name": last_name,
+    },
+)
+
+
+
+forgotuser_model = login_model.clone(
+    "Forgot User",
+    {
+        "OTP": otp
     }
 )
-
-forgotuser_email_model = Model(
-    'ForgotUserEmail', {
-    'email_id': fields.String,
-})
-
-changenames_model = Model(
-    "ChangeNames",
-    {
-        "first_name": fields.String(
-            required=True,
-            description="User first name",
-            example="Brett"    
-        ),
-        "last_name": fields.String(
-            required=True,
-            description="User last name",
-            example="Lee" 
-        )
-    },
-)
-
-changepwd_model = Model(
-    "ChangePwd",
-    {
-        "password": fields.String(
-            required=True,
-            description="User password",
-            example="pass1234"
-        )
-    },
-)
-
 
 watchlist_item_model = Model(
-    'WatchlistItem',
-    dict(
-        symbol=fields.String(
-            required=True,
-            description="Stock symbol in watchlist",
-            example="AAPL"
-        ),
-
-    )
+    "Watchlist Item",
+    {
+        "symbol": symbol,
+        "quote": simple_quote,
+    }
 )
 
-# do we need these?
+watchlist_model = Model(
+    "Watchlist",
+    {
+        "watchlist": fields.List(fields.Nested(watchlist_item_model)),
+    }
+)
+
+transaction_model = Model(
+    "Transaction",
+    {
+        "symbol": symbol,
+        "quote": simple_quote,
+        "timestamp": timestamp,
+        "quantity": simple_quantity,
+        "fee": fields.Float(
+            description="Fee of transaction",
+            example=7.5,
+        )
+    }
+)
+transactions_model = Model(
+    "Transactions",
+    {
+        "transactions": fields.List(fields.Nested(transaction_model)),
+    }
+)
+
 quote_model = Model(
     "Quote",
     {
-        "o": fields.Float,
-        "h": fields.Float,
-        "l": fields.Float,
-        "c": fields.Float,
-        "pc": fields.Float,
-        "t": fields.Integer,
-    },
-)
-# do we need these?
-base_symbol_model = Model(
-    "Symbol",
-    {
-        "type": fields.String,
-        "symbol": fields.String,
-        "display_symbol": fields.String,
-        "name": fields.String,
+        "o": fields.Float(
+            description="Open price",
+            example=100.0,
+        ),
+        "h": fields.Float(
+            description="High price",
+            example=110.0,
+        ),
+        "l": fields.Float(
+            description="Low price",
+            example=95.0,
+        ),
+        "c": fields.Float(
+            description="Current price",
+            example=101.0,
+        ),
+        "pc": fields.Float(
+            description="Previous close",
+            example=98.0,
+        ),
+        "t": timestamp,
     },
 )
 
 details_model = Model(
-    "Stock details model",
+    "Stock Details",
     {
-        "type": fields.String(
-            required=True,
-            description="Stock type",
-            example="STOCK"
-        ),
-        "symbol": fields.String(
-            required=True,
-            description="Stock type",
-            example="TSLA"
-        ),
+        "type": stock_type,
+        "symbol": symbol,
         "name": fields.String(
             required=True,
             description="Stock name",
             example="TESLA INC"
         ),
-        "industry": fields.String,
-        "exchange": fields.String,
-        "logo": fields.String,
-        "marketCapitalization": fields.Float,
+        "industry": fields.String(
+            description="Industry classification",
+            example="Technology",
+        ),
+        "exchange": fields.String(
+            description="Listed exchange",
+            example="NASDAQ/NMS",
+        ),
+        "logo": fields.String(
+            description="Logo image",
+            example="https://static.finnhub.io/logo/87cb30d8-80df-11ea-8951-00000000092a.png",
+        ),
+        "marketCapitalization": fields.Float(
+            description="Market capitalisation",
+            example=1415993,
+        ),
         "quote": fields.Nested(quote_model, skip_none=False),
     },
 )
@@ -174,18 +221,9 @@ buy_sell_model = Model(
 value_model = Model(
     "Value Model",
     {
-        "stock": fields.String(
-            description="Stock or asset in portfolio",
-            example="AAPL",
-        ),
-        "quantity": fields.Integer(
-            description="Number of stocks",
-            example=5,
-        ),
-        "quote": fields.Float(
-            description="Quyote price of the stock",
-            example=100.0,
-        ),
+        "symbol": symbol,
+        "quantity": simple_quantity,
+        "quote": simple_quote,
         "value": fields.Float(
             description="Value of the trade or stock balance",
             example=500.0,
@@ -199,26 +237,6 @@ value_model = Model(
     }
 )
 
-portfolio_model = Model(
-    "Portfolio",
-    {
-        "portfolio_name": fields.String(
-            description="Portfolio name",
-            example="John Doe's Portfolio"
-        ),
-        "balance": fields.Float(
-            description="Current cash balance",
-            example=55000.0
-        ),
-        "total_value": fields.Float(
-            description="The sum of the current cash balance and the value of the current holdings",
-            example=55500.0
-        ),
-        "portfolio": fields.List(
-            fields.Nested(value_model, skip_none=False)
-        ),
-    },
-)
 
 balance_model = Model(
     "UserBalance",
@@ -229,8 +247,35 @@ balance_model = Model(
         ),
         "balance": fields.Float(
             description="Current cash balance",
-            example=100000.0,
+            example=55000.0,
         ),
 
     },
+)
+
+portfolio_model = balance_model.clone(
+    "Portfolio",
+    {
+        "total_value": fields.Float(
+            description="The sum of the current cash balance and the value of the current holdings",
+            example=55500.0
+        ),
+        "portfolio": fields.List(
+            fields.Nested(value_model, skip_none=False)
+        ),
+    },
+)
+
+user_model = Model(
+    "User",
+    {
+        "email": email,
+    }
+)
+
+user_details_model = user_model.inherit(
+    "User Details",
+    portfolio_model,
+    watchlist_model,
+    transactions_model,
 )

@@ -17,8 +17,9 @@ def weighted_avg(df: pd.DataFrame, grouped=False):
 
     grouped_df["weighted_average"] = grouped_df.total / grouped_df.quantity
     grouped_df["weighted_average_fee"] = grouped_df.fee / grouped_df.quantity
-    grouped_df = grouped_df[["weighted_average_fee", "weighted_average",]]
+    grouped_df = grouped_df[["weighted_average_fee", "weighted_average", ]]
     return grouped_df
+
 
 # Source: https://stackoverflow.com/questions/50686238/pandas-groupby-with-fifo
 def FiFo(dfg):
@@ -50,9 +51,9 @@ def average_price(user: User, mode="moving"):
     elif mode == "moving":
         trans_df["PN"] = np.where(trans_df["quantity"] > 0, "P", "N")
         trans_df["CS"] = trans_df.groupby(["symbol", "PN"])["quantity"].cumsum()
-        fifo_trans_df = trans_df.groupby(["symbol"])\
-            .apply(FiFo)\
-            .drop(["CS", "PN", "id", "portfolio_id", "timestamp",], axis=1)\
+        fifo_trans_df = trans_df.groupby(["symbol"]) \
+            .apply(FiFo) \
+            .drop(["CS", "PN", "id", "portfolio_id", "timestamp", ], axis=1) \
             .reset_index(drop=True)
         moving_avg_df = weighted_avg(fifo_trans_df, grouped=True)
         payload = dict(
@@ -67,8 +68,6 @@ def all_stocks_balance(user: User):
         db.func.sum(Transaction.quantity).label("balance"),
         Transaction.symbol
     ).group_by("symbol").all()
-
-
 
     return {n: q for (q, n) in all_stocks if q > 0}
 
@@ -118,6 +117,16 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
                 entry[trade_type] = stock_statistics[entry["stock"]]
 
     return p_value
+
+
+def get_portfolio(user, averagemode):
+    portfolio = portfolio_value(user, average_mode=averagemode.lower())
+    return dict(
+        name=user.portfolio.portfolio_name,
+        balance=user.portfolio.balance,
+        total_value=sum([x["value"] for x in portfolio]),
+        portfolio=portfolio,
+    )
 
 
 def calculate_all_portfolios_values(query_limit=60):
