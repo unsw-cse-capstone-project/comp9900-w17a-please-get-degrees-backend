@@ -1,4 +1,4 @@
-from flask_restx import Resource, Namespace, reqparse, fields
+from flask_restx import Resource, Namespace, reqparse
 
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.portfolio import portfolio_value
@@ -15,13 +15,13 @@ api.models[portfolio_model.name] = portfolio_model
 @api.route("")
 class PortfoliosQuery(Resource):
     @api.response(200, "Successful")
-    @api.response(601, "Portfolio doesn't exist")
+    @api.response(404, "Portfolio not found")
     def get(self):
         portfolio_users = Portfolio.query.all()
         if not portfolio_users:
             return (
-                {"error": True, "message": "Portfolio doesn't exist"},
-                601,
+                {"error": True, "message": "Portfolio not found"},
+                404,
             )
 
         data = {
@@ -43,7 +43,6 @@ portfolio_query_parser.add_argument(
 @api.route("/user")
 class PortfolioQuery(Resource):
     @api.response(200, "Successful")
-    @api.response(601, "Portfolio doesn't exist")
     @api.expect(portfolio_query_parser)
     @api.doc(
         description="Show the user's current portfolio holdings and value",
