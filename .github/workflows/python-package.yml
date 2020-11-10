@@ -40,7 +40,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest -vh --path "./tests"
+        pytest -vh ./tests/
 
     - name: Commit build files
       run: |
