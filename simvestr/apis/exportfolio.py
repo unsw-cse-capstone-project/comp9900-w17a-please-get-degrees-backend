@@ -4,8 +4,9 @@ Created on Sun Nov  1 01:08:54 2020
 @author: Kovid
 """
 
+from pathlib import Path
 from flask_restx import Resource, Namespace
-from flask import after_this_request, send_file
+from flask import after_this_request, send_from_directory
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.models import Stock
 from simvestr.apis.portfolio import PortfolioQuery
@@ -24,8 +25,8 @@ api = Namespace(
 )
 
 
-def create_csv(path, file_basename, user, portfolio_details, portfolio_value_user):
-    workbook = xlsxwriter.Workbook(f'{path + file_basename}')
+def create_csv(file_path, file_basename, user, portfolio_details, portfolio_value_user):
+    workbook = xlsxwriter.Workbook(f'{file_path+file_basename}')
     worksheet = workbook.add_worksheet()
 
     heading_format_1 = workbook.add_format({'bold': True, 'bg_color': '#28B463', 'font_color': 'black'})
@@ -66,20 +67,20 @@ def create_csv(path, file_basename, user, portfolio_details, portfolio_value_use
     worksheet.write(f'H{row}', 'Weighted Avg Fee', stock_heading_format)
     worksheet.write(f'I{row}', 'Weighted Average', stock_heading_format)
 
-    for symbol, details in portfolio_value_user.items():
+    for stock_dict in portfolio_value_user:
         row += 1
-        stock = Stock.query.filter_by(symbol=symbol).first()
+        stock = Stock.query.filter_by(symbol=stock_dict["stock"]).first()
         worksheet.write(f'C{row}', f'{stock.name}')
-        worksheet.write(f'D{row}', f'{symbol}')
-        worksheet.write(f'E{row}', f'{details["quantity"]}')
-        if details["quote"] < details["buy"]["weighted_average"]:
-            worksheet.write(f'F{row}', f'{details["quote"]}', format1)
-            worksheet.write(f'I{row}', f'{details["buy"]["weighted_average"]}', format2)
+        worksheet.write(f'D{row}', f'{stock_dict["stock"]}')
+        worksheet.write(f'E{row}', f'{stock_dict["quantity"]}')
+        if stock_dict["quote"] < stock_dict["buy"]["weighted_average"]:
+            worksheet.write(f'F{row}', f'{stock_dict["quote"]}', format1)
+            worksheet.write(f'I{row}', f'{stock_dict["buy"]["weighted_average"]}', format2)
         else:
-            worksheet.write(f'F{row}', f'{details["quote"]}', format2)
-            worksheet.write(f'I{row}', f'{details["buy"]["weighted_average"]}', format1)
-        worksheet.write(f'G{row}', f'{details["value"]}')
-        worksheet.write(f'H{row}', f'{details["buy"]["weighted_average_fee"]}')
+            worksheet.write(f'F{row}', f'{stock_dict["quote"]}', format2)
+            worksheet.write(f'I{row}', f'{stock_dict["buy"]["weighted_average"]}', format1)
+        worksheet.write(f'G{row}', f'{stock_dict["value"]}')
+        worksheet.write(f'H{row}', f'{stock_dict["buy"]["weighted_average_fee"]}')
 
     workbook.close()
 
@@ -92,17 +93,17 @@ class ExportPortfolio(Resource):
         user = get_user()  # get user details from token
         portfolio_details = PortfolioQuery.get(user.id)[0]
         portfolio_value_user = portfolio_value(user)
-
-        # path = 'simvestr\\helpers\\'
-        path = ''
+        
         file_basename = f'{portfolio_details["portfolio_name"]}.xlsx'
-
-        create_csv(path, file_basename, user, portfolio_details, portfolio_value_user)
-
+        curr_dir = Path.cwd()
+        file_path = f'{str(curr_dir)}\\resources\\'
+        
+        create_csv(file_path, file_basename, user, portfolio_details, portfolio_value_user)
+        
         @after_this_request
-        def download_file():
-            return send_file(filename=file_basename, as_attachment=True)
-
+        def download_file(self):
+            return send_from_directory(directory=file_path, filename=file_basename, as_attachment=True)
+            
         return (
             {
                 "message": "Portfolio downloaded",
