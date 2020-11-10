@@ -19,7 +19,6 @@ api = Namespace(
 @api.route("")
 class Token(Resource):
     @api.response(200, "Successful")
-    @api.response(401, "Unsuccessful")
     def get(self):
 
         @after_this_request
