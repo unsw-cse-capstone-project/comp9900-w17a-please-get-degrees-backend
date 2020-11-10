@@ -34,12 +34,10 @@ signup_parser.add_argument("last_name", type=str)
 
 @api.route("")
 class Signup(Resource):
-    @api.response(200, "Successful")
+    @api.response(201, "Successful")
     @api.response(403, "Already exists")
-    # @api.response(403, "Email ID already exists")
+    @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
-    # @api.response(448, "Password cannot contain spaces")
-    # @api.response(422, "Password should be at least 8 characters")
     @api.doc(id="create_new_user", model="Signup", body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
@@ -65,13 +63,13 @@ class Signup(Resource):
         if len(password) < 8:
             return (
                 {"message": "Password should be at least 8 characters", },
-                422,
+                411,
             )
         
         if " " in password:
             return (
                 {"error": True, "message": "Password cannot contain spaces", },
-                448,
+                422,
             )
 
         create_new_user(
@@ -89,5 +87,5 @@ class Signup(Resource):
         
         return (
             {"message": "New user created!"},
-            200
+            201
         )

@@ -5,13 +5,14 @@ Created on Sun Oct 18 11:57:41 2020
 @author: Kovid
 """
 
-from flask_restx import Resource, fields, reqparse, Namespace
+from flask_restx import Resource, reqparse, Namespace
 
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.user import change_password
 from simvestr.models import Portfolio
 from simvestr.models import db
+from simvestr.helpers.api_models import changenames_model, changepwd_model
 
 api = Namespace(
     "change user details",
@@ -24,35 +25,13 @@ api = Namespace(
     description="Back-end API for changing user details - Name and Password",
 )
 
-changenames_model = api.model(
-    "ChangeNames",
-    {
-        "first_name": fields.String(
-            required=True,
-            description="User first name",
-            example="Brett"    
-        ),
-        "last_name": fields.String(
-            required=True,
-            description="User last name",
-            example="Lee" 
-        )
-    },
-)
+api.models[changenames_model.name] = changenames_model
+api.models[changepwd_model.name] = changepwd_model
+
 changenames_parser = reqparse.RequestParser()
 changenames_parser.add_argument("first_name", type=str)
 changenames_parser.add_argument("last_name", type=str)
 
-changepwd_model = api.model(
-    "ChangePwd",
-    {
-        "password": fields.String(
-            required=True,
-            description="User password",
-            example="pass1234"
-        )
-    },
-)
 changepwd_parser = reqparse.RequestParser()
 changepwd_parser.add_argument("password", type=str)
 
@@ -60,7 +39,7 @@ changepwd_parser.add_argument("password", type=str)
 @api.route('/changenames')
 class ChangeNames(Resource):
     @api.response(200, "Successful")
-    @api.doc(model="ChangeNames", body=changenames_model, description="Resets user\'s names")
+    @api.doc(model="ChangeNames", body=changenames_model, description="Resets user's names")
     @api.expect(changenames_parser, validate=True)
     @requires_auth
     def put(self):
@@ -92,8 +71,8 @@ class ChangeNames(Resource):
 @api.route('/changepwd')
 class ChangePwd(Resource):
     @api.response(200, "Successful")
-    @api.response(447, "Password should be at least 8 characters")
-    @api.response(448, "Password cannot contain spaces")
+    @api.response(411, "Length required")
+    @api.response(422, "Unprocessable entity")
     @api.doc(model="ChangePwd", body=changepwd_model, description="Resets password")
     @api.expect(changepwd_parser, validate=True)
     @requires_auth
@@ -106,13 +85,13 @@ class ChangePwd(Resource):
         if len(password) < 8:
             return (
                 {"error": True, "message": "Password should be at least 8 characters", },
-                447,
+                411,
             )
         
         if " " in password:
             return (
                 {"error": True, "message": "Password cannot contain spaces", },
-                448,
+                422,
             )
         
         change_password(user, password)
