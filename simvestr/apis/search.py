@@ -38,7 +38,7 @@ class StockDetails(Resource):
         # Remebered why we need to hit db - we have to check the exchange the stock is in to make a choice between crypto and regular stock.
 
         stock = Stock.query.filter_by(symbol=stock_symbol)
-        
+        stock = [] #teemporary bug fix - need to implement crypto checking logic
         if not stock:
             details = search(source_api="finnhub", query="profile", arg=stock_symbol)
             quote = search(source_api="finnhub", query="quote", arg=stock_symbol)
