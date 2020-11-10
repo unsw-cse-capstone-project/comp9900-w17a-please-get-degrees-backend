@@ -26,7 +26,7 @@ api = Namespace(
 
 
 def create_csv(file_path, file_basename, user, portfolio_details, portfolio_value_user):
-    workbook = xlsxwriter.Workbook(f'{file_path+file_basename}')
+    workbook = xlsxwriter.Workbook(f'{file_path}/{file_basename}')
     worksheet = workbook.add_worksheet()
 
     heading_format_1 = workbook.add_format({'bold': True, 'bg_color': '#28B463', 'font_color': 'black'})
@@ -96,8 +96,7 @@ class ExportPortfolio(Resource):
         
         file_basename = f'{portfolio_details["portfolio_name"]}.xlsx'
         curr_dir = Path.cwd()
-        file_path = f'{str(curr_dir)}\\resources\\'
-        
+        file_path = curr_dir / "resources"
         create_csv(file_path, file_basename, user, portfolio_details, portfolio_value_user)
         
         @after_this_request
