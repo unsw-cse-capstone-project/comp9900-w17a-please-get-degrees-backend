@@ -5,15 +5,14 @@ Created on Mon Sep 28 12:27:41 2020
 @author: Kovid
 """
 
-from flask_restx import Resource, fields, reqparse, Namespace
-from flask import make_response, after_this_request
-from werkzeug.security import check_password_hash
-import jwt
-import datetime
+from flask_restx import Resource, reqparse, Namespace
+from flask import after_this_request
+
 
 from simvestr.models import User
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.auth import auth
+from simvestr.helpers.api_models import login_model
 
 api = Namespace(
     "login",
@@ -23,24 +22,11 @@ api = Namespace(
     description="Generates a JWT, sets a cookie in browser",
 )
 
-credential_model = api.model(
-    "Credential",
-    {
-        "email": fields.String(
-            required=True,
-            description="User email",
-            example="test@test.com"
-        ),
-        "password": fields.String(
-            required=True,
-            description="User password",
-            example="pass1234"
-        )
-    }
-)
-credential_parser = reqparse.RequestParser()
-credential_parser.add_argument("email", type=str)
-credential_parser.add_argument("password", type=str)
+api.models[login_model.name] = login_model
+
+login_parser = reqparse.RequestParser()
+login_parser.add_argument("email", type=str)
+login_parser.add_argument("password", type=str)
 
 
 def validate_password(user, test_password):
@@ -51,28 +37,24 @@ def validate_password(user, test_password):
 @api.route("")
 class Token(Resource):
     @api.response(200, "Successful")
-    @api.response(401, "Unsuccessful")
-    @api.response(449, "User does not exist")
-    @api.response(442, "Incorrect password, retry")
-    @api.doc(
-        model="Credential",
-        body=credential_model,
-        descriptions="Generates an authentication token",
-    )
+    @api.response(400, "Bad Request")
+    @api.response(401, "Incorrect password, retry")
+    @api.response(404, "User not found")
+    @api.doc(id="login_user", model="Login", body=login_model, descriptions="Generates an authentication token")
     def post(self):
-        args = credential_parser.parse_args()
+        args = login_parser.parse_args()
         email_id = (args.get("email")).lower()
         password = args.get("password")
         user = User.query.filter_by(email_id=email_id).first()
         if not user:
             return (
-                {"message": "User doesn't exist"},
-                449,
+                {"message": "User not found"},
+                404,
             )
         if not validate_password(user, password):
             return (
                 {"message": "Incorrect password, retry"},
-                442,
+                401,
             )
 
         message_content = (
