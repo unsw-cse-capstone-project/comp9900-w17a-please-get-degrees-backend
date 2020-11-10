@@ -77,10 +77,12 @@ def check_price(symbol, quote):
     
     return True, cost_diff
 
+
+# TODO: Fix HTTP codes and responses
 @api.route("")
 class TradeStock(Resource):
     @api.response(200, "Successful")
-    @api.response(449, "User doesn't exist")
+    @api.response(404, "User doesn't exist")
     @api.response(422, "Unprocessable Entity")
     @api.response(401, "Exception error")
     @api.response(601, "Portfolio doesn't exist")

@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 from flask import Flask
 from flask_cors import CORS
 import yaml
@@ -29,6 +28,8 @@ def create_app(test_config=None, sim_config=None):
     config_yml = load_yaml_config()
     app.config["FINNHUB_API_KEY"] = config_yml["Finnhub API Key"]
     app.config["START_BALANCE"] = config_yml["START_BALANCE"]
+    app.config["SLIPPAGE"] = config_yml["SLIPPAGE"]
+    app.config["VALID_CHARS"] = config_yml["VALID_CHARS"]
 
     from simvestr.models import db
 

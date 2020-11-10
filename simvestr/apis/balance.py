@@ -1,4 +1,4 @@
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, fields
 
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.portfolio import calculate_all_portfolios_values
@@ -6,7 +6,23 @@ from simvestr.helpers.portfolio import calculate_all_portfolios_values
 api = Namespace('balance', description='Api for viewing balance for a User')
 
 
-@api.route("")
+balance_model = api.model(
+    "UserBalance",
+    {
+        "name": fields.String(
+            description="Portfolio name",
+            example="John Doe's Portfolio"
+        ),
+        "balance": fields.Float(
+            description="Current cash balance",
+            example=100000.0,
+        ),
+
+    },
+)
+
+
+@api.route("", doc=False)
 class PortfolioPriceUsersQuery(Resource):
     @api.response(200, 'Successful')
     @api.response(602, 'Portfolio for this user doesn\'t exist')
@@ -30,30 +46,31 @@ class PortfolioPriceUsersQuery(Resource):
 
 
 @api.route("/user/")
+@api.doc(
+    description="Query user's current cash balance"
+)
 class PortfolioPriceQuery(Resource):
     @api.response(200, "Successful")
-    @api.response(602, "Portfolio for this user doesn't exist")
+    @api.response(602, "Portfolio for this user doesn't exist") #needed??
+    @api.doc(
+        model=balance_model
+    )
     @requires_auth
     def get(self, ):
         user = get_user()
 
         data = dict(
             name=user.portfolio.portfolio_name,
-            portfolio_id=user.portfolio.id,
             balance=user.portfolio.balance,
-            time=str(user.portfolio.portfolioprice[-1].timestamp), # Do we need the time?
-
         )
-        payload = dict(
-            data=data
-        )
-        return payload
 
+        return data
 
+#TODO: Is this needed?
 @api.route("/user/detailed")
 class PortfolioPriceUserQuery(Resource):
     @api.response(200, "Successful")
-    @api.response(602, "Portfolio for this user doesn't exist")
+    @api.response(404, "Portfolio for this user doesn't exist") #Needed?
     @requires_auth
     def get(self):
         user = get_user()

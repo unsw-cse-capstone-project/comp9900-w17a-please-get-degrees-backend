@@ -87,7 +87,7 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
     balance = all_stocks_balance(user)
     avgs = average_price(user, mode=average_mode)
 
-    p_value = dict()
+    p_value = []
 
     if use_stored:
         quote = Stock.query.with_entities(
@@ -103,14 +103,19 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
     else:
         for stock, quant in balance.items():
             quote = search("quote", stock)["c"]
-            p_value[stock] = dict(
-                quantity=quant,
-                quote=quote,
-                value=quote * quant,
+            p_value.append(
+                dict(
+                    stock=stock,
+                    quantity=quant,
+                    quote=quote,
+                    value=quote * quant,
+                )
             )
-    for trade_type, stock_statistics in avgs.items():
-        for stock, statistics in stock_statistics.items():
-            p_value[stock][trade_type] = statistics
+    for entry in p_value:
+        for trade_type, stock_statistics in avgs.items():
+            entry[trade_type] = {}
+            if entry["stock"] in stock_statistics:
+                entry[trade_type] = stock_statistics[entry["stock"]]
 
     return p_value
 

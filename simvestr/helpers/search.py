@@ -15,7 +15,7 @@ QUERYS = dict(
     ),
     crypto=dict(
         exchange="crypto/symbol?exchange=",
-        quote="quote?symbol=",
+        candle="crypto/candle?",
     )
 )
 

@@ -10,6 +10,7 @@ from flask.cli import with_appcontext
 
 from werkzeug.security import generate_password_hash
 
+from simvestr import create_app
 from simvestr.models import db
 from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
 from simvestr.helpers.search import search
@@ -19,7 +20,7 @@ SALT_SIZE = 6
 
 
 def make_salt():
-    valid_pw_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY0123456789!@#$%^&*()-_=+<>,./?:;{}[]`~"
+    valid_pw_chars = current_app.config["VALID_CHARS"]
 
     return "".join(np.random.choice(list(valid_pw_chars), size=SALT_SIZE))
 
@@ -77,14 +78,14 @@ def populate_stocks():
             },
             "search": lambda ex: search(query="exchange", arg=ex)
         },
-        # "crypto": {
-        #     "exchange": crypto_exchanges,
-        #     "name": {
-        #         "description": "name",
-        #         "displaySymbol": "currency",  # please review, unsure if this is a good idea
-        #     },
-        #     "search": lambda ex: search(query="exchange", arg=ex, stock_type="crypto")
-        # },
+        "crypto": {
+            "exchange": crypto_exchanges,
+            "name": {
+                "description": "name",
+                "displaySymbol": "currency",  # please review, unsure if this is a good idea
+            },
+            "search": lambda ex: search(query="exchange", arg=ex, stock_type="crypto")
+        },
     }
 
     exchange_stocks = []
@@ -117,9 +118,8 @@ def populate_stocks():
             bulk_add_from_df(df, db, Stock)
 
 
-def load_dummy():
+def load_dummy(data_path: Path):
     db = get_db()
-    data_path = Path.cwd() / "resources" / "test_data_user.xlsx"
 
     # Order of models matters
     load_mapping = dict(
@@ -135,7 +135,7 @@ def load_dummy():
 
     df_map["users"]['salt'] = [make_salt() for _ in range(len(df_map["users"]))]
     df_map["users"].password = df_map["users"].password + df_map["users"].salt
-    df_map["users"].password = df_map["users"].password.apply(generate_password_hash, method="sha256")
+    df_map["users"].password = df_map["users"].password.apply(generate_password_hash, method="sha256",)
 
     bulk_add_from_df(df_map["exchanges"], db, Exchanges)
     bulk_add_from_df(df_map["transaction"], db, Transaction)
@@ -217,3 +217,11 @@ def init_db_command():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+
+def setup_new_db(data_path: Path):
+    app = create_app()
+
+    with app.app_context():
+        delete_db()
+        init_db()
+        load_dummy(data_path)

@@ -5,7 +5,6 @@ Created on Thu Oct 22 12:07:31 2020
 @author: Kovid
 """
 
-
 import numpy as np
 
 from functools import wraps
@@ -13,9 +12,11 @@ import datetime
 import jwt
 
 from flask_restx import abort, reqparse
+from werkzeug.security import check_password_hash
 
 from simvestr.models import User
 
+# TODO: MOve to config file
 SECRET_KEY = "thisismysecretkeydonotstealit"
 EXPIRES_IN = 86400  # 24 Hours
 
@@ -93,6 +94,11 @@ def get_user():
         abort(449, "User doesn't exist")
 
     return user
+
+
+def check_password(user, test_password):
+    test_password = "".join([test_password, user.salt])
+    return True if check_password_hash(user.password, test_password) else False
 
 
 auth = AuthenticationToken(SECRET_KEY, EXPIRES_IN)

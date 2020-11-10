@@ -1,11 +1,13 @@
-import tempfile
-import shutil
 import os
-import pytest
-from simvestr import create_app
-from simvestr.helpers.db import init_db, db
-from flask_sqlalchemy import SQLAlchemy
+import shutil
+import tempfile
 from pathlib import Path
+
+import pytest
+from flask_sqlalchemy import SQLAlchemy
+
+from simvestr import create_app
+from simvestr.helpers.db import db
 
 API_URL = "/api/v1"
 
@@ -46,21 +48,61 @@ def runner(app):
 def test_db(app):
     return SQLAlchemy(app)
 
-
+#to use later, need to correct
 class AuthActions(object):
-    def __init__(self, client):
+    def __init__(self, client, email="test@test.com", password="pass1234",
+                  first_name="test_first", last_name="test_last"):
         self._client = client
+        self.email = email
+        self.password = password
+        self.first_name = first_name
+        self.last_name = last_name
 
-    def login(self, email='test@testmail.com', password='test'):
+    def sign_up(self, ):
+        new_user = {
+            "email": self.email,
+            "password": self.password,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+        }
+
         return self._client.post(
-            '/auth/login',
-            data={'username': email, 'password': password}
+            "/".join([API_URL, "signup"]),
+            data=new_user
+        )
+
+    def login(self,):
+        return self._client.post(
+            "/".join([API_URL, "login"]),
+            data={
+                "email": self.email,
+                "password": self.password,
+            }
         )
 
     def logout(self):
-        return self._client.get('/auth/logout')
+        return self._client.get(
+            "/".join([API_URL, "logout"]),
+        )
 
+
+    @property
+    def name(self):
+        return " ".join([self.first_name, self.last_name])
 
 @pytest.fixture
 def auth(client):
     return AuthActions(client)
+
+@pytest.fixture
+def client_new_user(client):
+    new_user = {
+        "email": "test@test.com",
+        "password": "pass1234",
+        "first_name": "test",
+        "last_name": "register"
+    }
+    client.post(
+        "/".join([API_URL, "signup"]), data=new_user
+    )
+    return client
