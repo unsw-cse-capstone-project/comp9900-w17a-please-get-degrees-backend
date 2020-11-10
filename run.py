@@ -13,7 +13,7 @@ from simvestr.helpers.db import db, setup_new_db
 
 RUN_COMMAND = "flask run"
 
-RUN_SETUP = True
+RUN_SETUP = False
 
 SIM_DURATION = timedelta(minutes=1)
 INTERVAL = timedelta(seconds=1)
