@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash
 
 from simvestr.models import User, db
 from simvestr.helpers.simvestr_email import send_email
+from simvestr.helpers.user import change_password
 from simvestr.models.api_models import forgotuser_model, forgotuser_email_model
 
 api = Namespace(
@@ -99,10 +100,9 @@ class ForgotUser(Resource):
                 422,
             )
 
-        user.password = generate_password_hash(password, method="sha256")
-        db.session.commit()
+        change_password(user, password)
         
-        message_content = "ALERT! Your password for Simvestr has been changed. Please contact us if this wasn\'t you."
+        message_content = "ALERT! Your password for Simvestr has been changed. Please contact us if this wasn\"t you."
         #sends a confirmation email to the user
         send_email(email_id, "Password updated successfully", message_content) 
         return (
