@@ -14,7 +14,7 @@ def send_email(user_email_address, message_text, message_content):
     from_address = 'simvestr@gmail.com'
     # to_address = 'z5240067@ad.unsw.edu.au'
     to_address = user_email_address
-    
+    '''
     message_content = 'Hello Investor,\n\n' + message_content + '\n\nSimvestr Pvt. Ltd.\nSyndey, Australia'
     
     message = MIMEMultipart('Simvestr')
@@ -33,5 +33,5 @@ def send_email(user_email_address, message_text, message_content):
     mail.login(from_address, 'simvestr@123')
     mail.sendmail(from_address,to_address, message.as_string())
     mail.close()
-    
+    '''
 # send_email('z5240067@ad.unsw.edu.au', 'User created successfully', 'Congratulations, you have been registered successfully. Happy investing!')
