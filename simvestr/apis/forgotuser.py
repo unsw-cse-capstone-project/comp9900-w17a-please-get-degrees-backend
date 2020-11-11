@@ -26,12 +26,12 @@ api.models[forgotuser_model.name] = forgotuser_model
 api.models[forgotuser_email_model.name] = forgotuser_email_model
 
 forgotuser_parser = reqparse.RequestParser()
-forgotuser_parser.add_argument("email_id", type=str)
+forgotuser_parser.add_argument("email", type=str)
 forgotuser_parser.add_argument("password", type=str)
 forgotuser_parser.add_argument("OTP", type=str)
 
 forgotuser_email_parser = reqparse.RequestParser()
-forgotuser_email_parser.add_argument("email_id", type=str)
+forgotuser_email_parser.add_argument("email", type=str)
 
 random_OTP = 1234
 
@@ -46,7 +46,7 @@ class ForgotUser(Resource):
     @api.expect(forgotuser_email_parser, validate=True)
     def get(self):
         args = forgotuser_email_parser.parse_args()
-        email_id = (args.get("email_id")).lower()
+        email_id = (args.get("email")).lower()
         user = User.query.filter_by(email_id=email_id).first()
         if not user:
             return (
@@ -68,7 +68,7 @@ class ForgotUser(Resource):
     @api.expect(forgotuser_parser, validate=True)
     def put(self):
         args = forgotuser_parser.parse_args()
-        email_id = (args.get("email_id")).lower()
+        email_id = (args.get("email")).lower()
         password = args.get("password")
         one_time_pass = args.get("OTP")
         user = User.query.filter_by(email_id=email_id).first()
@@ -101,7 +101,7 @@ class ForgotUser(Resource):
         user.password = generate_password_hash(password, method="sha256")
         db.session.commit()
         
-        message_content = "ALERT! Your password for Simvestr has been changed. Please contact us if this wasn\"t you."
+        message_content = "ALERT! Your password for Simvestr has been changed. Please contact us if this wasn\'t you."
         #sends a confirmation email to the user
         send_email(email_id, "Password updated successfully", message_content) 
         return (
