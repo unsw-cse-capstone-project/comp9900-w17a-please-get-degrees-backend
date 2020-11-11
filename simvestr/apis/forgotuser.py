@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash
 
 from simvestr.models import User, db
 from simvestr.helpers.simvestr_email import send_email
-from simvestr.helpers.api_models import forgotuser_model, forgotuser_email_model
+from simvestr.models.api_models import forgotuser_model, forgotuser_email_model
 
 api = Namespace(
     "forgot user password",

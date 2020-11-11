@@ -6,7 +6,7 @@ from flask_restx import Resource, Namespace, reqparse
 from simvestr.helpers.auth import requires_auth
 from simvestr.helpers.search import search
 from simvestr.models import Stock, db
-from simvestr.helpers.api_models import quote_model, details_model
+from simvestr.models.api_models import quote_model, details_model
 
 api = Namespace("search", description="Search stocks")
 

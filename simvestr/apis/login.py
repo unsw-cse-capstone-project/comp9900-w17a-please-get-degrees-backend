@@ -12,7 +12,7 @@ from flask import after_this_request
 from simvestr.models import User
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.auth import auth
-from simvestr.helpers.api_models import login_model
+from simvestr.models.api_models import login_model
 
 api = Namespace(
     "login",

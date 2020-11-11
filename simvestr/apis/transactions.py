@@ -1,9 +1,8 @@
 from flask_restx import Resource, Namespace
 
 from simvestr.helpers.transactions import get_transactions
-from simvestr.models import Transaction
 from simvestr.helpers.auth import get_user, requires_auth
-from simvestr.helpers.api_models import transactions_model, transaction_model
+from simvestr.models.api_models import transactions_model, transaction_model
 
 api = Namespace(
     "transactions",

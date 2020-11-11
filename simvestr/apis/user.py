@@ -3,7 +3,7 @@ from flask_restx import Resource, Namespace, fields
 from simvestr.helpers.user import get_user_details
 from simvestr.models import User
 from simvestr.helpers.auth import get_user, requires_auth
-from simvestr.helpers.api_models import user_details_model, user_model
+from simvestr.models.api_models import user_details_model, user_model
 
 api = Namespace('view user details', description='Demo api for querying users')
 api.models[user_model.name] = user_model

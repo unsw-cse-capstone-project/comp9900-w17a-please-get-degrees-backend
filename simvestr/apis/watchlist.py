@@ -3,7 +3,7 @@ from flask_restx import Resource, Namespace
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.watchlist import get_watchlist, in_watchlist
 from simvestr.models import db, Stock
-from simvestr.helpers.api_models import watchlist_item_model, watchlist_model
+from simvestr.models.api_models import watchlist_item_model, watchlist_model
 
 authorizations = {
     "TOKEN-BASED": {

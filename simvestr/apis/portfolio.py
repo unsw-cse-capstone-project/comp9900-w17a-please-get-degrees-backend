@@ -1,9 +1,9 @@
 from flask_restx import Resource, Namespace, reqparse
 
 from simvestr.helpers.auth import get_user, requires_auth
-from simvestr.helpers.portfolio import portfolio_value, get_portfolio
+from simvestr.helpers.portfolio import get_portfolio
 from simvestr.models import Portfolio
-from simvestr.helpers.api_models import portfolio_model, value_model, buy_sell_model
+from simvestr.models.api_models import portfolio_model, value_model, buy_sell_model
 
 api = Namespace("portfolios", description="Api for viewing Portfolios")
 

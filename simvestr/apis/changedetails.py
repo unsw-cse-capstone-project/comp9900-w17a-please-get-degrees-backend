@@ -12,7 +12,7 @@ from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.user import change_password
 from simvestr.models import Portfolio
 from simvestr.models import db
-from simvestr.helpers.api_models import changenames_model, changepwd_model
+from simvestr.models.api_models import changenames_model, changepwd_model
 
 api = Namespace(
     "change user details",
