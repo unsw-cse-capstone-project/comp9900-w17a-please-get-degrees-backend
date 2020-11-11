@@ -1,6 +1,9 @@
 from flask import current_app
 from werkzeug.security import generate_password_hash
 
+from simvestr.helpers.portfolio import get_portfolio
+from simvestr.helpers.transactions import get_transactions
+from simvestr.helpers.watchlist import get_watchlist
 from simvestr.models import User, Portfolio, PortfolioPrice, Watchlist, db
 from simvestr.helpers.db import make_salt
 
@@ -52,3 +55,14 @@ def create_new_user(email_id, first_name, last_name, password):
     db.session.add(new_portfolioprice)
     db.session.commit()
     return new_user
+
+
+def get_user_details(user: User):
+    watch = get_watchlist(user)
+    port = get_portfolio(user, averagemode="alltime")
+    transact = get_transactions(user)
+    payload = dict(email=user.email_id)
+    payload.update(port)
+    payload.update(watch)
+    payload.update(transact)
+    return payload

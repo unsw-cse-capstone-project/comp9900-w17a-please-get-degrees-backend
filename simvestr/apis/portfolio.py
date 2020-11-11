@@ -1,9 +1,9 @@
 from flask_restx import Resource, Namespace, reqparse
 
 from simvestr.helpers.auth import get_user, requires_auth
-from simvestr.helpers.portfolio import portfolio_value
+from simvestr.helpers.portfolio import get_portfolio
 from simvestr.models import Portfolio
-from simvestr.helpers.api_models import portfolio_model, value_model, buy_sell_model
+from simvestr.models.api_models import portfolio_model, value_model, buy_sell_model
 
 api = Namespace("portfolios", description="Api for viewing Portfolios")
 
@@ -37,7 +37,8 @@ portfolio_query_parser.add_argument(
     "averagemode",
     type=str,
     help="Type of averaging for portfolio query. Options are 'alltime' or 'moving'.",
-    default="moving"
+    default="moving",
+    choices=("moving","alltime"),
 )
 
 @api.route("/user")
@@ -53,12 +54,5 @@ class PortfolioQuery(Resource):
     def get(self):
         user = get_user()
         args = portfolio_query_parser.parse_args()
-        portfolio = portfolio_value(user, average_mode=args["averagemode"].lower())
-
-        payload = dict(
-            portfolio_name=user.portfolio.portfolio_name,
-            balance=user.portfolio.balance,
-            total_value=sum([x["value"] for x in portfolio]),
-            portfolio=portfolio,
-        )
+        payload = get_portfolio(user, args["averagemode"])
         return payload, 200

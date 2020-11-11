@@ -12,7 +12,7 @@ from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.user import change_password
 from simvestr.models import Portfolio
 from simvestr.models import db
-from simvestr.helpers.api_models import changenames_model, changepwd_model
+from simvestr.models.api_models import changenames_model, changepwd_model
 
 api = Namespace(
     "change user details",
@@ -39,7 +39,7 @@ changepwd_parser.add_argument("password", type=str)
 @api.route('/changenames')
 class ChangeNames(Resource):
     @api.response(200, "Successful")
-    @api.doc(model="ChangeNames", body=changenames_model, description="Resets user's names")
+    @api.doc(model="Change Names", body=changenames_model, description="Resets user's names")
     @api.expect(changenames_parser, validate=True)
     @requires_auth
     def put(self):
@@ -73,7 +73,7 @@ class ChangePwd(Resource):
     @api.response(200, "Successful")
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
-    @api.doc(model="ChangePwd", body=changepwd_model, description="Resets password")
+    @api.doc(model="Change Password", body=changepwd_model, description="Resets password")
     @api.expect(changepwd_parser, validate=True)
     @requires_auth
     def put(self):

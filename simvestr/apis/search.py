@@ -6,12 +6,11 @@ from flask_restx import Resource, Namespace, reqparse
 from simvestr.helpers.auth import requires_auth
 from simvestr.helpers.search import search
 from simvestr.models import Stock, db
-from simvestr.helpers.api_models import quote_model, base_symbol_model, details_model
+from simvestr.models.api_models import quote_model, details_model
 
 api = Namespace("search", description="Search stocks")
 
 api.models[quote_model.name] = quote_model # do we need these?
-api.models[base_symbol_model.name] = base_symbol_model # do we need these?
 api.models[details_model.name] = details_model
 
 @api.route("/exchange/<string:exchange>")
@@ -29,7 +28,7 @@ class StockDetails(Resource):
     @api.response(404, "Symbol not found")
     @api.doc(
         id="stock_details",
-        model="Stock details model",
+        model="Stock Details",
         body=details_model,
         description="Gets details for the specified stock",
         params={"stock_symbol": "The stock symbol associated with the company"},
@@ -39,7 +38,7 @@ class StockDetails(Resource):
         # Remebered why we need to hit db - we have to check the exchange the stock is in to make a choice between crypto and regular stock.
 
         stock = Stock.query.filter_by(symbol=stock_symbol)
-        
+        stock = [] #teemporary bug fix - need to implement crypto checking logic
         if not stock:
             details = search(source_api="finnhub", query="profile", arg=stock_symbol)
             quote = search(source_api="finnhub", query="quote", arg=stock_symbol)

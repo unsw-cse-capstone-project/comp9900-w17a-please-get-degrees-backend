@@ -1,7 +1,7 @@
 from flask_restx import Resource, Namespace
 
 from simvestr.helpers.auth import requires_auth, get_user
-from simvestr.helpers.api_models import balance_model
+from simvestr.models.api_models import balance_model
 
 api = Namespace('balance', description='Api for viewing balance for a User')
 
