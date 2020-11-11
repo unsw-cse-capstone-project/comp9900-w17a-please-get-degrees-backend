@@ -32,18 +32,20 @@ user_details_model = api.model(
     },
 )
 
+
 @api.route('/all')
 class UsersQuery(Resource):
     @requires_auth
     def get(self):
         user = User.query.all()
         data = {u.id: dict
-        (email=u.email_id,
-         role=u.role,
-         fname=u.first_name,
-         lname=u.last_name,
-         validated=u.validated,
-         ) for u in user}
+                (    
+                 email=u.email_id,
+                 role=u.role,
+                 fname=u.first_name,
+                 lname=u.last_name,
+                 validated=u.validated,
+                ) for u in user}
         payload = dict(
             data=data
         )
@@ -75,3 +77,17 @@ class UserQuery(Resource):
         )
 
         return data
+
+
+@api.route('/info')
+class UserInfoQuery(Resource):
+    @requires_auth
+    def get(self, ):
+        user = get_user()
+        return (
+                {"first_name": user.first_name,
+                 "last_name": user.last_name,
+                 "email_id": user.email_id,
+                 "message": "Authenticated with cookie set in browser"},
+                200,
+            )
