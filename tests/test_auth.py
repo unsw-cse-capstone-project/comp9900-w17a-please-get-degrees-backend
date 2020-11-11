@@ -31,7 +31,7 @@ def test_register(client, app):
     response = client.post(
         "/".join([API_URL, "signup"]), data=new_user
     )
-    assert response._status_code == 200
+    assert response._status_code == 201
 
 
 def test_user_signup(client):
