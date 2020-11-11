@@ -3,6 +3,7 @@
 Created on Thu Oct 15 20:58:41 2020
 @author: Kovid
 """
+#TODO: Suggest deleting this
 
 from flask_restx import Resource, Namespace
 
@@ -21,8 +22,9 @@ api = Namespace(
 )
 
 
-@api.route('/')
+@api.route('/', doc={"deprecated":True})
 class StocksOwnedQuery(Resource):
+
     def get(self, ):
         user = get_user()
 

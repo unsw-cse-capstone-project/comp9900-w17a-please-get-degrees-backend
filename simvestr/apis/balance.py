@@ -40,6 +40,7 @@ class PortfolioPriceQuery(Resource):
         model=balance_model, 
         descriptions="User cash balance"
     )
+    @api.marshal_with(balance_model)
     @requires_auth
     def get(self, ):
         user = get_user()
