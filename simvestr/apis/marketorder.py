@@ -10,6 +10,7 @@ from flask_restx import Resource, fields, reqparse, Namespace
 
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.portfolio import stock_balance
+from simvestr.helpers.search import get_details
 from simvestr.models import db, Transaction, Stock
 from simvestr.apis.search import StockDetails
 
@@ -60,9 +61,9 @@ trade_parser.add_argument("trade_type", type=str)
 trade_parser.add_argument("quantity", type=int)
 
 def check_price(symbol, quote):
-    stock_details = StockDetails.get("", symbol)
+    stock_details = get_details(symbol.upper())
 
-    current_quote = stock_details.json["quote"]["c"]
+    current_quote = stock_details["quote"]["c"]
     cost_diff = abs(current_quote - quote)
     allowed_cost_diff = 0.0005 * quote
     
