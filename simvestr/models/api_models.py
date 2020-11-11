@@ -64,6 +64,30 @@ timestamp = fields.Integer(
     example=1569297600,
 )
 
+open_price = fields.Float(
+            description="Open price",
+            example=100.0)
+
+high_price = fields.Float(
+            description="High price",
+            example=110.0)
+
+low_price = fields.Float(
+            description="Low price",
+            example=95.0)
+
+current_price = fields.Float(
+            description="Current price",
+            example=101.0)
+
+close_price = fields.Float(
+            description="Close price",
+            example=101.0)
+
+previous_close_price = fields.Float(
+            description="Previous close price",
+            example=101.0)
+
 # Models here
 forgotuser_email_model = Model(
     "Forgot User Email",
@@ -147,33 +171,27 @@ transactions_model = Model(
     }
 )
 
+candle_model = Model(
+    "Candles",
+    {
+        "o": fields.List(open_price),
+        "h": fields.List(high_price),
+        "l": fields.List(low_price),
+        "c": fields.List(close_price),
+        "t": fields.List(timestamp),
+    },
+)
 quote_model = Model(
     "Quote",
     {
-        "o": fields.Float(
-            description="Open price",
-            example=100.0,
-        ),
-        "h": fields.Float(
-            description="High price",
-            example=110.0,
-        ),
-        "l": fields.Float(
-            description="Low price",
-            example=95.0,
-        ),
-        "c": fields.Float(
-            description="Current price",
-            example=101.0,
-        ),
-        "pc": fields.Float(
-            description="Previous close",
-            example=98.0,
-        ),
+        "o": open_price,
+        "h": high_price,
+        "l": low_price,
+        "c": current_price,
+        "pc": previous_close_price,
         "t": timestamp,
     },
 )
-
 details_model = Model(
     "Stock Details",
     {
@@ -182,7 +200,7 @@ details_model = Model(
         "name": fields.String(
             required=True,
             description="Stock name",
-            example="TESLA INC"
+            example="Apple Inc."
         ),
         "industry": fields.String(
             description="Industry classification",
