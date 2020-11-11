@@ -108,11 +108,11 @@ def populate_stocks():
         num_stocks, stock_dict = heapq.heappop(exchange_stocks)
         ex, df = stock_dict.popitem()
         unique_stocks = df.name.unique()
-        sq = Stock.query.filter(Stock.name.in_(list(unique_stocks))).all()
+        sq = Stock.query.filter(Stock.symbol.in_(list(unique_stocks))).all()
 
         if sq:
-            names = [n.name for n in sq]
-            df = df[~df.name.isin(names)]
+            symbols = [n.symbol for n in sq]
+            df = df[~df.symbol.isin(symbols)]
 
         if len(df):
             bulk_add_from_df(df, db, Stock)

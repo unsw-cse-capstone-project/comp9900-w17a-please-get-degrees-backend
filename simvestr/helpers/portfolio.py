@@ -104,7 +104,7 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
             quote = search("quote", stock)["c"]
             p_value.append(
                 dict(
-                    stock=stock,
+                    symbol=stock,
                     quantity=quant,
                     quote=quote,
                     value=quote * quant,
@@ -113,8 +113,8 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
     for entry in p_value:
         for trade_type, stock_statistics in avgs.items():
             entry[trade_type] = {}
-            if entry["stock"] in stock_statistics:
-                entry[trade_type] = stock_statistics[entry["stock"]]
+            if entry["symbol"] in stock_statistics:
+                entry[trade_type] = stock_statistics[entry["symbol"]]
 
     return p_value
 

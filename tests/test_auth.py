@@ -4,7 +4,7 @@ from tests.conftest import API_URL
 
 @pytest.mark.parametrize(("email", "password", "message", "code"), (
         ("", "", "Email is required", 422),
-        ("a", "", "Password should be at least 8 characters", 422),
+        ("a", "", "Password should be at least 8 characters", 411),
 ))
 def test_register_validate_input(client, email, password, message, code):
     new_user = {
@@ -58,7 +58,7 @@ def test_user_signup(client):
 @pytest.mark.parametrize(("email", "password", "message", "code"), (
         ("test@test.com", "pass1234", "Login successful", 200),
         ("test@test.com", "WrongPassword", "Incorrect password, retry", 401),
-        ("test_doesnt_exist@test.com", "pass1234", "User doesn't exist", 404),
+        ("test_doesnt_exist@test.com", "pass1234", "User not found", 404),
 ))
 def test_login(client_new_user, email, password, message, code):
     user = {
