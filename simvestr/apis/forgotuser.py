@@ -64,7 +64,7 @@ class ForgotUser(Resource):
             200,
         )
     
-    @api.doc(id="reset_user_password", model="ForgotUser", body=forgotuser_model, description="Resets password for user using OTP")
+    @api.doc(id="reset_user_password", model="Forgot User", body=forgotuser_model, description="Resets password for user using OTP")
     @api.expect(forgotuser_parser, validate=True)
     def put(self):
         args = forgotuser_parser.parse_args()
