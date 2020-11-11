@@ -59,6 +59,7 @@ class ForgotUser(Resource):
         message_content = f"ALERT! You have requested password change for your Simvestr account. Please copy the 4 digit OTP {random_OTP}."
         #sends a confirmation email to the user
         send_email(user.email_id, f"Forgot Password - OTP: {random_OTP}", message_content)
+        print(f'\n\nOTP: {random_OTP}\n\n') # MAKE SURE TO TURN IT OFF BEFORE SUBMISSION
         return (
             {"error": False, "message": "Email sent!"}, 
             200,
