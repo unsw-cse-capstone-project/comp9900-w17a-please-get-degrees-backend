@@ -94,7 +94,7 @@ class ExportPortfolio(Resource):
         portfolio_details = PortfolioQuery.get(user.id)[0]
         portfolio_value_user = portfolio_value(user)
         
-        file_basename = f'{portfolio_details["portfolio_name"]}.xlsx'
+        file_basename = f'{portfolio_details["name"]}.xlsx'
         curr_dir = Path.cwd()
         file_path = curr_dir / "resources"
         create_csv(file_path, file_basename, user, portfolio_details, portfolio_value_user)
