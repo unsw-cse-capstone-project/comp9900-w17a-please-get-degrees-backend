@@ -129,6 +129,18 @@ def get_portfolio(user, averagemode):
     )
 
 
+def get_stocks_owned(user: User):
+    stocks_owned = all_stocks_balance(user)
+    payload = dict(
+        stocksowned=[
+            dict(
+                symbol=k,
+                quantity=v
+            ) for k, v in stocks_owned.items()
+        ]
+    )
+    return payload
+
 def calculate_all_portfolios_values(query_limit=60):
     # First, query only the stocks that are in users portfolios
     portfolio_stocks = Stock.query.join(Portfolio, Stock.portfolios).all()

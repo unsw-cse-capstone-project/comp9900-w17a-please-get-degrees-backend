@@ -104,7 +104,7 @@ class TradeStock(Resource):
         stock = Stock.query.filter_by(symbol=symbol).first()
         fee = 0
         quantity = -quantity if trade_type == "sell" else quantity
-        slippage = 0
+        slippage = 0 #Needed?
         
         # --------------- Buy ---------------- #
         if quantity > 0:  # check if user even has enough money to buy this stock quantity

@@ -1,15 +1,19 @@
 from flask_restx import Resource, Namespace, reqparse
 
 from simvestr.helpers.auth import get_user, requires_auth
-from simvestr.helpers.portfolio import get_portfolio
+from simvestr.helpers.portfolio import get_portfolio, all_stocks_balance, get_stocks_owned
 from simvestr.models import Portfolio
-from simvestr.models.api_models import portfolio_model, value_model, buy_sell_model
+from simvestr.models.api_models import portfolio_model, value_model, buy_sell_model, stocks_owned_model, \
+    stock_owned_model
 
 api = Namespace("portfolios", description="Api for viewing Portfolios")
 
 api.models[value_model.name] = value_model
 api.models[buy_sell_model.name] = buy_sell_model
 api.models[portfolio_model.name] = portfolio_model
+api.models[stock_owned_model.name] = stock_owned_model
+api.models[stocks_owned_model.name] = stocks_owned_model
+
 
 # TODO: Need to protect this endpoint from non-users
 @api.route("")
@@ -38,21 +42,39 @@ portfolio_query_parser.add_argument(
     type=str,
     help="Type of averaging for portfolio query. Options are 'alltime' or 'moving'.",
     default="moving",
-    choices=("moving","alltime"),
+    choices=("moving", "alltime"),
+    required=True,
 )
+
 
 @api.route("/user")
 class PortfolioQuery(Resource):
+    @requires_auth
     @api.response(200, "Successful")
     @api.expect(portfolio_query_parser)
     @api.doc(
         description="Show the user's current portfolio holdings and value",
         model=portfolio_model,
-
     )
-    @requires_auth
+    @api.marshal_with(portfolio_model)
     def get(self):
         user = get_user()
         args = portfolio_query_parser.parse_args()
         payload = get_portfolio(user, args["averagemode"])
         return payload, 200
+
+
+@api.route("/user/stocksowned")
+class StocksOwned(Resource):
+    @api.response(200, "Successful")
+    @api.doc(
+        description="List of the current stock holdings",
+        model=stocks_owned_model,
+    )
+    @api.marshal_with(stocks_owned_model)
+    @requires_auth
+    def get(self):
+        user = get_user()
+        stocks_owned = get_stocks_owned(user)
+        # return only stocks greater than zero
+        return stocks_owned, 200
