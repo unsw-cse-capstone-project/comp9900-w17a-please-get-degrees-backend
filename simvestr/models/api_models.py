@@ -41,11 +41,17 @@ symbol = fields.String(
 stock_type = fields.String(
     required=True,
     description="Stock type",
-    example="STOCK",
+    example="stock",
     enum=(
-        "STOCK",
-        "CRYPTO",
+        "stock",
+        "crypto",
     )
+)
+
+stock_name = fields.String(
+    required=True,
+    description="Stock name",
+    example="Apple Inc."
 )
 
 simple_quote = fields.Float(
@@ -136,20 +142,6 @@ forgotuser_model = login_model.clone(
     }
 )
 
-watchlist_item_model = Model(
-    "Watchlist Item",
-    {
-        "symbol": symbol,
-        "quote": simple_quote,
-    }
-)
-
-watchlist_model = Model(
-    "Watchlist",
-    {
-        "watchlist": fields.List(fields.Nested(watchlist_item_model)),
-    }
-)
 
 transaction_model = Model(
     "Transaction",
@@ -192,16 +184,30 @@ quote_model = Model(
         "t": timestamp,
     },
 )
+
+watchlist_item_model = quote_model.clone(
+    "Watchlist Item",
+    {
+        "symbol": symbol,
+        "name": stock_name,
+    }
+)
+
+watchlist_model = Model(
+    "Watchlist",
+    {
+        "watchlist": fields.List(fields.Nested(watchlist_item_model)),
+    }
+)
+
+
+
 details_model = Model(
     "Stock Details",
     {
         "type": stock_type,
         "symbol": symbol,
-        "name": fields.String(
-            required=True,
-            description="Stock name",
-            example="Apple Inc."
-        ),
+        "name": stock_name,
         "industry": fields.String(
             description="Industry classification",
             example="Technology",
