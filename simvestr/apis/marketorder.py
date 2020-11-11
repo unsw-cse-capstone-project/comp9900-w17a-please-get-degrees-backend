@@ -158,4 +158,6 @@ class TradeStock(Resource):
         db.session.add(new_transaction)
         db.session.commit()
 
+        # payload = make_order(user, )
+
         return dict(symbol=symbol, quote=quote, quantity=quantity, slippage=slippage, ), 200

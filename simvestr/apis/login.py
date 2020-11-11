@@ -11,7 +11,7 @@ from flask import after_this_request
 
 from simvestr.models import User
 from simvestr.helpers.simvestr_email import send_email
-from simvestr.helpers.auth import auth
+from simvestr.helpers.auth import auth, check_password
 from simvestr.models.api_models import login_model
 
 api = Namespace(
@@ -27,11 +27,6 @@ api.models[login_model.name] = login_model
 login_parser = reqparse.RequestParser()
 login_parser.add_argument("email", type=str)
 login_parser.add_argument("password", type=str)
-
-
-def validate_password(user, test_password):
-    test_password = "".join([test_password, user.salt])
-    return (user.password, test_password)
 
 
 @api.route("")
@@ -51,7 +46,7 @@ class Token(Resource):
                 {"message": "User not found"},
                 404,
             )
-        if not validate_password(user, password):
+        if not check_password(user, password):
             return (
                 {"message": "Incorrect password, retry"},
                 401,

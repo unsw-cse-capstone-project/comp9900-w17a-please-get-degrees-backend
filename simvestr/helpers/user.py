@@ -61,7 +61,11 @@ def get_user_details(user: User):
     watch = get_watchlist(user)
     port = get_portfolio(user, averagemode="alltime")
     transact = get_transactions(user)
-    payload = dict(email=user.email_id)
+    payload = dict(
+        email=user.email_id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+    )
     payload.update(port)
     payload.update(watch)
     payload.update(transact)
