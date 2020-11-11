@@ -21,19 +21,21 @@ api = Namespace(
     description = "Back-end API User signup and authentication"
 )
 
-api.models[forgotuser_email_model.name] = forgotuser_email_model
+
 api.models[forgotuser_model.name] = forgotuser_model
+api.models[forgotuser_email_model.name] = forgotuser_email_model
 
 forgotuser_parser = reqparse.RequestParser()
 forgotuser_parser.add_argument("email_id", type=str)
 forgotuser_parser.add_argument("password", type=str)
 forgotuser_parser.add_argument("OTP", type=str)
 
-
 forgotuser_email_parser = reqparse.RequestParser()
 forgotuser_email_parser.add_argument("email_id", type=str)
 
 random_OTP = 1234
+
+
 @api.route("")
 class ForgotUser(Resource):
     @api.response(200, "Successful")
@@ -62,7 +64,7 @@ class ForgotUser(Resource):
             200,
         )
     
-    @api.doc(id="reset_user_password", model="Forgot User", body=forgotuser_model, description="Resets password for user using OTP")
+    @api.doc(id="reset_user_password", model="ForgotUser", body=forgotuser_model, description="Resets password for user using OTP")
     @api.expect(forgotuser_parser, validate=True)
     def put(self):
         args = forgotuser_parser.parse_args()

@@ -1,4 +1,4 @@
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, fields
 
 from simvestr.helpers.user import get_user_details
 from simvestr.models import User
@@ -16,12 +16,13 @@ class UsersQuery(Resource):
     def get(self):
         user = User.query.all()
         data = {u.id: dict
-        (email=u.email_id,
-         role=u.role,
-         fname=u.first_name,
-         lname=u.last_name,
-         validated=u.validated,
-         ) for u in user}
+                (
+                 email=u.email_id,
+                 role=u.role,
+                 fname=u.first_name,
+                 lname=u.last_name,
+                 validated=u.validated,
+                ) for u in user}
         payload = dict(
             data=data
         )
@@ -41,3 +42,17 @@ class UserQuery(Resource):
         user = get_user()
         data = get_user_details(user)
         return data, 200
+
+
+@api.route('/info')
+class UserInfoQuery(Resource):
+    @requires_auth
+    def get(self, ):
+        user = get_user()
+        return (
+                {"first_name": user.first_name,
+                 "last_name": user.last_name,
+                 "email_id": user.email_id,
+                 "message": "Authenticated with cookie set in browser"},
+                200,
+            )
