@@ -252,6 +252,10 @@ value_model = Model(
             description="Value of the trade or stock balance",
             example=500.0,
         ),
+        "return":fields.Float(
+            description="Absolute profit or loss of investment",
+            example=50.0
+        ),
         "buy": fields.Nested(
             buy_sell_model
         ),
