@@ -79,11 +79,11 @@ class TradeStock(Resource):
         if quantity > 0:  # check if user even has enough money to buy this stock quantity
             balance_adjustment = ((quote * quantity) + fee)
             if user.portfolio.balance - balance_adjustment < 0:
-                return abort(417, "Expectation Failed - Insufficient funds")
+                return abort(417, "Insufficient funds")
 
             variation, slippage = check_price(symbol, quote)
             if variation:
-                return abort(417, "Expectation Failed - Current price has changed, can't commit this transaction")
+                return abort(417, "Current price has changed, can't commit this transaction")
             if stock not in user.portfolio.stocks:
                 user.portfolio.stocks.append(stock)
         # --- Buy-ends --- #
@@ -93,14 +93,14 @@ class TradeStock(Resource):
             check_stock = stock_balance(user, symbol)
 
             if not check_stock:
-                return abort(417, "Expectation Failed - You currently don't own this stock")
+                return abort(417, "You currently don't own this stock")
 
             if check_stock[0] + quantity < 0:
-                return abort(417, "Expectation Failed - Insufficient quantity of stock to sell")
+                return abort(417, "Insufficient quantity of stock to sell")
 
             variation, slippage = check_price(symbol, quote)
             if variation:
-                return abort(416, "Requested Range Not Satisfiable - Current price has changed, can't commit this transaction")
+                return abort(416, "Current price has changed, can't commit this transaction")
 
             if check_stock[0] + quantity == 0:
                 user.portfolio.stocks.remove(stock)
