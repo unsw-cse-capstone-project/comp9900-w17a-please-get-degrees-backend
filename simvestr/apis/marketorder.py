@@ -4,8 +4,8 @@ Created on Mon Oct 14 11:23:31 2020
 
 @author: Kovid
 """
-
-from flask_restx import Resource, fields, reqparse, Namespace
+from flask import current_app
+from flask_restx import Resource, reqparse, Namespace
 
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.portfolio import stock_balance
@@ -38,11 +38,7 @@ def check_price(symbol, quote):
 
     current_quote = stock_details["quote"]["c"]
     cost_diff = abs(current_quote - quote)
-    allowed_cost_diff = 0.0005 * quote  # cost difference of 0.05%
-
-    print('current price quote:', quote)
-    print('actual price', current_quote)
-    print('price difference', cost_diff)
+    allowed_cost_diff = current_app.config["SLIPPAGE"] * quote  # cost difference of 0.05%
 
     # if the cost hasn't changed more than 0.05%
     # otherwise if quote is same as current price, commit transaction
