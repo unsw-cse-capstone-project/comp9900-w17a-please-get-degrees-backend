@@ -117,6 +117,11 @@ changenames_model = Model(
     },
 )
 
+user_info_model = changenames_model.clone(
+    "User Information",
+    forgotuser_email_model
+)
+
 login_model = Model(
     "Login",
     {
@@ -127,10 +132,7 @@ login_model = Model(
 
 signup_model = login_model.clone(
     "Signup",
-    {
-        "first_name": first_name,
-        "last_name": last_name,
-    },
+    changenames_model,
 )
 
 

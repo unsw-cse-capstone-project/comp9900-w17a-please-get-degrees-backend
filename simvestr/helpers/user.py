@@ -70,3 +70,10 @@ def get_user_details(user: User):
     payload.update(watch)
     payload.update(transact)
     return payload
+
+def get_info(user: User):
+    return dict(
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email_id
+    )
