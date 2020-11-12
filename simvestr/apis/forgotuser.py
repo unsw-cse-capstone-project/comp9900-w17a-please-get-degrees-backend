@@ -44,14 +44,15 @@ class ForgotUser(Resource):
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
     @api.doc(id="reset_user_password", model="Forgot User Email", description="Send OTP to registered email")
-    @api.expect(forgotuser_email_parser, validate=True)
+    @api.marshal_with(forgotuser_email_model)
+    @api.expect(forgotuser_email_parser, validate=True)@api.marshal_with(forgotuser_email_model)
     def get(self):
         args = forgotuser_email_parser.parse_args()
         email_id = (args.get("email")).lower()
         user = User.query.filter_by(email_id=email_id).first()
         if not user:
             return (
-            {"error": True, "message": "User not found"}, 
+            {"message": "User not found"}, 
             404,
         )
         
@@ -62,11 +63,12 @@ class ForgotUser(Resource):
         send_email(user.email_id, f"Forgot Password - OTP: {random_OTP}", message_content)
         print(f'\n\nOTP: {random_OTP}\n\n') # MAKE SURE TO TURN IT OFF BEFORE SUBMISSION
         return (
-            {"error": False, "message": "Email sent!"}, 
+            {"message": "Email sent!"}, 
             200,
         )
     
     @api.doc(id="reset_user_password", model="Forgot User", body=forgotuser_model, description="Resets password for user using OTP")
+    @api.marshal_with(forgotuser_model)
     @api.expect(forgotuser_parser, validate=True)
     def put(self):
         args = forgotuser_parser.parse_args()
@@ -76,19 +78,19 @@ class ForgotUser(Resource):
         user = User.query.filter_by(email_id=email_id).first()
         if not user:
             return (
-                {"error": True, "message": "User not found"}, 
+                {"message": "User not found"}, 
             404,
             )
         
         if len(password) < 8:
             return (
-                {"error": True, "message": "Password should be atleast 8 characters"}, 
+                {"message": "Password should be atleast 8 characters"}, 
                 411,
             )
         
         if " " in password:
             return (
-                {"error": True, "message": "Password cannot contain spaces", },
+                {"message": "Password cannot contain spaces", },
                 422,
             )
         
@@ -96,7 +98,7 @@ class ForgotUser(Resource):
         
         if one_time_pass != str(random_OTP):
             return (
-                {"error": True, "message": "The OTP you entered is incorrect!"}, 
+                {"message": "The OTP you entered is incorrect!"}, 
                 422,
             )
 
@@ -106,6 +108,6 @@ class ForgotUser(Resource):
         #sends a confirmation email to the user
         send_email(email_id, "Password updated successfully", message_content) 
         return (
-            {"error": False, "message": "Password updated!"}, 
+            {"message": "Password updated!"}, 
             200
         )
