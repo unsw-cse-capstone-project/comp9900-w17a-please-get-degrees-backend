@@ -103,7 +103,6 @@ watchlist_model = Model(
     "Watchlist", {"watchlist": fields.List(fields.Nested(watchlist_item_model)),}
 )
 
-
 market_order_model = Model(
     "Market Order",
     {
@@ -140,6 +139,18 @@ details_model = Model(
         ),
         "quote": fields.Nested(quote_model, skip_none=False),
     },
+)
+
+search_name_model = Model(
+    "Stock Name",
+    {
+        "symbol": symbol,
+        "display_symbol": fields.String(
+            description="The display symbol of the stock or crypto",
+            example="APPL"
+        ),
+        "name": stock_name,
+    }
 )
 
 buy_sell_model = Model(

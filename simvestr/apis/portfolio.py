@@ -1,4 +1,4 @@
-from flask_restx import Resource, Namespace, reqparse
+from flask_restx import Resource, Namespace, reqparse, abort
 
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.portfolio import get_portfolio, all_stocks_balance, get_stocks_owned, get_close_balance
@@ -76,14 +76,18 @@ portfolio_history_parser.add_argument(
 class PortfolioHistory(Resource):
     @requires_auth
     @api.response(200, "Successful")
+    @api.response(400, "Invalid Input")
     @api.expect(portfolio_history_parser)
     @api.doc(
         description="Show the user's current portfolio holdings and value",
-        model=portfolio_historic_model, #TODO
+        model=portfolio_historic_model,
     )
+    @api.marshal_with(portfolio_historic_model)
     def get(self):
         user = get_user()
         args = portfolio_history_parser.parse_args()
+        if args["number_of_days"] < 1:
+            return abort(400, "Number of days must be a non zero positive integer")
         history = get_close_balance(user, **args)
         return history, 200
 

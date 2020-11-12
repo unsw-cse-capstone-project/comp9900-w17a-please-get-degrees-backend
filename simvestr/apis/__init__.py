@@ -11,12 +11,11 @@ from .user import api as ns6
 from .search import api as ns7
 from .watchlist import api as ns8
 from .marketorder import api as ns9
-from .stocksowned import api as ns10
-from .portfolio import api as ns11
-from .balance import api as ns12
-from .transactions import api as ns13
-from .leaderboard import api as ns14
-from .exportfolio import api as ns15
+from .portfolio import api as ns10
+from .balance import api as ns11
+from .transactions import api as ns12
+from .leaderboard import api as ns13
+from .exportfolio import api as ns14
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 
@@ -38,9 +37,8 @@ api.add_namespace(ns6, path="/user")
 api.add_namespace(ns7, path="/search")
 api.add_namespace(ns8, path="/watchlist")
 api.add_namespace(ns9, path="/marketorder")
-api.add_namespace(ns10, path="/stocksowned")
-api.add_namespace(ns11, path="/portfolio")
-api.add_namespace(ns12, path="/balance")
-api.add_namespace(ns13, path="/transaction")
-api.add_namespace(ns14, path="/leaderboard")
-api.add_namespace(ns15, path="/exportfolio")
+api.add_namespace(ns10, path="/portfolio")
+api.add_namespace(ns11, path="/balance")
+api.add_namespace(ns12, path="/transaction")
+api.add_namespace(ns13, path="/leaderboard")
+api.add_namespace(ns14, path="/exportfolio")

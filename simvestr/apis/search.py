@@ -6,13 +6,14 @@ from flask_restx import Resource, Namespace, reqparse
 from simvestr.helpers.auth import requires_auth
 from simvestr.helpers.search import search, get_details
 from simvestr.models import Stock, db
-from simvestr.models.api_models import candle_model, details_model, quote_model
+from simvestr.models.api_models import candle_model, details_model, quote_model, search_name_model
 
 api = Namespace("search", description="Search stocks")
 
 api.models[quote_model.name] = quote_model
 api.models[candle_model.name] = candle_model
 api.models[details_model.name] = details_model
+api.models[search_name_model.name] = search_name_model
 
 
 @api.route("/exchange/<string:exchange>")
@@ -38,22 +39,18 @@ class StockDetails(Resource):
     @api.marshal_with(details_model)
     def get(self, stock_symbol):
         payload = get_details(stock_symbol.upper())
-        if payload:
-            return payload, 200
-        else:
-            return (
-                {
-                    "message": "Symbol not found. Incorrect symbol, check spelling.",
-                },
-                404,
-            )
+        return payload, 200
+
 
 
 @api.route("/<string:name>")
 class StockSearch(Resource):
     @api.doc(
+        description="Partial name search for stocks and crypto.",
+        model=search_name_model,
         params={"name": "The name or partial name of the stock symbol or company name"},
     )
+    @api.marshal_with(search_name_model)
     @requires_auth
     def get(self, name: str = "AAPL"):
         stock_q = Stock.query.filter(db.or_(

@@ -100,8 +100,10 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
         quote_df = pd.DataFrame(quote, columns=["symbol", "current"])
         quote_df.set_index(["symbol"], inplace=True)
         portfolio_df = balance_df.join(quote_df)
-        portfolio_df["value"] = portfolio_df.current * portfolio_df.quantity
-        p_value = portfolio_df.to_dict(orient="index",)
+
+        portfolio_df["value"] = portfolio_df.quote * portfolio_df.quantity
+        p_value = portfolio_df.reset_index().rename(columns={"index":"symbol"}).to_dict(orient="records")
+
     else:
         for stock, quant in balance.items():
             quote = search("quote", stock)
@@ -156,7 +158,7 @@ def get_close_balance(user: User, number_of_days=7):
     return payload
 
 
-def calculate_all_portfolios_values(query_limit=60):
+def calculate_all_portfolios_values(query_limit=60, new_day=None):
     # First, query only the stocks that are in users portfolios
     portfolio_stocks = Stock.query.join(Portfolio, Stock.portfolios).all()
     allowance_per_call = S_PER_MIN / query_limit
@@ -185,12 +187,22 @@ def calculate_all_portfolios_values(query_limit=60):
         portfolio = portfolio_value(user, use_stored=True)
         if not portfolio:
             continue
-        portfolio_df = pd.DataFrame.from_dict(portfolio, orient="index",)
+
+        portfolio_df = pd.DataFrame.from_records(portfolio, )
         investment_value = portfolio_df["value"].sum()
         cash_balance = user.portfolio.balance
-        portfolioprice = PortfolioPrice(
-            close_balance=cash_balance, investment_value=investment_value,
-        )
+        if new_day:
+            portfolioprice = PortfolioPrice(
+                close_balance=cash_balance,
+                investment_value=investment_value,
+                timestamp=new_day,
+            )
+        else:
+            portfolioprice = PortfolioPrice(
+                close_balance=cash_balance,
+                investment_value=investment_value,
+            )
+
         user.portfolio.portfolioprice.append(portfolioprice)
 
         db.session.commit()

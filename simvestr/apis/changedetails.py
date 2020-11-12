@@ -5,7 +5,7 @@ Created on Sun Oct 18 11:57:41 2020
 @author: Kovid
 """
 
-from flask_restx import Resource, reqparse, Namespace
+from flask_restx import Resource, reqparse, Namespace, abort
 
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.simvestr_email import send_email
@@ -40,6 +40,7 @@ changepwd_parser.add_argument("password", type=str)
 class ChangeNames(Resource):
     @api.response(200, "Successful")
     @api.doc(model="Change Names", body=changenames_model, description="Resets user's names")
+    @api.marshal_with(changenames_model)
     @api.expect(changenames_parser, validate=True)
     @requires_auth
     def put(self):
@@ -63,7 +64,7 @@ class ChangeNames(Resource):
             user.email_id, "User details have been changed", message_content
         )  # sends a confirmation email to the user
         return (
-            {"error": False, "message": "User details changed!"},
+            {"message": "User details changed!"},
             200
         )
 
@@ -74,6 +75,7 @@ class ChangePwd(Resource):
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
     @api.doc(model="Change Password", body=changepwd_model, description="Resets password")
+    @api.marshal_with(changepwd_model)
     @api.expect(changepwd_parser, validate=True)
     @requires_auth
     def put(self):
@@ -83,15 +85,13 @@ class ChangePwd(Resource):
         user = get_user()
             
         if len(password) < 8:
-            return (
-                {"error": True, "message": "Password should be at least 8 characters", },
-                411,
+            return abort(
+                411, "Password should be at least 8 characters"
             )
         
         if " " in password:
-            return (
-                {"error": True, "message": "Password cannot contain spaces", },
-                422,
+            return abort(
+                422, "Password cannot contain spaces"
             )
         
         change_password(user, password)
@@ -102,6 +102,6 @@ class ChangePwd(Resource):
             user.email_id, "User details have been changed", message_content
         )  
         return (
-            {"error": False, "message": "Password changed!"},
+            {"message": "Password changed!"},
             200
         )
