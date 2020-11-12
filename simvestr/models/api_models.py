@@ -203,6 +203,27 @@ watchlist_model = Model(
 )
 
 
+market_order_model = Model(
+    "Market Order",
+    {
+        "symbol": symbol,
+        "quote": current_price,
+        "trade_type": fields.String(
+            required=True,
+            description="Stock symbol for transaction",
+            example="buy",
+            enum=[
+                "buy",
+                "sell"
+            ]
+        ),
+        "quantity": fields.Integer(
+            required=True,
+            description="Quote price per share of stock",
+            example=5
+        ),
+    },
+)
 
 details_model = Model(
     "Stock Details",
