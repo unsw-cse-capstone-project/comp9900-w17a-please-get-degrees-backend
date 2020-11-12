@@ -1,6 +1,6 @@
 from simvestr.models import db
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import func, and_, join
+from sqlalchemy import func, and_, join, desc
 from flask import jsonify
 from flask_restx import Resource, reqparse, Namespace
 from sqlalchemy.sql import select
@@ -54,14 +54,26 @@ class PortfolioQuery(Resource):
     def get(self):
         user = get_user()
         portfolio_id = user.portfolio.id
+        
+        # get the balances of all the portfolios
         balances_sorted = get_ordered_portfolios()
-        pos = 1
-        while (balances_sorted[pos - 1]["portfolio"] != portfolio_id):
-            pos += 1
-        suffix = ORDINAL_SUFFIXES[min(pos % 10, 4)]
-        if 11 <= (pos % 100) <= 13:
+        
+        # get the value of the users portfolio
+        p = db.session.query(PortfolioPrice).filter(PortfolioPrice.portfolio_id == portfolio_id).order_by(PortfolioPrice.timestamp.desc()).first()
+        my_value = p.close_balance + p.investment_value
+
+        pos_screen = 0  # position that the portfolio will be displayed on the screen
+        pos_actual = -1 # actual position - maybe higher than displayed position if duplicate portfolio balances
+        while (balances_sorted[pos_screen]["portfolio"] != portfolio_id):
+             pos_screen += 1
+             if((pos_actual == -1) and (my_value == balances_sorted[pos_screen]["value"]) ) :
+                 pos_actual = pos_screen + 1
+        
+        # add the ordinal suffix to the actual position
+        suffix = ORDINAL_SUFFIXES[min(pos_actual % 10, 4)]
+        if 11 <= (pos_actual % 100) <= 13:
             suffix = "th"
-        return jsonify(str(pos) + suffix)
+        return jsonify({"nominal": pos_screen + 1, "ordinal": str(pos_actual) + suffix})
 
 
 @api.route("/all")
@@ -76,11 +88,16 @@ class TopInvestorsAll(Resource):
         users = []
         id_value_pos = {}
         portfolios = []
-        num_ports = len(balances_sorted)
+        num_ports = len(balances_sorted) # number of portfolios in the database
         if(num_ports > 0):
+            portfolio_position = 1
+            previous_value = -1 # store the previous portfolio value to check for same value portfolios
             for i in range(num_ports):
+                if (previous_value != balances_sorted[i]["value"]) :
+                    portfolio_position = i+1
+                previous_value = balances_sorted[i]["value"]
                 id_value_pos.update(
-                    {balances_sorted[i]["portfolio"]: [balances_sorted[i]["value"], i+1]})
+                    {balances_sorted[i]["portfolio"]: [balances_sorted[i]["value"], portfolio_position]})
                 users.append(balances_sorted[i]["portfolio"])
             for p in db.session.query(Portfolio).join(Portfolio.user).filter(Portfolio.id.in_(users)).all():
                 portfolios.append({"id": p.id, "position": id_value_pos[p.id][1], "user": p.user.first_name +
