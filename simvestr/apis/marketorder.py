@@ -51,6 +51,7 @@ def check_price(symbol, quote):
 @api.route("")
 class TradeStock(Resource):
     @api.response(200, "Successful")
+    @api.response(400, "Bad Request")
     @api.response(422, "Unprocessable Entity")
     @api.response(417, "Requested Range Not Satisfiable")
     @api.response(417, "Expectation Failed")
@@ -68,6 +69,10 @@ class TradeStock(Resource):
         user = get_user()  # get user details from token
         stock = Stock.query.filter_by(symbol=symbol).first()
         fee = 0
+
+        if quantity < 1:
+            return abort(400, f"Quantity should be an integer value greater than 0. Given {quantity}")
+
         quantity = -quantity if trade_type == "sell" else quantity
 
         # --- Buy --- #

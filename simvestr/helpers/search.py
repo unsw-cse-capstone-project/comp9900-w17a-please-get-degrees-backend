@@ -103,4 +103,6 @@ def get_details(symbol):
             **details,
             "quote": quote,
         }
+    else:
+        return abort(404, "Symbol not found. Please check your inputs.")
     return payload
