@@ -40,7 +40,7 @@ changepwd_parser.add_argument("password", type=str)
 class ChangeNames(Resource):
     @api.response(200, "Successful")
     @api.doc(model="Change Names", body=changenames_model, description="Resets user's names")
-    @api.marshal_with(changenames_model)
+    @api.marshal_with(changenames_model, code=200)
     @api.expect(changenames_parser, validate=True)
     @requires_auth
     def put(self):
@@ -59,14 +59,12 @@ class ChangeNames(Resource):
         portfolio.portfolio_name = user.first_name + '\'s Portfolio'
         db.session.commit()
 
-        message_content = "You have succesfully changed your personal details. Let us know if this wasn\'t you."
+        message_content = "You have successfully changed your personal details. Let us know if this wasn't you."
+        # sends a confirmation email to the user
         send_email(
             user.email_id, "User details have been changed", message_content
-        )  # sends a confirmation email to the user
-        return (
-            {"message": "User details changed!"},
-            200
         )
+        return 200
 
 
 @api.route('/changepwd')
@@ -75,7 +73,7 @@ class ChangePwd(Resource):
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
     @api.doc(model="Change Password", body=changepwd_model, description="Resets password")
-    @api.marshal_with(changepwd_model)
+    @api.marshal_with(changepwd_model, code=200)
     @api.expect(changepwd_parser, validate=True)
     @requires_auth
     def put(self):
@@ -96,12 +94,9 @@ class ChangePwd(Resource):
         
         change_password(user, password)
         
-        message_content = "You have succesfully changed your password. Let us know if this wasn\'t you."
+        message_content = "You have successfully changed your password. Let us know if this wasn't you."
         # sends a confirmation email to the user
         send_email(
             user.email_id, "User details have been changed", message_content
         )  
-        return (
-            {"message": "Password changed!"},
-            200
-        )
+        return 200
