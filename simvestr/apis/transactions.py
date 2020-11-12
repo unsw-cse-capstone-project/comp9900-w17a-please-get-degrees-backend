@@ -28,7 +28,7 @@ class TransactionsQuery(Resource):
         return data
 
 
-@api.route("/user")
+@api.route("/user/")
 class TransactionQuery(Resource):
     @api.response(200, "Success")
     @api.doc(
