@@ -5,7 +5,7 @@ Created on Sun Oct 18 11:57:41 2020
 @author: Kovid
 """
 
-from flask_restx import Resource, reqparse, Namespace
+from flask_restx import Resource, reqparse, Namespace, abort
 
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.simvestr_email import send_email
@@ -44,8 +44,8 @@ class ChangeNames(Resource):
     @requires_auth
     def put(self):
         args = changenames_parser.parse_args()
-        first_name = args["first_name"]
-        last_name = args["last_name"]
+        first_name = args.get("first_name")
+        last_name = args.get("last_name")
 
         user = get_user()
 
@@ -62,7 +62,10 @@ class ChangeNames(Resource):
         send_email(
             user.email_id, "User details have been changed", message_content
         )  # sends a confirmation email to the user
-        return 200
+        return (
+            {"message": "User details changed!"},
+            200
+        )
 
 
 @api.route('/changepwd')
@@ -78,27 +81,25 @@ class ChangePwd(Resource):
         password = args.get("password")
 
         user = get_user()
-            
+
         if len(password) < 8:
-            return (
-                {"error": True, "message": "Password should be at least 8 characters", },
-                411,
+            return abort(
+                411, "Password should be at least 8 characters"
             )
-        
+
         if " " in password:
-            return (
-                {"error": True, "message": "Password cannot contain spaces", },
-                422,
+            return abort(
+                422, "Password cannot contain spaces"
             )
-        
+
         change_password(user, password)
-        
+
         message_content = "You have succesfully changed your password. Let us know if this wasn\'t you."
         # sends a confirmation email to the user
         send_email(
             user.email_id, "User details have been changed", message_content
-        )  
+        )
         return (
-            {"error": False, "message": "Password changed!"},
+            {"message": "Password changed!"},
             200
         )
