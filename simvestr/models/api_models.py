@@ -237,6 +237,18 @@ details_model = Model(
     },
 )
 
+search_name_model = Model(
+    "Stock Name",
+    {
+        "symbol": symbol,
+        "display_symbol": fields.String(
+            description="The display symbol of the stock or crypto",
+            example="APPL"
+        ),
+        "name": stock_name,
+    }
+)
+
 buy_sell_model = Model(
     "Buy and Sell Model",
     {
