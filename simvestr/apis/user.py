@@ -32,6 +32,7 @@ class UsersQuery(Resource):
 @api.route('/details')
 class UserQuery(Resource):
     @api.response(200, "Success")
+    @api.response(401, "Unauthorised")
     @requires_auth
     @api.doc(
         model=user_details_model,
@@ -46,6 +47,8 @@ class UserQuery(Resource):
 
 @api.route('/info')
 class UserInfoQuery(Resource):
+    @api.response(200, "Success")
+    @api.response(401, "Unauthorised")
     @requires_auth
     def get(self, ):
         user = get_user()

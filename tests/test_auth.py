@@ -72,3 +72,17 @@ def test_login(client_new_user, email, password, message, code):
 
     assert response.get_json()["message"] == message
     assert response._status_code == code
+
+
+def test_logout(auth):
+    auth.sign_up()
+    auth.login()
+    auth.logout()
+
+    response = auth._client.get(
+        "/".join([API_URL, "user", "info"]),
+    )
+
+    assert response._status_code == 401
+
+

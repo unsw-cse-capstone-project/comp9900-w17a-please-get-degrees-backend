@@ -24,3 +24,5 @@ def test_user_balance(auth, ):
 
     assert response._status_code == 200
     assert response.get_json()["balance"] == 100000.0
+
+# def test_user
