@@ -4,7 +4,6 @@ Created on Mon Oct 14 11:23:31 2020
 
 @author: Kovid
 """
-from datetime import datetime
 
 from flask_restx import Resource, fields, reqparse, Namespace
 
@@ -12,7 +11,6 @@ from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.portfolio import stock_balance
 from simvestr.helpers.search import get_details
 from simvestr.models import db, Transaction, Stock
-from simvestr.apis.search import StockDetails
 from simvestr.models.api_models import market_order_model
 
 api = Namespace(
@@ -34,22 +32,23 @@ trade_parser.add_argument("quote", type=float)
 trade_parser.add_argument("trade_type", type=str)
 trade_parser.add_argument("quantity", type=int)
 
+
 def check_price(symbol, quote):
     stock_details = get_details(symbol.upper())
 
     current_quote = stock_details["quote"]["c"]
     cost_diff = abs(current_quote - quote)
-    allowed_cost_diff = 0.0005 * quote # cost difference of 0.05%
-    
+    allowed_cost_diff = 0.0005 * quote  # cost difference of 0.05%
+
     print('current price quote:', quote)
     print('actual price', current_quote)
     print('price difference', cost_diff)
-    
+
     # if the cost hasn't changed more than 0.05%
     # otherwise if quote is same as current price, commit transaction
-    if (cost_diff <= allowed_cost_diff or current_quote == quote) :
+    if cost_diff <= allowed_cost_diff or current_quote == quote:
         return False, cost_diff
-    
+
     return True, cost_diff
 
 
@@ -68,19 +67,19 @@ class TradeStock(Resource):
         quote = args.get("quote")
         trade_type = args.get("trade_type")
         quantity = args.get("quantity")
-        symbol = symbol.upper()  # TODO: Need wrapper function to automaticlly uppercase the input
+        symbol = symbol.upper()  # TODO: Need wrapper function to automatically uppercase the input
 
         user = get_user()  # get user details from token
         stock = Stock.query.filter_by(symbol=symbol).first()
         fee = 0
         quantity = -quantity if trade_type == "sell" else quantity
-        
+
         # --- Buy --- #
         if quantity > 0:  # check if user even has enough money to buy this stock quantity
             balance_adjustment = ((quote * quantity) + fee)
             if user.portfolio.balance - balance_adjustment < 0:
                 return {"message": "Expectation Failed - Insufficient funds"}, 417
-            
+
             variation, slippage = check_price(symbol, quote)
             if variation:
                 return {"message": "Expectation Failed - Current price has changed, can't commit this transaction"}, 417
@@ -97,10 +96,12 @@ class TradeStock(Resource):
 
             if check_stock[0] + quantity < 0:
                 return {"message": "Expectation Failed - Insufficient quantity of stock to sell"}, 417
-            
+
             variation, slippage = check_price(symbol, quote)
             if variation:
-                return {"message": "Requested Range Not Satisfiable - Current price has changed, can't commit this transaction"}, 416
+                return {
+                           "message": "Requested Range Not Satisfiable "
+                                      "- Current price has changed, can't commit this transaction"}, 416
 
             if check_stock[0] + quantity == 0:
                 user.portfolio.stocks.remove(stock)
@@ -124,6 +125,5 @@ class TradeStock(Resource):
 
         db.session.add(new_transaction)
         db.session.commit()
-
 
         return dict(symbol=symbol, quote=quote, quantity=quantity, slippage=slippage, ), 200
