@@ -238,6 +238,10 @@ buy_sell_model = Model(
         "weighted_average_fee": fields.Float(
             description="Weighted average of the fee's",
             example=3.5,
+        ),
+        "total": fields.Float(
+            desciption="Total value of transactions",
+            example=500.0
         )
     }
 )
@@ -288,9 +292,14 @@ portfolio_model = balance_model.clone(
             description="The sum of the current cash balance and the value of the current holdings",
             example=55500.0
         ),
+        "total_return": fields.Float(
+            description="Total portfolio return",
+            example=500.00
+        ),
         "portfolio": fields.List(
             fields.Nested(value_model, skip_none=False)
         ),
+
     },
 )
 
