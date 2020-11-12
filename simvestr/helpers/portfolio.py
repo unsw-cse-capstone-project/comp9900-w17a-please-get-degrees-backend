@@ -17,7 +17,7 @@ def weighted_avg(df: pd.DataFrame, grouped=False):
 
     grouped_df["weighted_average"] = grouped_df.total / grouped_df.quantity
     grouped_df["weighted_average_fee"] = grouped_df.fee / grouped_df.quantity
-    grouped_df = grouped_df[["weighted_average_fee", "weighted_average", ]]
+    grouped_df = grouped_df[["weighted_average_fee", "weighted_average", "total"]]
     return grouped_df
 
 
@@ -115,6 +115,9 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
             entry[trade_type] = {}
             if entry["symbol"] in stock_statistics:
                 entry[trade_type] = stock_statistics[entry["symbol"]]
+        entry["return"] = entry["value"] - entry["buy"]["total"]
+
+
 
     return p_value
 
@@ -125,6 +128,7 @@ def get_portfolio(user, averagemode):
         name=user.portfolio.portfolio_name,
         balance=user.portfolio.balance,
         total_value=sum([x["value"] for x in portfolio]),
+        total_return=sum([x["return"] for x in portfolio]),
         portfolio=portfolio,
     )
 

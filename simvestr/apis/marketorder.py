@@ -143,7 +143,6 @@ class TradeStock(Resource):
             return {"message": f"Invalid quantity. Quantity must be a non zero integer. Received {quantity}"}, 422
 
         stock.last_quote = quote
-#         stock.last_quote_time = datetime.utcfromtimestamp(timestamp)
 
         user.portfolio.balance -= balance_adjustment  # update user's balance after trade
         # -------------- Sell-ends ----------- #
