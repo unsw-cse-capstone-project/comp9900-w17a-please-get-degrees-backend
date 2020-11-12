@@ -42,10 +42,10 @@ class Signup(Resource):
     @api.marshal_with(signup_model)
     def post(self):
         args = signup_parser.parse_args()
-        email_id = (args.get("email")).lower()
-        password = args.get("password")
-        fname = args.get("first_name")
-        lname = args.get("last_name")
+        email_id = args["email"].lower()
+        password = args["password"]
+        fname = args["first_name"]
+        lname = args["last_name"]
 
         if len(email_id) < 1:
             return (

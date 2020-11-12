@@ -95,12 +95,6 @@ previous_close_price = fields.Float(
             example=101.0)
 
 # Models here
-forgotuser_email_model = Model(
-    "Forgot User Email",
-    {
-        "email": email
-    }
-)
 
 changepwd_model = Model(
     "Change Password",
@@ -119,7 +113,9 @@ changenames_model = Model(
 
 user_info_model = changenames_model.clone(
     "User Information",
-    forgotuser_email_model
+    {
+        "email": email
+    }
 )
 
 login_model = Model(
@@ -133,15 +129,6 @@ login_model = Model(
 signup_model = login_model.clone(
     "Signup",
     changenames_model,
-)
-
-
-
-forgotuser_model = login_model.clone(
-    "Forgot User",
-    {
-        "OTP": otp
-    }
 )
 
 
