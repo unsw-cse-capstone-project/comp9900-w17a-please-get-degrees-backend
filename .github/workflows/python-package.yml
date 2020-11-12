@@ -30,6 +30,10 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+    - name: Test with pytest
+          run: |
+            pytest -vh ./tests/
+
     - name: Run the package script
       run: |
         python setup.py sdist bdist_wheel
@@ -38,9 +42,7 @@ jobs:
       run: |
         pip install dist/simvestr-0.0.1.tar.gz
 
-    - name: Test with pytest
-      run: |
-        pytest -vh ./tests/
+
 
     - name: Commit build files
       run: |
