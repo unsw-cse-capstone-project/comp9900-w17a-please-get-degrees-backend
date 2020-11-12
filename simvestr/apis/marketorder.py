@@ -40,8 +40,8 @@ def check_price(symbol, quote):
     cost_diff = abs(current_quote - quote)
     allowed_cost_diff = current_app.config["SLIPPAGE"] * quote  # cost difference of 0.05%
 
-    # if the cost hasn't changed more than 0.05%
-    # otherwise if quote is same as current price, commit transaction
+    # if the cost hasn't changed more than 0.05% OR
+    # if quote is same as current price, commit transaction
     if cost_diff <= allowed_cost_diff or current_quote == quote:
         return False, cost_diff
 
@@ -53,7 +53,7 @@ class TradeStock(Resource):
     @api.response(200, "Successful")
     @api.response(400, "Bad Request")
     @api.response(422, "Unprocessable Entity")
-    @api.response(417, "Requested Range Not Satisfiable")
+    @api.response(416, "Requested Range Not Satisfiable")
     @api.response(417, "Expectation Failed")
     @api.doc(model="Market Order", body=market_order_model, description="Places a market order")
     @api.marshal_with(market_order_model, code=200)
