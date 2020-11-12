@@ -68,7 +68,7 @@ class Signup(Resource):
         
         if " " in password:
             return (
-                {"error": True, "message": "Password cannot contain spaces", },
+                {"message": "Password cannot contain spaces", },
                 422,
             )
 
