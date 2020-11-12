@@ -39,7 +39,7 @@ def get_ordered_portfolios():
         value = p.close_balance + p.investment_value
         close_balances.append(
             {"portfolio": p.portfolio_id, "value": value})
-    return sorted(close_balances, key=lambda i: i["value"], reverse=True)
+    return sorted(close_balances, key=lambda i: (i["value"],i['portfolio']), reverse=True)
 
 
 @ api.route("/position")
@@ -61,19 +61,29 @@ class PortfolioQuery(Resource):
         # get the value of the users portfolio
         p = db.session.query(PortfolioPrice).filter(PortfolioPrice.portfolio_id == portfolio_id).order_by(PortfolioPrice.timestamp.desc()).first()
         my_value = p.close_balance + p.investment_value
-
-        pos_screen = 0  # position that the portfolio will be displayed on the screen
-        pos_actual = -1 # actual position - maybe higher than displayed position if duplicate portfolio balances
-        while (balances_sorted[pos_screen]["portfolio"] != portfolio_id):
-             pos_screen += 1
-             if((pos_actual == -1) and (my_value == balances_sorted[pos_screen]["value"]) ) :
-                 pos_actual = pos_screen + 1
         
+        # find the position on the screen
+        pos_screen = 1
+        while (balances_sorted[pos_screen - 1]["portfolio"] != portfolio_id):
+            pos_screen += 1
+        
+        
+        # pos_screen = 1  # position that the portfolio will be displayed on the screen
+        # while (True) :
+        #     if (balances_sorted[pos_screen-1]["portfolio"] == portfolio_id):
+        #         break
+        #     pos_screen = pos_screen + 1
+        
+        # find actual position in the leaderboard - maybe higher than displayed position if duplicate portfolio balances
+        pos_actual = pos_screen
+        while( (pos_actual > 0) and (my_value == balances_sorted[pos_actual-1]["value"]) ) :
+            pos_actual -= 1
+        pos_actual += 1
         # add the ordinal suffix to the actual position
         suffix = ORDINAL_SUFFIXES[min(pos_actual % 10, 4)]
         if 11 <= (pos_actual % 100) <= 13:
             suffix = "th"
-        return jsonify({"nominal": pos_screen + 1, "ordinal": str(pos_actual) + suffix})
+        return jsonify({"nominal": pos_screen, "ordinal": str(pos_actual) + suffix})
 
 
 @api.route("/all")
