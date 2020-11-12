@@ -27,9 +27,16 @@ def test_user_change_details(auth, ):
     auth.first_name = change_names["first_name"]
     auth.last_name = change_names["last_name"]
 
+
     response = auth._client.put(
-        "/".join([API_URL, "changedetails", "changenames", ""]) ,
-        data=change_names
+        "/".join([API_URL, "changedetails", "changenames"]),
+        json=change_names
+    )
+
+    assert response._status_code == 200
+
+    response = auth._client.get(
+        "/".join([API_URL, "user", "info"])  # trailing empty space is to get around 308 error
     )
 
     assert response._status_code == 200

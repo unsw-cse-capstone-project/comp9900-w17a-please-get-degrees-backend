@@ -44,8 +44,8 @@ class ChangeNames(Resource):
     @requires_auth
     def put(self):
         args = changenames_parser.parse_args()
-        first_name = args.get("first_name")
-        last_name = args.get("last_name")
+        first_name = args["first_name"]
+        last_name = args["last_name"]
 
         user = get_user()
 
@@ -62,10 +62,7 @@ class ChangeNames(Resource):
         send_email(
             user.email_id, "User details have been changed", message_content
         )  # sends a confirmation email to the user
-        return (
-            {"error": False, "message": "User details changed!"},
-            200
-        )
+        return 200
 
 
 @api.route('/changepwd')

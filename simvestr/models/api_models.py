@@ -189,7 +189,6 @@ watchlist_model = Model(
     }
 )
 
-
 market_order_model = Model(
     "Market Order",
     {
