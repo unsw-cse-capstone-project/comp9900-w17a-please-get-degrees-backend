@@ -63,19 +63,18 @@ if __name__ == "__main__":
         sim_config = dict(
             duration=SIM_DURATION,
             interval=INTERVAL,
+            new_day=True,
         )
 
         app = create_app(sim_config=sim_config)
         db.init_app(app)
-
+        sim_config["app"] = app
         monitoring_thread = threading.Thread(
             target=update_portfolio,
-            kwargs=dict(
-                duration=SIM_DURATION,
-                interval=INTERVAL,
-                app=app,
-            )
+            kwargs=sim_config,
+            daemon=True
         )
+        monitoring_thread.start()
 
     # Run the app based on system specification        
     if sys.platform == "darwin" or sys.platform.lower() == "linux":
