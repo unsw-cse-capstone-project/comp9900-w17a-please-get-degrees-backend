@@ -15,8 +15,8 @@ RUN_COMMAND = "flask run"
 
 RUN_SETUP = False
 
-SIM_DURATION = timedelta(minutes=1)
-INTERVAL = timedelta(seconds=1)
+SIM_DURATION = timedelta(minutes=5)
+INTERVAL = timedelta(seconds=3)
 
 
 class ServiceExit(Exception):

@@ -145,6 +145,18 @@ def get_stocks_owned(user: User):
     )
     return payload
 
+
+def get_close_balance(user: User, number_of_days=7):
+    portfolios = user.portfolio.portfolioprice[-number_of_days:]
+    payload = dict(
+        close_balance=[p.close_balance for p in portfolios],
+        investment_value=[p.investment_value for p in portfolios],
+        total_value=[p.close_balance + p.investment_value for p in portfolios],
+        timestamp=[p.timestamp.timestamp() for p in portfolios],
+    )
+    return payload
+
+
 def calculate_all_portfolios_values(query_limit=60):
     # First, query only the stocks that are in users portfolios
     portfolio_stocks = Stock.query.join(Portfolio, Stock.portfolios).all()

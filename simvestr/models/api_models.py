@@ -322,8 +322,20 @@ portfolio_model = balance_model.clone(
         "portfolio": fields.List(
             fields.Nested(value_model, skip_none=False)
         ),
-
     },
+)
+
+portfolio_historic_model = Model(
+    "Historic Portfolios",
+    {
+        "close_balance": fields.List(close_price),
+        "investment_value": fields.List(fields.Float(
+            description="Closing investment value",
+            example=55000.0
+        )),
+        "timestamp": fields.List(timestamp),
+
+    }
 )
 
 user_model = Model(
