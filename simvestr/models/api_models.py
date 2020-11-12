@@ -281,3 +281,44 @@ user_details_model = user_model.inherit(
     watchlist_model,
     transactions_model,
 )
+
+leaderboard_position_model = Model(
+    "Leaderboard",
+    {
+        "nominal": fields.Integer(
+                    description="screen position after sorting in value order",
+                    example = 21,
+                ), 
+        "ordinal": fields.String(
+                    description="users actual position - not just screen position",
+                    example = "23rd",
+                ),
+    }
+)
+leaderboard_all_model = Model(
+    "Leaderboard",
+    {
+        "portfolios":[
+            {
+                "id": fields.Integer(
+                    description="portfolio id",
+                ), 
+                "position": fields.Integer(
+                    description="users actual position - not just screen position",
+                ),
+                "user": fields.String(
+                    description="porfolio users name (first + last)",
+                    example = "John Doe",
+                ), 
+                "name": fields.String(
+                    description="porfolio name",
+                    example = "John Doe's Portfolio",
+                ),  
+                "value": fields.Float(
+                    description="value of portfolio (cash balance + stock value",
+                    example = 230023.23,
+                ), 
+            }
+        ]
+    }
+)
