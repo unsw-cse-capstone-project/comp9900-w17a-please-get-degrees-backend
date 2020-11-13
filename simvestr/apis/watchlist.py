@@ -24,7 +24,7 @@ api.models[watchlist_model.name] = watchlist_model
 
 
 # Delete?
-@api.route('/')
+@api.route("")
 class Watchlist(Resource):
     # @api.param('watchlist_id', 'Stock or crypto symbol to be searched')
     @api.response(200, "Success")
