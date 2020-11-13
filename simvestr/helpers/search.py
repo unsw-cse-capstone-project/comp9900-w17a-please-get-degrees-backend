@@ -24,31 +24,51 @@ QUERYS = dict(
 )
 
 STOCK_TYPE_MAP = {True: "CRYPTO", False: "STOCK"}
-#
-# def get_unix_time(day="today"):
-#     if day=="today":
-#         date_to = datetime.datetime.now(datetime.timezone.utc)
-#         date_from = date_to - datetime.timedelta(days=1)
-#     # elif:
-#
-# def crypto_quote(symbol):
-#     token = f"&token={current_app.config['FINNHUB_API_KEY']}"
-#     query_string = QUERYS["crypto"]["candle"]
-#     arg = dict(
-#         symbol=symbol,
-#         resolution="D",
-#         to=,
-#         from=,
-#     )
-#     arg = "&".join([f"{k}={v}" for k, v in arg.items()])
-#     uri = f"{FINNHUB_BASE}{query_string}{symbol}{token}"
-#     r = requests.get(uri)
-#     r = r.json()
+
+
+def get_unix_time():
+
+    date_to = datetime.datetime.now(datetime.timezone.utc)
+    date_from = date_to - datetime.timedelta(days=2)
+
+    return date_from.timestamp(), date_to.timestamp()
+
+
+def crypto_quote(symbol):
+    token = f"&token={current_app.config['FINNHUB_API_KEY']}"
+    query_string = QUERYS["crypto"]["candle"]
+
+    date_from, date_to = get_unix_time()
+    arg = {
+        "symbol": symbol,
+        "resolution": "D",
+        "to": date_to,
+        "from": date_from,
+    }
+    arg = "&".join([f"{k}={v}" for k, v in arg.items()])
+    uri = f"{FINNHUB_BASE}{query_string}{arg}{token}"
+    r = requests.get(uri)
+    payload = r.json()
+
+    if payload["s"] == "no_data":
+        abort(404, "Symbol not found")
+
+    payload = {k: v[-1] for k,v in payload if k != "c"}
+
+
+    payload["pc"] = payload["c"][0]
+
+    payload["c"].pop(0)
+
+    return payload
+
 
 
 
 def finnhub_query(query: str, arg, stock_type="stock"):
     token = f"&token={current_app.config['FINNHUB_API_KEY']}"
+    if stock_type == "crypto" and query == "quote":
+        return crypto_quote(symbol=arg)
     try:
         query_string = QUERYS[stock_type][query]
     except ValueError as e:
@@ -78,30 +98,13 @@ def get_details(symbol):
 
     if stock:
         if stock.type == "crypto":
-            current_unix_time = datetime.datetime.now().timestamp()
-            current_price_quote_args = {
-                "symbol": symbol,
-                "resolution": "1",
-                "to": int(current_unix_time),
-                "from": int(current_unix_time - datetime.timedelta(minutes=1).total_seconds()),
-            }
-            previous_price_quote_args = {
-                "symbol": symbol,
-                "resolution": "D",
-                "to": int(current_unix_time - datetime.timedelta(days=1).total_seconds()),
-                "from": int(current_unix_time - datetime.timedelta(days=2).total_seconds()),
-            }
             details = dict(
                 exchange=stock.exchange,
                 type=stock.type,
                 name=stock.name,
                 symbol=symbol,
             )
-            quote = search(source_api="finnhub", query="candle", arg=current_price_quote_args)
-            pc_quote = search(source_api="finnhub", query="candle", arg=previous_price_quote_args)
-            if quote:
-                quote = {k: v[0] for k, v in quote.items()}
-                quote["pc"] = pc_quote["c"][0]
+            quote = search(source_api="finnhub", query="quote", arg=symbol)
         else:
             details = search(query="profile", stock_type="stock", arg=symbol)
             if details:
@@ -131,7 +134,12 @@ def get_details(symbol):
             db.session.add(stock)
             db.session.commit()
         else:
-            details = search(query="profile", stock_type="crypto", arg=symbol)
+            quote = search(query="quote", stock_type="crypto", arg=symbol)
+            if quote:
+                details = dict(
+                    type="crypto",
+                    symbol=symbol,
+                )
 
     if details and quote:  # Gives an error - local variable 'details' referenced before assignment
         return {

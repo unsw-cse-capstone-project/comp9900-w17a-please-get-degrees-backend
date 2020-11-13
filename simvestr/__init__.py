@@ -102,7 +102,7 @@ def create_app(test_config=None, sim_config=None, run_setup=False):
 
     update_config = dict(
         duration=datetime.timedelta(weeks=10000),
-        interval=datetime.timedelta(days=1),
+        interval=datetime.timedelta(seconds=2),
     )
     delay = get_delay()
     daily_update_thread = threading.Timer(

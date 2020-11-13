@@ -25,6 +25,8 @@ api.models[buy_sell_model.name] = buy_sell_model
 api.models[portfolio_model.name] = portfolio_model
 api.models[portfolio_historic_model.name] = portfolio_historic_model
 api.models[portfolios_historic_model.name] = portfolios_historic_model
+api.models[stock_owned_model.name] = stock_owned_model
+api.models[stocks_owned_model.name] = stocks_owned_model
 
 portfolio_query_parser = reqparse.RequestParser()
 portfolio_query_parser.add_argument(
