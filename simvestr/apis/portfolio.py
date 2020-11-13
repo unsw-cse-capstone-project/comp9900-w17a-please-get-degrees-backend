@@ -18,6 +18,7 @@ from simvestr.models.api_models import (
     stock_owned_model,
     portfolio_historic_model,
     portfolios_historic_model,
+    portfolios_simulate_model,
 )
 
 api = Namespace("portfolios", description="Api for viewing Portfolios")
@@ -27,6 +28,7 @@ api.models[buy_sell_model.name] = buy_sell_model
 api.models[portfolio_model.name] = portfolio_model
 api.models[portfolio_historic_model.name] = portfolio_historic_model
 api.models[portfolios_historic_model.name] = portfolios_historic_model
+api.models[portfolios_simulate_model.name] = portfolios_simulate_model
 api.models[stock_owned_model.name] = stock_owned_model
 api.models[stocks_owned_model.name] = stocks_owned_model
 
@@ -112,16 +114,16 @@ class PortfolioSimulation(Resource):
     @api.response(400, "Invalid Input")
     @api.doc(
         description="Show the user's current portfolio holdings and value",
-        model=portfolios_historic_model,
+        model=portfolios_simulate_model,
     )
-    @api.marshal_with(portfolios_historic_model)
+    @api.marshal_with(portfolios_simulate_model)
     def get(self):
         user = get_user()
         args = simulate_parser.parse_args()
-
-        if args["date_from"] > args["date_to"]:
-            return abort(400, "date_from must be a date at least 1 day before date_to. Check your inputs.")
-        elif args["date_to"] - args["date_from"] < timedelta(days=1).total_seconds():
-            return abort(400, "date_from must be a date at least 1 day before date_to. Check your inputs.")
+        if args["date_from"] and args["date_to"]:
+            if args["date_from"] > args["date_to"]:
+                return abort(400, "date_from must be a date at least 1 day before date_to. Check your inputs.")
+            elif args["date_to"] - args["date_from"] < timedelta(days=1).total_seconds():
+                return abort(400, "date_from must be a date at least 1 day before date_to. Check your inputs.")
         payload = simulate(user=user, **args)
         return {"simulation": payload}, 200

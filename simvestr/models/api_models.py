@@ -232,6 +232,12 @@ portfolios_historic_model = Model(
     {"history": fields.List(fields.Nested(portfolio_historic_model, skip_none=False))},
 )
 
+portfolios_simulate_model = Model(
+    "Simulated Porfolio Performance",
+    {"simulation": fields.List(fields.Nested(portfolio_historic_model, skip_none=False))},
+
+)
+
 user_model = Model(
     "User", {"email": email, "first_name": first_name, "last_name": last_name,}
 )
