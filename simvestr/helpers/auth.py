@@ -66,7 +66,7 @@ def requires_auth(f):
         arg = token_parser.parse_args()  # From http cookies
         token = arg.get("token")
         try:
-            user = auth.validate_token(token)
+            auth.validate_token(token)
         except Exception as e:
             abort(401, e)
         return f(*args, **kwargs)
