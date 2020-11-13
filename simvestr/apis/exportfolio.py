@@ -9,8 +9,7 @@ from flask_restx import Resource, Namespace
 from flask import after_this_request, send_from_directory, make_response
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.models import Stock
-from simvestr.apis.portfolio import PortfolioQuery
-from simvestr.helpers.portfolio import portfolio_value
+from simvestr.helpers.portfolio import portfolio_value, get_portfolio
 import xlsxwriter
 
 api = Namespace(
@@ -24,7 +23,8 @@ api = Namespace(
     description="Back-end API for exporting portfolio to csv file",
 )
 
-#TODO: Move to helpers
+
+# TODO: Move to helpers
 def create_csv(file_path, file_basename, user, portfolio_details, portfolio_value_user):
     workbook = xlsxwriter.Workbook(f"{file_path}/{file_basename}")
     worksheet = workbook.add_worksheet()
@@ -76,25 +76,27 @@ def create_csv(file_path, file_basename, user, portfolio_details, portfolio_valu
     worksheet.write(f"G{row}", "Value", stock_heading_format)
     worksheet.write(f"H{row}", "Weighted Avg Fee", stock_heading_format)
     worksheet.write(f"I{row}", "Weighted Average", stock_heading_format)
+    worksheet.write(f"J{row}", "Return", stock_heading_format)
 
     for stock_dict in portfolio_value_user:
         row += 1
-        stock = Stock.query.filter_by(symbol=stock_dict["stock"]).first()
+        stock = Stock.query.filter_by(symbol=stock_dict["symbol"]).first()
         worksheet.write(f"C{row}", f"{stock.name}")
-        worksheet.write(f"D{row}", f'{stock_dict["stock"]}')
+        worksheet.write(f"D{row}", f'{stock_dict["symbol"]}')
         worksheet.write(f"E{row}", f'{stock_dict["quantity"]}')
-        if stock_dict["quote"] < stock_dict["buy"]["weighted_average"]:
-            worksheet.write(f"F{row}", f'{stock_dict["quote"]}', format1)
+        if stock_dict["current"] < stock_dict["buy"]["weighted_average"]:
+            worksheet.write(f"F{row}", f'{stock_dict["current"]}', format1)
             worksheet.write(
                 f"I{row}", f'{stock_dict["buy"]["weighted_average"]}', format2
             )
         else:
-            worksheet.write(f"F{row}", f'{stock_dict["quote"]}', format2)
+            worksheet.write(f"F{row}", f'{stock_dict["current"]}', format2)
             worksheet.write(
                 f"I{row}", f'{stock_dict["buy"]["weighted_average"]}', format1
             )
         worksheet.write(f"G{row}", f'{stock_dict["value"]}')
         worksheet.write(f"H{row}", f'{stock_dict["buy"]["weighted_average_fee"]}')
+        worksheet.write(f"J{row}", f'{stock_dict["return"]}')
 
     workbook.close()
 
@@ -105,8 +107,11 @@ class ExportPortfolio(Resource):
     @requires_auth
     def get(self):
         user = get_user()  # get user details from token
-        portfolio_details = PortfolioQuery.get(user.id)[0]
+        portfolio_details = get_portfolio(user, "moving")
         portfolio_value_user = portfolio_value(user)
+
+        print('\n\nportfolio_details', portfolio_details, '\n\n')
+        print('\n\nportfolio_value_user', portfolio_value_user, '\n\n')
 
         file_basename = f'{portfolio_details["name"]}.xlsx'
         curr_dir = Path.cwd()
@@ -121,8 +126,8 @@ class ExportPortfolio(Resource):
             response = make_response(send_from_directory(directory=file_path, filename=file_basename, as_attachment=True))
             response.headers['export'] = 'portfolio'
             return response
-        
+
         return (
-            {"message": "Portfolio downloaded",},
+            {"message": "Portfolio downloaded", },
             200,
         )
