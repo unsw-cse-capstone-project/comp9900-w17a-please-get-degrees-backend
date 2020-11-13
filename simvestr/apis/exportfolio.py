@@ -110,9 +110,6 @@ class ExportPortfolio(Resource):
         portfolio_details = get_portfolio(user, "moving")
         portfolio_value_user = portfolio_value(user)
 
-        print('\n\nportfolio_details', portfolio_details, '\n\n')
-        print('\n\nportfolio_value_user', portfolio_value_user, '\n\n')
-
         file_basename = f'{portfolio_details["name"]}.xlsx'
         curr_dir = Path.cwd()
         file_path = curr_dir / "resources"
