@@ -120,11 +120,6 @@ market_order_model = Model(
         "quantity": fields.Integer(
             required=True, description="Quote price per share of stock", example=5
         ),
-        # "slippage": fields.Float(
-        #     required=True,
-        #     description="Slippage from actual price",
-        #     example=1.2
-        # )
     },
 )
 
