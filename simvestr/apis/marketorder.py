@@ -85,11 +85,8 @@ class TradeStock(Resource):
             if user.portfolio.balance - balance_adjustment < 0:
                 return abort(417, "Insufficient funds")
 
-
-
             if stock not in user.portfolio.stocks:
                 user.portfolio.stocks.append(stock)
-        # --- Buy-ends --- #
 
         # --- Sell --- #
         elif quantity < 0:  # check if user owns this stock first, then the quantity he's
