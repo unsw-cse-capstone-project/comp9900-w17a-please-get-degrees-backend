@@ -146,11 +146,10 @@ search_name_model = Model(
     {
         "symbol": symbol,
         "display_symbol": fields.String(
-            description="The display symbol of the stock or crypto",
-            example="APPL"
+            description="The display symbol of the stock or crypto", example="APPL"
         ),
         "name": stock_name,
-    }
+    },
 )
 
 buy_sell_model = Model(
@@ -210,14 +209,24 @@ portfolio_model = balance_model.clone(
 )
 
 portfolio_historic_model = Model(
-    "Historic Portfolios",
+    "Historic Portfolio",
     {
-        "close_balance": fields.List(close_price),
-        "investment_value": fields.List(
-            fields.Float(description="Closing investment value", example=55000.0)
+        "close_balance": fields.Float(
+            description="Closing cash balance", example=45000
         ),
-        "timestamp": fields.List(timestamp),
+        "investment_value": fields.Float(
+            description="Closing investment value", example=55000
+        ),
+        "total_value": fields.Float(
+            descripton="Total investment value", example=100000
+        ),
+        "timestamp": timestamp,
     },
+)
+
+portfolios_historic_model = Model(
+    "Historic Portfolios",
+    {"history": fields.List(fields.Nested(portfolio_historic_model, skip_none=False))},
 )
 
 user_model = Model(
