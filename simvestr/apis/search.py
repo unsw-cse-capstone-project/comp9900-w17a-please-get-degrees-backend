@@ -15,16 +15,6 @@ api.models[candle_model.name] = candle_model
 api.models[details_model.name] = details_model
 api.models[search_name_model.name] = search_name_model
 
-
-@api.route("/exchange/<string:exchange>")
-class ExchangeList(Resource):
-
-    @requires_auth
-    def get(self, exchange: str = "US"):
-        uri = search(source_api="finnhub", query="exchange", arg=exchange)
-        return uri
-
-
 @api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
     @requires_auth
@@ -61,18 +51,6 @@ class StockSearch(Resource):
             dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
             for s in stock_q
         ]
-
-
-@api.route("/symbols")
-class StockSymbols(Resource):
-    @requires_auth
-    def get(self):
-        stock_q = Stock.query.all()
-        return [
-            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
-            for s in stock_q
-        ]
-
 
 candle_parser = reqparse.RequestParser()
 candle_parser.add_argument("symbol", type=str, required=True, help="Stock symbol to search.")
