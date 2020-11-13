@@ -29,7 +29,7 @@ class PortfolioPriceUsersQuery(Resource):
         return payload
 
 
-@api.route("/user/")
+@api.route("/user")
 @api.doc(
     description="Query user's current cash balance"
 )
