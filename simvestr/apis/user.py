@@ -9,26 +9,6 @@ api = Namespace('view user details', description='Demo api for querying users')
 api.models[user_model.name] = user_model
 api.models[user_info_model.name] = user_info_model
 api.models[user_details_model.name] = user_details_model
-#TODO: Fix user details swagger model
-
-@api.deprecated
-@api.route('/all')
-class UsersQuery(Resource):
-    @requires_auth
-    def get(self):
-        user = User.query.all()
-        data = {u.id: dict
-                (
-                 email=u.email_id,
-                 role=u.role,
-                 fname=u.first_name,
-                 lname=u.last_name,
-                 validated=u.validated,
-                ) for u in user}
-        payload = dict(
-            data=data
-        )
-        return payload
 
 
 @api.route('/details')

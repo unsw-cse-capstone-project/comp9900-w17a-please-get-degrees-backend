@@ -38,8 +38,7 @@ class Signup(Resource):
     @api.response(403, "Already exists")
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
-    @api.doc(id="create_new_user", model="Signup", body=signup_model, description="Creates a new user")
-    @api.marshal_with(signup_model)
+    @api.doc(id="create_new_user",body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
         email_id = args["email"].lower()
