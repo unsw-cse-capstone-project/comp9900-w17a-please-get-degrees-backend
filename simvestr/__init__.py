@@ -36,37 +36,12 @@ def create_app(test_config=None, sim_config=None, run_setup=False):
     # create and configure the app
 
     app = Flask(__name__, instance_relative_config=True)
-    db_path = Path(app.instance_path) / "simvestr.db"
-    app.config.from_mapping(
-        SECRET_KEY="dev",
-        DATABASE=db_path,
-        SQLALCHEMY_DATABASE_URI="sqlite:///"+ str(db_path),
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    )
-
-    if not db_path.is_file() or run_setup:
-        print("Aah new installation!")
-        curr_dir = Path(__file__).parent.parent
-        input_data = curr_dir / "resources" / "test_data_user.xlsx"
-        setup_new_db(app, input_data)
-    else:
-        print("Database file found, won\"t reset the db!")
 
     config_yml = load_yaml_config()
     app.config["FINNHUB_API_KEY"] = config_yml["FINNHUB_API_KEY"]
     app.config["START_BALANCE"] = config_yml["START_BALANCE"]
     app.config["SLIPPAGE"] = config_yml["SLIPPAGE"]
     app.config["VALID_CHARS"] = config_yml["VALID_CHARS"]
-
-    from simvestr.models import db
-
-    db.init_app(app)
-
-    from simvestr.apis import blueprint as api
-
-    app.register_blueprint(api)
-
-    CORS(app, supports_credentials=True)
 
     is_test = (test_config is not None)
     is_sim = (sim_config is None)
@@ -81,6 +56,33 @@ def create_app(test_config=None, sim_config=None, run_setup=False):
         app.config.from_mapping(test_config)
     elif is_test:
         app.config.from_mapping(test_config)
+    else:
+        db_path = Path(app.instance_path) / "simvestr.db"
+        app.config.from_mapping(
+            SECRET_KEY="dev",
+            DATABASE=db_path,
+            SQLALCHEMY_DATABASE_URI="sqlite:///" + str(db_path),
+            SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        )
+
+        if not db_path.is_file() or run_setup:
+            print("Aah new installation!")
+            curr_dir = Path(__file__).parent.parent
+            input_data = curr_dir / "resources" / "test_data_user.xlsx"
+            setup_new_db(app, input_data)
+        else:
+            print("Database file found, won\"t reset the db!")
+
+    from simvestr.models import db
+
+    db.init_app(app)
+
+    from simvestr.apis import blueprint as api
+
+    app.register_blueprint(api)
+
+    CORS(app, supports_credentials=True)
+
     # ensure the instance folder exists
     try:
         Path(app.instance_path).mkdir(exist_ok=True)
