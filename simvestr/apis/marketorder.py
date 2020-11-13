@@ -32,7 +32,7 @@ trade_parser.add_argument("quote", type=float)
 trade_parser.add_argument("trade_type", type=str)
 trade_parser.add_argument("quantity", type=int)
 
-
+#TODO: Move to helpers
 def check_price(symbol, quote):
     stock_details = get_details(symbol.upper())
 
@@ -70,6 +70,10 @@ class TradeStock(Resource):
         stock = Stock.query.filter_by(symbol=symbol).first()
         fee = 0
 
+        variation, slippage = check_price(symbol, quote)
+        if variation:
+            return abort(417, "Current price has changed, can't commit this transaction")
+
         if quantity < 1:
             return abort(400, f"Quantity should be an integer value greater than 0. Given {quantity}")
 
@@ -81,12 +85,8 @@ class TradeStock(Resource):
             if user.portfolio.balance - balance_adjustment < 0:
                 return abort(417, "Insufficient funds")
 
-            variation, slippage = check_price(symbol, quote)
-            if variation:
-                return abort(417, "Current price has changed, can't commit this transaction")
             if stock not in user.portfolio.stocks:
                 user.portfolio.stocks.append(stock)
-        # --- Buy-ends --- #
 
         # --- Sell --- #
         elif quantity < 0:  # check if user owns this stock first, then the quantity he's
@@ -97,10 +97,6 @@ class TradeStock(Resource):
 
             if check_stock[0] + quantity < 0:
                 return abort(417, "Insufficient quantity of stock to sell")
-
-            variation, slippage = check_price(symbol, quote)
-            if variation:
-                return abort(416, "Current price has changed, can't commit this transaction")
 
             if check_stock[0] + quantity == 0:
                 user.portfolio.stocks.remove(stock)

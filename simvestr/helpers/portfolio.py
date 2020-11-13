@@ -101,7 +101,7 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
         quote_df.set_index(["symbol"], inplace=True)
         portfolio_df = balance_df.join(quote_df)
 
-        portfolio_df["value"] = portfolio_df.quote * portfolio_df.quantity
+        portfolio_df["value"] = portfolio_df.current * portfolio_df.quantity
         p_value = (
             portfolio_df.reset_index()
             .rename(columns={"index": "symbol"})
