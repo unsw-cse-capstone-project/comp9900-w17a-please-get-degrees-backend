@@ -44,7 +44,7 @@ class Watchlist(Resource):
 
 
 
-@api.route('/symbol/<string:symbol>')
+@api.route('/<string:symbol>')
 class WatchlistPost(Resource):
     # @api.param('symbol', 'Stock or crypto symbol to be searched')
     @api.marshal_with(watchlist_item_model, envelope='resource')
