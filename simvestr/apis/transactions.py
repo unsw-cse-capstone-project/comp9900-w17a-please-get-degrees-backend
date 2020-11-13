@@ -18,17 +18,8 @@ api = Namespace(
 api.models[transaction_model.name] = transaction_model
 api.models[transactions_model.name] = transactions_model
 
-@api.deprecated
+
 @api.route("")
-class TransactionsQuery(Resource):
-    @requires_auth
-    def get(self):
-        user = get_user()
-        data = get_transactions(user)
-        return data
-
-
-@api.route("/user/")
 class TransactionQuery(Resource):
     @api.response(200, "Success")
     @api.doc(
