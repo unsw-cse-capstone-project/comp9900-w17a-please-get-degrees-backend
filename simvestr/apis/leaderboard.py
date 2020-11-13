@@ -62,7 +62,7 @@ class PortfolioQuery(Resource):
         balances_sorted = get_ordered_portfolios()
         
         # get the value of the users portfolio
-        p = db.session.query(PortfolioPrice).filter(PortfolioPrice.portfolio_id == portfolio_id).order_by(PortfolioPrice.timestamp.desc()).first()
+        p = PortfolioPrice.query.filter(PortfolioPrice.portfolio_id == portfolio_id).order_by(PortfolioPrice.timestamp.desc()).first()
         my_value = p.close_balance + p.investment_value
         
         # find the position on the screen
