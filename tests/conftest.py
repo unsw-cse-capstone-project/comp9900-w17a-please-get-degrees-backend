@@ -21,7 +21,8 @@ def app():
     test_config = dict(
         TESTING=True,
         DATABASE=db_path.with_suffix(".sqlite"),
-        SQLALCHEMY_DATABASE_URI=f"sqlite:///{db_path}"
+        SQLALCHEMY_DATABASE_URI=f"sqlite:///{db_path}",
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
 
     app = create_app(test_config)
@@ -112,6 +113,12 @@ def client_new_user(client):
     return client
 
 
+def get_quote(client, symbol: str):
+    return client.get(
+        "/".join([API_URL, "search", "details", f"{symbol}"]),
+    ).json
+
+
 class NewUser(AuthActions):
     def __init__(self, client, email="test@test.com", password="pass1234", first_name="test_first",
                  last_name="test_last"):
@@ -120,9 +127,10 @@ class NewUser(AuthActions):
         self.sign_up()
         self.login()
 
-    def buy(self, symbol="AAPL", quote=None, quantity=15, ):
+    def buy(self, symbol: str = "AAPL", quote=None, quantity=15, ):
         if not quote:
-            quote = search(query="quote", arg=symbol)
+            quote = get_quote(self._client, symbol)
+
         buy = {
             "symbol": symbol,
             "quote": quote,
@@ -137,7 +145,7 @@ class NewUser(AuthActions):
 
     def sell(self, symbol="AAPL", quote=None, quantity=1, ):
         if not quote:
-            quote = search(query="quote", arg=symbol)
+            quote = get_quote(self._client, symbol)
         sell = {
             "symbol": symbol,
             "quote": quote,
