@@ -11,6 +11,7 @@ api.models[user_info_model.name] = user_info_model
 api.models[user_details_model.name] = user_details_model
 #TODO: Fix user details swagger model
 
+@api.deprecated
 @api.route('/all')
 class UsersQuery(Resource):
     @requires_auth
