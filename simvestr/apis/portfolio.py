@@ -88,8 +88,20 @@ class PortfolioHistory(Resource):
 
 
 simulate_parser = reqparse.RequestParser()
-simulate_parser.add_argument("from", dest="date_from", type=int, help="UNIX timestamp. Interval initial value.")
-simulate_parser.add_argument("to", dest="date_to", type=int, help="UNIX timestamp. Interval end value.")
+simulate_parser.add_argument(
+    "from",
+    dest="date_from",
+    type=int,
+    help="UNIX timestamp. Date to simulate from. If not given, default is 4 weeks before date_to."
+)
+simulate_parser.add_argument(
+    "to",
+    dest="date_to",
+    type=int,
+    help=("UNIX timestamp. Date to simulate to. If not given, default is current date if the current date is after "
+          "the market close time. If the date_to is before the close time, date_to is the yesterday at market close "
+          "time")
+)
 
 
 @api.route("/simulate")
@@ -100,9 +112,9 @@ class PortfolioSimulation(Resource):
     @api.response(400, "Invalid Input")
     @api.doc(
         description="Show the user's current portfolio holdings and value",
-        # model=portfolios_historic_model,
+        model=portfolios_historic_model,
     )
-    # @api.marshal_with(portfolios_historic_model)
+    @api.marshal_with(portfolios_historic_model)
     def get(self):
         user = get_user()
         args = simulate_parser.parse_args()
