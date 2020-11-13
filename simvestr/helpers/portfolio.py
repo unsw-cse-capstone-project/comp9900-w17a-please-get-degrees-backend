@@ -102,7 +102,11 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
         portfolio_df = balance_df.join(quote_df)
 
         portfolio_df["value"] = portfolio_df.current * portfolio_df.quantity
-        p_value = portfolio_df.reset_index().rename(columns={"index":"symbol"}).to_dict(orient="records")
+        p_value = (
+            portfolio_df.reset_index()
+            .rename(columns={"index": "symbol"})
+            .to_dict(orient="records")
+        )
 
     else:
         for stock, quant in balance.items():
@@ -150,10 +154,15 @@ def get_stocks_owned(user: User):
 def get_close_balance(user: User, number_of_days=7):
     portfolios = user.portfolio.portfolioprice[-number_of_days:]
     payload = dict(
-        close_balance=[p.close_balance for p in portfolios],
-        investment_value=[p.investment_value for p in portfolios],
-        total_value=[p.close_balance + p.investment_value for p in portfolios],
-        timestamp=[p.timestamp.timestamp() for p in portfolios],
+        history=[
+            dict(
+                close_balance=p.close_balance,
+                investment_value=p.investment_value,
+                total_value=(p.close_balance + p.investment_value),
+                timestamp=int(p.timestamp.timestamp()),
+            )
+            for p in portfolios
+        ]
     )
     return payload
 
@@ -188,7 +197,7 @@ def calculate_all_portfolios_values(query_limit=60, new_day=None):
         if not portfolio:
             continue
 
-        portfolio_df = pd.DataFrame.from_records(portfolio, )
+        portfolio_df = pd.DataFrame.from_records(portfolio,)
         investment_value = portfolio_df["value"].sum()
         cash_balance = user.portfolio.balance
         if new_day:
@@ -199,8 +208,7 @@ def calculate_all_portfolios_values(query_limit=60, new_day=None):
             )
         else:
             portfolioprice = PortfolioPrice(
-                close_balance=cash_balance,
-                investment_value=investment_value,
+                close_balance=cash_balance, investment_value=investment_value,
             )
 
         user.portfolio.portfolioprice.append(portfolioprice)
