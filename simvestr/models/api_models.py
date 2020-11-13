@@ -281,3 +281,12 @@ leaderboard_all_model = Model(
     }
 )
 
+
+
+stock_owned_model = Model(
+    "Stock Owned", {"symbol": symbol, "quantity": simple_quantity,}
+)
+
+stocks_owned_model = Model(
+    "Stocks Owned", {"stocksowned": fields.List(fields.Nested(stock_owned_model))}
+)
