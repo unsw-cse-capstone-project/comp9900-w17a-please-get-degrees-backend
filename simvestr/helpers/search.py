@@ -1,6 +1,10 @@
+import requests
+import datetime
+
 from flask import current_app
 from flask_restx import abort
-import requests
+
+from simvestr.models import Stock, db
 
 FINNHUB_BASE = "https://finnhub.io/api/v1/"
 
@@ -20,6 +24,27 @@ QUERYS = dict(
 )
 
 STOCK_TYPE_MAP = {True: "CRYPTO", False: "STOCK"}
+#
+# def get_unix_time(day="today"):
+#     if day=="today":
+#         date_to = datetime.datetime.now(datetime.timezone.utc)
+#         date_from = date_to - datetime.timedelta(days=1)
+#     # elif:
+#
+# def crypto_quote(symbol):
+#     token = f"&token={current_app.config['FINNHUB_API_KEY']}"
+#     query_string = QUERYS["crypto"]["candle"]
+#     arg = dict(
+#         symbol=symbol,
+#         resolution="D",
+#         to=,
+#         from=,
+#     )
+#     arg = "&".join([f"{k}={v}" for k, v in arg.items()])
+#     uri = f"{FINNHUB_BASE}{query_string}{symbol}{token}"
+#     r = requests.get(uri)
+#     r = r.json()
+
 
 
 def finnhub_query(query: str, arg, stock_type="stock"):
@@ -46,3 +71,72 @@ def search(query, arg, stock_type="stock", source_api="finnhub"):
         arg = "&".join([f"{k}={v}" for k, v in arg.items()])
 
     return search_function[source_api](query, arg, stock_type)
+
+
+def get_details(symbol):
+    stock = Stock.query.filter_by(symbol=symbol).first()  # If its in the database, we know where to get it
+
+    if stock:
+        if stock.type == "crypto":
+            current_unix_time = datetime.datetime.now().timestamp()
+            current_price_quote_args = {
+                "symbol": symbol,
+                "resolution": "1",
+                "to": int(current_unix_time),
+                "from": int(current_unix_time - datetime.timedelta(minutes=1).total_seconds()),
+            }
+            previous_price_quote_args = {
+                "symbol": symbol,
+                "resolution": "D",
+                "to": int(current_unix_time - datetime.timedelta(days=1).total_seconds()),
+                "from": int(current_unix_time - datetime.timedelta(days=2).total_seconds()),
+            }
+            details = dict(
+                exchange=stock.exchange,
+                type=stock.type,
+                name=stock.name,
+                symbol=symbol,
+            )
+            quote = search(source_api="finnhub", query="candle", arg=current_price_quote_args)
+            pc_quote = search(source_api="finnhub", query="candle", arg=previous_price_quote_args)
+            if quote:
+                quote = {k: v[0] for k, v in quote.items()}
+                quote["pc"] = pc_quote["c"][0]
+        else:
+            details = search(query="profile", stock_type="stock", arg=symbol)
+            if details:
+                details["symbol"] = details["ticker"]
+                details["industry"] = details["finnhubIndustry"]
+                details["type"] = "stock"
+                quote = search(source_api="finnhub", query="quote", arg=symbol)
+    else:
+        # BUG: Dont have anything for crypto yet
+        details = search(query="profile", stock_type="stock", arg=symbol)
+        if details:
+            details["symbol"] = details["ticker"]
+            details["type"] = "stock"
+            details["industry"] = details["finnhubIndustry"]
+            quote = search(source_api="finnhub", query="quote", arg=symbol)
+            stock = Stock(
+                symbol=details["symbol"],
+                name=details["name"],
+                currency=details["currency"],
+                last_quote=quote["c"],
+                last_quote_time=datetime.datetime.fromtimestamp(quote["t"]),
+                industry=details["industry"],
+                type="stock",
+                display_symbol=details["symbol"],
+                exchange=details["exchange"],
+            )
+            db.session.add(stock)
+            db.session.commit()
+        else:
+            details = search(query="profile", stock_type="crypto", arg=symbol)
+
+    if details and quote:  # Gives an error - local variable 'details' referenced before assignment
+        return {
+            **details,
+            "quote": quote,
+        }
+    else:
+        return abort(404, "Symbol not found. Please check your inputs.")

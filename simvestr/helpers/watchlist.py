@@ -9,7 +9,7 @@ def get_watchlist(user: User):
             {
                 "symbol": stock.symbol,
                 "name": stock.name,
-                "quote": search(query="quote", arg=stock.symbol)["c"]
+                **search(query="quote", arg=stock.symbol)
             }
         )
     return {"watchlist": watchlist_list}

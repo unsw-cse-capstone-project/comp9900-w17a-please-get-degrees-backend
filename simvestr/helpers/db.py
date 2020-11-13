@@ -10,7 +10,6 @@ from flask.cli import with_appcontext
 
 from werkzeug.security import generate_password_hash
 
-from simvestr import create_app
 from simvestr.models import db
 from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
 from simvestr.helpers.search import search
@@ -108,11 +107,11 @@ def populate_stocks():
         num_stocks, stock_dict = heapq.heappop(exchange_stocks)
         ex, df = stock_dict.popitem()
         unique_stocks = df.name.unique()
-        sq = Stock.query.filter(Stock.name.in_(list(unique_stocks))).all()
+        sq = Stock.query.filter(Stock.symbol.in_(list(unique_stocks))).all()
 
         if sq:
-            names = [n.name for n in sq]
-            df = df[~df.name.isin(names)]
+            symbols = [n.symbol for n in sq]
+            df = df[~df.symbol.isin(symbols)]
 
         if len(df):
             bulk_add_from_df(df, db, Stock)
@@ -135,7 +134,7 @@ def load_dummy(data_path: Path):
 
     df_map["users"]['salt'] = [make_salt() for _ in range(len(df_map["users"]))]
     df_map["users"].password = df_map["users"].password + df_map["users"].salt
-    df_map["users"].password = df_map["users"].password.apply(generate_password_hash, method="sha256",)
+    df_map["users"].password = df_map["users"].password.apply(generate_password_hash, method="sha256", )
 
     bulk_add_from_df(df_map["exchanges"], db, Exchanges)
     bulk_add_from_df(df_map["transaction"], db, Transaction)
@@ -205,7 +204,6 @@ def load_dummy(data_path: Path):
         db.session.commit()
 
 
-
 @click.command("init-db")
 @with_appcontext
 def init_db_command():
@@ -218,9 +216,8 @@ def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
 
-def setup_new_db(data_path: Path):
-    app = create_app()
 
+def setup_new_db(app, data_path: Path):
     with app.app_context():
         delete_db()
         init_db()

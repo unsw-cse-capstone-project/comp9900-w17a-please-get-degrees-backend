@@ -1,37 +1,20 @@
 from flask_restx import Resource, Namespace, fields
 
-from simvestr.helpers.user import get_user_details
+from simvestr.helpers.user import get_user_details, get_info
 from simvestr.models import User
 from simvestr.helpers.auth import get_user, requires_auth
-from simvestr.models.api_models import user_details_model, user_model
+from simvestr.models.api_models import user_details_model, user_model, user_info_model
 
 api = Namespace('view user details', description='Demo api for querying users')
 api.models[user_model.name] = user_model
+api.models[user_info_model.name] = user_info_model
 api.models[user_details_model.name] = user_details_model
-#TODO: Fix user details swagger model
-
-@api.route('/all')
-class UsersQuery(Resource):
-    @requires_auth
-    def get(self):
-        user = User.query.all()
-        data = {u.id: dict
-                (
-                 email=u.email_id,
-                 role=u.role,
-                 fname=u.first_name,
-                 lname=u.last_name,
-                 validated=u.validated,
-                ) for u in user}
-        payload = dict(
-            data=data
-        )
-        return payload
 
 
 @api.route('/details')
 class UserQuery(Resource):
     @api.response(200, "Success")
+    @api.response(401, "Unauthorised")
     @requires_auth
     @api.doc(
         model=user_details_model,
@@ -46,13 +29,15 @@ class UserQuery(Resource):
 
 @api.route('/info')
 class UserInfoQuery(Resource):
+    @api.response(200, "Success")
+    @api.response(401, "Unauthorised")
+    @api.doc(
+        description="Basic user details",
+        model=user_info_model
+    )
+    @api.marshal_with(user_info_model)
     @requires_auth
     def get(self, ):
         user = get_user()
-        return (
-                {"first_name": user.first_name,
-                 "last_name": user.last_name,
-                 "email_id": user.email_id,
-                 "message": "Authenticated with cookie set in browser"},
-                200,
-            )
+        info = get_info(user)
+        return info, 200

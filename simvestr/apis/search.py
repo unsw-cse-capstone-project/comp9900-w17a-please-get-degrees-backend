@@ -4,22 +4,16 @@ from flask import jsonify
 from flask_restx import Resource, Namespace, reqparse
 
 from simvestr.helpers.auth import requires_auth
-from simvestr.helpers.search import search
+from simvestr.helpers.search import search, get_details
 from simvestr.models import Stock, db
-from simvestr.models.api_models import quote_model, details_model
+from simvestr.models.api_models import candle_model, details_model, quote_model, search_name_model
 
 api = Namespace("search", description="Search stocks")
 
-api.models[quote_model.name] = quote_model # do we need these?
+api.models[quote_model.name] = quote_model
+api.models[candle_model.name] = candle_model
 api.models[details_model.name] = details_model
-
-@api.route("/exchange/<string:exchange>")
-class ExchangeList(Resource):
-
-    @requires_auth
-    def get(self, exchange: str = "US"):
-        uri = search(source_api="finnhub", query="exchange", arg=exchange)
-        return uri
+api.models[search_name_model.name] = search_name_model
 
 @api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
@@ -28,47 +22,25 @@ class StockDetails(Resource):
     @api.response(404, "Symbol not found")
     @api.doc(
         id="stock_details",
-        model="Stock Details",
-        body=details_model,
+        model=details_model,
         description="Gets details for the specified stock",
         params={"stock_symbol": "The stock symbol associated with the company"},
     )
+    @api.marshal_with(details_model)
     def get(self, stock_symbol):
-        # Since we are fetching from finnhub we need to fetch anyway, so why hit the DB at all?
-        # Remebered why we need to hit db - we have to check the exchange the stock is in to make a choice between crypto and regular stock.
+        payload = get_details(stock_symbol.upper())
+        return payload, 200
 
-        stock = Stock.query.filter_by(symbol=stock_symbol)
-        stock = [] #teemporary bug fix - need to implement crypto checking logic
-        if not stock:
-            details = search(source_api="finnhub", query="profile", arg=stock_symbol)
-            quote = search(source_api="finnhub", query="quote", arg=stock_symbol)
-        # This can be STOCK or CRYPTO, for now only handle STOCK
-        stockType = "STOCK"
-        if details and quote: #Gives an error - local variable 'details' referenced before assignment
-            stock = {
-                "type": stockType,
-                "symbol": details["ticker"],
-                "name": details["name"],
-                "industry": details["finnhubIndustry"],
-                "exchange": details["exchange"],
-                "logo": details["logo"],
-                "marketCapitalization": details["marketCapitalization"],
-                "quote": quote,
-            }
-            return jsonify(stock)
-        else:
-            return (
-                {
-                    "message": "Symbol not found. Incorrect symbol, check spelling.",
-                },
-                404,
-            )
+
 
 @api.route("/<string:name>")
 class StockSearch(Resource):
     @api.doc(
+        description="Partial name search for stocks and crypto.",
+        model=search_name_model,
         params={"name": "The name or partial name of the stock symbol or company name"},
     )
+    @api.marshal_with(search_name_model)
     @requires_auth
     def get(self, name: str = "AAPL"):
         stock_q = Stock.query.filter(db.or_(
@@ -80,21 +52,9 @@ class StockSearch(Resource):
             for s in stock_q
         ]
 
-
-@api.route("/symbols")
-class StockSymbols(Resource):
-    @requires_auth
-    def get(self):
-        stock_q = Stock.query.all()
-        return [
-            dict(symbol=s.symbol, display_symbol=s.display_symbol, name=s.name, )
-            for s in stock_q
-        ]
-
-
 candle_parser = reqparse.RequestParser()
 candle_parser.add_argument("symbol", type=str, required=True, help="Stock symbol to search.")
-candle_parser.add_argument("resolution", type=str, help="Resolution of data", default="D")
+candle_parser.add_argument("resolution", type=str, help="Resolution of data", default="D", choices=("1", "5", "15", "30", "60", "D", "W", "M",))
 candle_parser.add_argument("from", type=int, help="UNIX timestamp. Interval initial value.")
 candle_parser.add_argument("to", type=int, help="UNIX timestamp. Interval end value.")
 
@@ -104,6 +64,11 @@ candle_parser.add_argument("to", type=int, help="UNIX timestamp. Interval end va
 class Candles(Resource):
     @api.response(200, "Success")
     @api.response(404, "Symbol not found")
+    @api.doc(
+        model=candle_model,
+        description="Candles for a stock over a timeframe",
+    )
+    @api.marshal_with(candle_model)
     @requires_auth
     def get(self):
         args = candle_parser.parse_args()
@@ -118,9 +83,9 @@ class Candles(Resource):
 
         if not args["resolution"]:
             args["resolution"] = "60"
-        print(args)
+
         candle = search(query="candle", arg=args)
         if candle["s"] == "no_data":
-            return {"message": "Symbol not found or data, check inputs."}, 404
+            return {"message": "Symbol not found or data unavailable for that resolution, check inputs and try again."}, 404
 
         return candle, 200

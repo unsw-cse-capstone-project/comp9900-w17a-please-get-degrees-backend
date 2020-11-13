@@ -38,13 +38,13 @@ class Signup(Resource):
     @api.response(403, "Already exists")
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
-    @api.doc(id="create_new_user", model="Signup", body=signup_model, description="Creates a new user")
+    @api.doc(id="create_new_user",body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
-        email_id = (args.get("email")).lower()
-        password = args.get("password")
-        fname = args.get("first_name")
-        lname = args.get("last_name")
+        email_id = args["email"].lower()
+        password = args["password"]
+        fname = args["first_name"]
+        lname = args["last_name"]
 
         if len(email_id) < 1:
             return (
@@ -68,7 +68,7 @@ class Signup(Resource):
         
         if " " in password:
             return (
-                {"error": True, "message": "Password cannot contain spaces", },
+                {"message": "Password cannot contain spaces", },
                 422,
             )
 

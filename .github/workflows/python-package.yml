@@ -30,6 +30,10 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+    - name: Test with pytest
+      run: |
+        pytest
+
     - name: Run the package script
       run: |
         python setup.py sdist bdist_wheel
@@ -38,10 +42,6 @@ jobs:
       run: |
         pip install dist/simvestr-0.0.1.tar.gz
 
-    - name: Test with pytest
-      run: |
-        pytest -vh ./tests/
-
     - name: Commit build files
       run: |
         git config --global user.name "Github Action"
@@ -49,12 +49,3 @@ jobs:
         git commit -am "Build distribution"
         git push
 
-#    - name: GitHub Push
-#      uses: ad-m/github-push-action@v0.6.0
-#
-#    - name: Push changes
-#      uses: ad-m/github-push-action@master
-#      with:
-#        github_token: ${{ secrets.GITHUB_TOKEN }}
-#        branch: ${{ github.ref }}
-#        git config --global user.email "KhanMechAI@users.noreply.github.com"
