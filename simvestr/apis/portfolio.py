@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask_restx import Resource, Namespace, reqparse, abort
 
 from simvestr.helpers.auth import get_user, requires_auth
@@ -5,7 +7,7 @@ from simvestr.helpers.portfolio import (
     get_portfolio,
     all_stocks_balance,
     get_stocks_owned,
-    get_close_balance,
+    get_close_balance, simulate,
 )
 from simvestr.models import Portfolio
 from simvestr.models.api_models import (
@@ -83,3 +85,31 @@ class PortfolioHistory(Resource):
             return abort(400, "Number of days must be a non zero positive integer")
         history = get_close_balance(user, **args)
         return history, 200
+
+
+simulate_parser = reqparse.RequestParser()
+simulate_parser.add_argument("from", dest="date_from", type=int, help="UNIX timestamp. Interval initial value.")
+simulate_parser.add_argument("to", dest="date_to", type=int, help="UNIX timestamp. Interval end value.")
+
+
+@api.route("/simulate")
+@api.expect(simulate_parser)
+class PortfolioSimulation(Resource):
+    @requires_auth
+    @api.response(200, "Successful")
+    @api.response(400, "Invalid Input")
+    @api.doc(
+        description="Show the user's current portfolio holdings and value",
+        # model=portfolios_historic_model,
+    )
+    # @api.marshal_with(portfolios_historic_model)
+    def get(self):
+        user = get_user()
+        args = simulate_parser.parse_args()
+
+        if args["date_from"] > args["date_to"]:
+            return abort(400, "date_from must be a date at least 1 day before date_to. Check your inputs.")
+        elif args["date_to"] - args["date_from"] < timedelta(days=1).total_seconds():
+            return abort(400, "date_from must be a date at least 1 day before date_to. Check your inputs.")
+        payload = simulate(user=user, **args)
+        return {"simulation": payload}, 200
