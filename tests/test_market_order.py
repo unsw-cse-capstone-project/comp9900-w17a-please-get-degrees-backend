@@ -36,7 +36,7 @@ def test_bad_buy(registered_user, symbol, quote, trade_type, quantity, message):
         ("BINANCE:BTCUSDT", None, "buy", 2,),
         ("BINANCE:ETHBTC", None, "buy", 1, ),
 ))
-def test_good_buy(registered_user, symbol, quote, trade_type, quantity, message):
+def test_good_buy(registered_user, symbol, quote, trade_type, quantity,):
     client = registered_user._client
 
     if quote is None:
