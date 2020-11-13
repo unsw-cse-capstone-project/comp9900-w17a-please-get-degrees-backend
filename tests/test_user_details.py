@@ -80,7 +80,8 @@ def test_user_balance(auth, ):
     auth.login()
 
     response = auth._client.get(
-        "/".join([API_URL, "balance", "user", ""])  # trailing empty space is to get around 308 error
+        "/".join([API_URL, "portfolio",]),
+        query_string={"averagemode": "moving"}
     )
 
     assert response._status_code == 200

@@ -31,7 +31,7 @@ def get_unix_time():
     date_to = datetime.datetime.now(datetime.timezone.utc)
     date_from = date_to - datetime.timedelta(days=2)
 
-    return date_from.timestamp(), date_to.timestamp()
+    return int(date_from.timestamp()), int(date_to.timestamp())
 
 
 def crypto_quote(symbol):
@@ -53,12 +53,11 @@ def crypto_quote(symbol):
     if payload["s"] == "no_data":
         abort(404, "Symbol not found")
 
-    payload = {k: v[-1] for k,v in payload if k != "c"}
-
+    payload = {k: (v[-1] if k not in ("c", "s") else v) for k,v in payload.items()}
 
     payload["pc"] = payload["c"][0]
 
-    payload["c"].pop(0)
+    payload["c"] = payload["c"][-1]
 
     return payload
 
@@ -94,8 +93,7 @@ def search(query, arg, stock_type="stock", source_api="finnhub"):
 
 
 def get_details(symbol):
-    stock = Stock.query.filter_by(symbol=symbol).first()  # If its in the database, we know where to get it
-
+    stock = Stock.query.filter_by(symbol=symbol).first()
     if stock:
         if stock.type == "crypto":
             details = dict(
@@ -140,6 +138,19 @@ def get_details(symbol):
                     type="crypto",
                     symbol=symbol,
                 )
+                stock = Stock(
+                    symbol=details["symbol"],
+                    name=details["symbol"],
+                    currency=details["symbol"],
+                    last_quote=quote["c"],
+                    last_quote_time=datetime.datetime.fromtimestamp(quote["t"]),
+                    industry="Cryptocurrency/altcoin",
+                    type="crypto",
+                    display_symbol=details["symbol"],
+                    exchange=details["symbol"].split(":")[0],
+                )
+                db.session.add(stock)
+                db.session.commit()
 
     if details and quote:  # Gives an error - local variable 'details' referenced before assignment
         return {
