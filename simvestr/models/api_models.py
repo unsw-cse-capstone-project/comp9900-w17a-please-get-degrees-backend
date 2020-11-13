@@ -240,12 +240,44 @@ user_details_model = user_model.inherit(
     "User Details", portfolio_model, watchlist_model, transactions_model,
 )
 
-
-stock_owned_model = Model(
-    "Stock Owned", {"symbol": symbol, "quantity": simple_quantity,}
+leaderboard_position_model = Model(
+    "Leaderboard",
+    {
+        "nominal": fields.Integer(
+                    description="screen position after sorting in value order",
+                    example = 21,
+                ), 
+        "ordinal": fields.String(
+                    description="users actual position - not just screen position",
+                    example = "23rd",
+                ),
+    }
 )
-
-stocks_owned_model = Model(
-    "Stocks Owned", {"stocksowned": fields.List(fields.Nested(stock_owned_model))}
+leaderboard_all_model = Model(
+    "Leaderboard",
+    {
+        "portfolios":[
+            {
+                "id": fields.Integer(
+                    description="portfolio id",
+                ), 
+                "position": fields.Integer(
+                    description="users actual position - not just screen position",
+                ),
+                "user": fields.String(
+                    description="porfolio users name (first + last)",
+                    example = "John Doe",
+                ), 
+                "name": fields.String(
+                    description="porfolio name",
+                    example = "John Doe's Portfolio",
+                ),  
+                "value": fields.Float(
+                    description="value of portfolio (cash balance + stock value",
+                    example = 230023.23,
+                ), 
+            }
+        ]
+    }
 )
 
