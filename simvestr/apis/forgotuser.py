@@ -5,10 +5,11 @@ Created on Mon Sep 28 12:27:41 2020
 @author: Kovid
 """
 import random
-from flask_restx import Resource, reqparse, Namespace
+
+from flask_restx import Resource, reqparse, Namespace, abort
 from werkzeug.security import generate_password_hash
-from ..models import User
-from simvestr.models import db
+
+from simvestr.models import db, User
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.models.api_models import forgotuser_model, forgotuser_email_model
 
