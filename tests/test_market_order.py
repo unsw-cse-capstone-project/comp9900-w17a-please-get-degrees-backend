@@ -44,7 +44,7 @@ def test_good_buy(registered_user, symbol, quote, trade_type, quantity,):
         quote = quote["quote"]["c"]
 
     buy = {
-        "symbol": symbol,
+        "symbol": symbol.upper(),
         "quote": quote,
         "trade_type": trade_type,
         "quantity": quantity,
@@ -55,7 +55,7 @@ def test_good_buy(registered_user, symbol, quote, trade_type, quantity,):
         json=buy
     )
 
-    assert message == response.json
+    assert buy == response.json
 
 
 # @pytest.mark.parametrize(

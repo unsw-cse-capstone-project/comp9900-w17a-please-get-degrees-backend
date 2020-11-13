@@ -8,8 +8,8 @@ from flask import current_app
 from flask_restx import Resource, reqparse, Namespace, abort
 
 from simvestr.helpers.auth import requires_auth, get_user
+from simvestr.helpers.marketorder import check_price
 from simvestr.helpers.portfolio import stock_balance
-from simvestr.helpers.search import get_details
 from simvestr.models import db, Transaction, Stock
 from simvestr.models.api_models import market_order_model
 
@@ -32,21 +32,6 @@ trade_parser.add_argument("quote", type=float)
 trade_parser.add_argument("trade_type", type=str)
 trade_parser.add_argument("quantity", type=int)
 
-#TODO: Move to helpers
-def check_price(symbol, quote):
-    stock_details = get_details(symbol.upper())
-
-    current_quote = stock_details["quote"]["c"]
-    cost_diff = abs(current_quote - quote)
-    allowed_cost_diff = current_app.config["SLIPPAGE"] * quote  # cost difference of 0.05%
-
-    # if the cost hasn't changed more than 0.05% OR
-    # if quote is same as current price, commit transaction
-    if cost_diff <= allowed_cost_diff or current_quote == quote:
-        return False, cost_diff
-
-    return True, cost_diff
-
 
 @api.route("")
 class TradeStock(Resource):
@@ -67,12 +52,13 @@ class TradeStock(Resource):
         symbol = symbol.upper()  # TODO: Need wrapper function to automatically uppercase the input
 
         user = get_user()  # get user details from token
-        stock = Stock.query.filter_by(symbol=symbol).first()
-        fee = 0
 
         variation, slippage = check_price(symbol, quote)
         if variation:
             return abort(417, "Current price has changed, can't commit this transaction")
+
+        stock = Stock.query.filter_by(symbol=symbol).first()
+        fee = 0
 
         if quantity < 1:
             return abort(400, f"Quantity should be an integer value greater than 0. Given {quantity}")
@@ -121,4 +107,5 @@ class TradeStock(Resource):
         db.session.add(new_transaction)
         db.session.commit()
 
-        return dict(symbol=symbol, quote=quote, quantity=quantity, slippage=slippage, ), 200
+        return dict(symbol=symbol, quote=quote, quantity=quantity, trade_type=trade_type, ), 200
+        # return dict(symbol=symbol, quote=quote, quantity=quantity, trade_type=trade_type, slippage=slippage ), 200

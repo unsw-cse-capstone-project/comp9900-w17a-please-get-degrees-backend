@@ -76,8 +76,12 @@ if __name__ == "__main__":
         )
         monitoring_thread.start()
 
-    # Run the app based on system specification        
-    if sys.platform == "darwin" or sys.platform.lower() == "linux":
-        os.system(RUN_COMMAND)
-    else:
-        subprocess.run(RUN_COMMAND)
+    # Run the app based on system specification
+
+    # if sys.platform == "darwin" or sys.platform.lower() == "linux":
+    #     os.system(RUN_COMMAND)
+    # else:
+    #     subprocess.run(RUN_COMMAND)
+
+    app = create_app(run_setup=True)
+    app.run(debug=True)

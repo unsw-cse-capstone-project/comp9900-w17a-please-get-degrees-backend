@@ -24,7 +24,7 @@ api = Namespace(
     description="Back-end API for exporting portfolio to csv file",
 )
 
-
+#TODO: Move to helpers
 def create_csv(file_path, file_basename, user, portfolio_details, portfolio_value_user):
     workbook = xlsxwriter.Workbook(f"{file_path}/{file_basename}")
     worksheet = workbook.add_worksheet()

@@ -35,8 +35,7 @@ class Token(Resource):
     @api.response(400, "Bad Request")
     @api.response(401, "Incorrect password, retry")
     @api.response(404, "User not found")
-    @api.doc(id="login_user", model="Login", body=login_model, descriptions="Generates an authentication token")
-    @api.marshal_with(login_model)
+    @api.doc(id="login_user", body=login_model, descriptions="Generates an authentication token")
     def post(self):
         args = login_parser.parse_args()
         email_id = (args.get("email")).lower()
@@ -70,7 +69,4 @@ class Token(Resource):
             response.set_cookie("token", value=token, httponly=True)
             return response
 
-        return (
-            {"message": "Login successful"},
-            200,
-        )
+        return 200
