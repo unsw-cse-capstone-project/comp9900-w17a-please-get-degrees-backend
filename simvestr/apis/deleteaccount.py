@@ -38,26 +38,8 @@ class DeleteAccount(Resource):
         Portfolio.query.filter_by(id=port.id).delete()       
 
         db.session.commit()
-
-        @after_this_request
-        def set_cookie_value(response):
-            response.delete_cookie("token")
-            return response
-      
+     
         return (
             {"message": "Account Deleted", },
             200,
         )
-        # user = User.query.filter_by(id=4).first()
-        # watch = user.watchlist
-        # port = user.portfolio
-        # test =  str(user.id) + " "+ str(watch.id) + " "+ str(port.id) + " "
-        # for pp in PortfolioPrice.query.filter_by(portfolio_id=port.id).all() :
-        #     test = test + str(pp.id) + " "
-        # for tr in Transaction.query.filter_by(portfolio_id=port.id).all() :
-        #     test = test + str(tr.id) + " "
-        #return test
-
-
-    
-    
