@@ -4,7 +4,9 @@ Created on Sat Nov 14 11:57:41 2020
 @author: Kovid
 """
 
+from simvestr.models import Stock
 import xlsxwriter
+
 
 def create_csv(file_path, file_basename, user, portfolio_details, portfolio_value_user):
     workbook = xlsxwriter.Workbook(f"{file_path}/{file_basename}")
