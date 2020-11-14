@@ -4,12 +4,13 @@ from simvestr.helpers.search import search
 
 def get_watchlist(user: User):
     watchlist_list = []
-    for stock in user.watchlist.stocks:
+    for item in user.watchlist.watchlist_items:
         watchlist_list.append(
             {
-                "symbol": stock.symbol,
-                "name": stock.name,
-                **search(query="quote", arg=stock.symbol)
+                "symbol": item.stock.symbol,
+                "name": item.stock.name,
+                "date_added": item.date_added.timestamp(),
+                **search(query="quote", arg=item.stock.symbol)
             }
         )
     return {"watchlist": watchlist_list}

@@ -99,7 +99,7 @@ quote_model = Model(
 )
 
 watchlist_item_model = quote_model.clone(
-    "Watchlist Item", {"symbol": symbol, "name": stock_name,}
+    "Watchlist Item", {"symbol": symbol, "name": stock_name, "date_added": timestamp}
 )
 
 watchlist_model = Model(
