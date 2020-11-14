@@ -98,8 +98,17 @@ quote_model = Model(
     },
 )
 
+base_symbol = Model(
+    "Symbol",
+    {
+        "symbol": symbol
+    }
+)
+
 watchlist_item_model = quote_model.clone(
-    "Watchlist Item", {"symbol": symbol, "name": stock_name,}
+    "Watchlist Item",
+    base_symbol,
+    {"name": stock_name, "date_added": timestamp}
 )
 
 watchlist_model = Model(
@@ -230,6 +239,12 @@ portfolio_historic_model = Model(
 portfolios_historic_model = Model(
     "Historic Portfolios",
     {"history": fields.List(fields.Nested(portfolio_historic_model, skip_none=False))},
+)
+
+portfolios_simulate_model = Model(
+    "Simulated Porfolio Performance",
+    {"simulation": fields.List(fields.Nested(portfolio_historic_model, skip_none=False))},
+
 )
 
 user_model = Model(

@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 import numpy as np
@@ -35,7 +35,7 @@ def FiFo(dfg):
 def average_price(user: User, mode="moving"):
     trans_df = pd.read_sql(user.portfolio.transactions.subquery(), db.session.bind)
     if trans_df.empty:
-        return dict(buy={}, sell={},)
+        return dict(buy={}, sell={}, )
     buy_df = trans_df[trans_df.quantity > 0]
     sell_df = trans_df[trans_df.quantity < 0]
     if mode == "alltime":
@@ -49,9 +49,9 @@ def average_price(user: User, mode="moving"):
         trans_df["CS"] = trans_df.groupby(["symbol", "PN"])["quantity"].cumsum()
         fifo_trans_df = (
             trans_df.groupby(["symbol"])
-            .apply(FiFo)
-            .drop(["CS", "PN", "id", "portfolio_id", "timestamp",], axis=1)
-            .reset_index(drop=True)
+                .apply(FiFo)
+                .drop(["CS", "PN", "id", "portfolio_id", "timestamp", ], axis=1)
+                .reset_index(drop=True)
         )
         moving_avg_df = weighted_avg(fifo_trans_df, grouped=True)
         payload = dict(buy=moving_avg_df.to_dict(orient="index"), sell={})
@@ -63,22 +63,22 @@ def all_stocks_balance(user: User):
         user.portfolio.transactions.with_entities(
             db.func.sum(Transaction.quantity).label("balance"), Transaction.symbol
         )
-        .group_by("symbol")
-        .all()
+            .group_by("symbol")
+            .all()
     )
 
     return {n: q for (q, n) in all_stocks if q > 0}
 
 
 def stock_balance(user: User, symbol):
-    average_price(user,)
+    average_price(user, )
     return (
         user.portfolio.transactions.with_entities(
             db.func.sum(Transaction.quantity).label("balance"), Transaction.symbol
         )
-        .filter_by(symbol=symbol)
-        .group_by("symbol")
-        .first()
+            .filter_by(symbol=symbol)
+            .group_by("symbol")
+            .first()
     )
 
 
@@ -91,8 +91,8 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
     if use_stored:
         quote = (
             Stock.query.with_entities(Stock.symbol, Stock.last_quote)
-            .filter(Stock.symbol.in_(list(balance.keys())))
-            .all()
+                .filter(Stock.symbol.in_(list(balance.keys())))
+                .all()
         )
         balance_df = pd.DataFrame.from_dict(
             balance, orient="index", columns=["quantity"]
@@ -104,8 +104,8 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
         portfolio_df["value"] = portfolio_df.current * portfolio_df.quantity
         p_value = (
             portfolio_df.reset_index()
-            .rename(columns={"index": "symbol"})
-            .to_dict(orient="records")
+                .rename(columns={"index": "symbol"})
+                .to_dict(orient="records")
         )
 
     else:
@@ -197,7 +197,7 @@ def calculate_all_portfolios_values(query_limit=60, new_day=None):
         if not portfolio:
             continue
 
-        portfolio_df = pd.DataFrame.from_records(portfolio,)
+        portfolio_df = pd.DataFrame.from_records(portfolio, )
         investment_value = portfolio_df["value"].sum()
         cash_balance = user.portfolio.balance
         if new_day:
@@ -214,3 +214,115 @@ def calculate_all_portfolios_values(query_limit=60, new_day=None):
         user.portfolio.portfolioprice.append(portfolioprice)
 
         db.session.commit()
+
+
+def get_query_time(date, start_hour, start_minute):
+    if isinstance(date, int):
+        date = datetime.fromtimestamp(date, timezone.utc)
+    year, month, day = date.year, date.month, date.day
+    compile_time = datetime(year, month, day, start_hour, start_minute, 0, 0, tzinfo=timezone.utc)
+    if date > compile_time:
+        date = int(compile_time.timestamp())
+    else:
+        date = (compile_time - timedelta(days=1)).timestamp()
+
+    return int(date)
+
+
+def simulate(date_from=None, date_to=None, query_limit=60, user=None, start_hour=21, start_minute=30):
+    # First, query only the stocks that are in users portfolios
+    if user is None:
+        portfolio_stocks = Stock.query.join(Portfolio, Stock.portfolios).all()
+    else:
+        portfolio_stocks = user.portfolio.stocks
+    allowance_per_call = S_PER_MIN / query_limit
+
+    if date_to is None:
+        date_to = datetime.now(timezone.utc)
+
+    date_to = get_query_time(date_to, start_hour, start_minute)
+
+    if date_from is None:
+        date_from = int((date_to - timedelta(weeks=4).total_seconds()))
+
+    date_from = get_query_time(date_from, start_hour, start_minute)
+
+    if date_from > date_to:
+        raise ValueError("date_from must be a date at least 1 day before date_to. Check your inputs.")
+    elif date_to - date_from < timedelta(days=1).total_seconds():
+        raise ValueError("date_from must be a date at least 1 day before date_to. Check your inputs.")
+
+    processing_start = time.time()
+    # Time logic is to limit our calls per minute to the bandwidth available
+    # Get current quote price for the portfolio stocks
+
+    symbols = [s.symbol for s in portfolio_stocks]
+    first_query_flag = True
+    for symbol in symbols:
+        start_t = time.time()
+
+        arg = {
+            "symbol": symbol,
+            "resolution": "D",
+            "to": date_to,
+            "from": date_from,
+        }
+
+        quote = search(query="candle", arg=arg)
+
+        if first_query_flag:
+            stock_price = pd.DataFrame(
+                columns=pd.MultiIndex.from_product([symbols, ["quote", "quantity"]]),
+                index=quote["t"]
+            )
+            first_query_flag = False
+
+        stock_price.loc[:, (symbol, "quote")] = quote["c"]
+
+        end_t = time.time()
+        duration = end_t - start_t
+        pause_time = allowance_per_call - duration
+
+        if pause_time > 0:
+            time.sleep(pause_time)
+
+    # For every user, create a portfolio price entry and commit it to the db
+    if user is None:
+        all_users = User.query.all()
+    else:
+        all_users = [user]
+
+    for user in all_users:
+        stock_balance = all_stocks_balance(user)
+        if not portfolio_stocks:
+            continue
+        portfolio_stock_symbols = list(stock_balance.keys())
+        user_stocks = stock_price[portfolio_stock_symbols]
+        for stock, quantity in stock_balance.items():
+            user_stocks.loc[:, (stock, "quantity")] = quantity
+
+        investment_values = user_stocks.groupby(axis=1, level=0).prod().sum(axis=1)
+        cash_balance = user.portfolio.balance
+
+        payload_df= pd.DataFrame()
+        payload_df["timestamp"] = investment_values.index
+        payload_df["investment_value"] = investment_values.values
+        payload_df["close_balance"] = cash_balance
+
+        payload_df["total_value"] = payload_df.close_balance + payload_df.investment_value
+
+        return payload_df.to_dict("records")
+
+
+
+        #Logic to commit to database
+        # for timestamp, investment_value in investment_values.iteritems():
+        #     portfolioprice = PortfolioPrice(
+        #         close_balance=cash_balance,
+        #         investment_value=investment_value,
+        #         timestamp=timestamp,
+        #     )
+        #
+        #     user.portfolio.portfolioprice.append(portfolioprice)
+        #
+        # db.session.commit()

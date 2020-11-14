@@ -11,7 +11,7 @@ from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
 
 from simvestr.models import db
-from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
+from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges, WatchlistItem
 from simvestr.helpers.search import search
 from simvestr.helpers.portfolio import all_stocks_balance
 
@@ -150,11 +150,14 @@ def load_dummy(data_path: Path):
         watch_df = df_map["watchlist"]
         watch_df = watch_df[watch_df.user_id == user.id]
         watchlist = Watchlist(user_id=user.id)
+        db.session.add(watchlist)
 
         stocks = Stock.query.filter(Stock.symbol.in_(list(watch_df["symbol"].values))).all()
-        watchlist.stocks = stocks
-
-        db.session.add(watchlist)
+        for stock in stocks:
+            watchlist_item = WatchlistItem(watchlist_id=watchlist.id, stock_symbol=stock.symbol, )
+            db.session.add(watchlist_item)
+            db.session.commit()
+        # watchlist.stocks = stocks
 
         user.watchlist = watchlist
 
