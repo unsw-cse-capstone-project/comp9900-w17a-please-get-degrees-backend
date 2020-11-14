@@ -112,7 +112,11 @@ def get_details(symbol):
                 details["industry"] = details["finnhubIndustry"]
                 details["type"] = "stock"
                 quote = search(source_api="finnhub", query="quote", arg=symbol)
-        if stock.last_quote_time > datetime.datetime.utcnow() - datetime.timedelta(minutes=5):
+        if stock.last_quote_time is None:
+            stock.last_quote = quote["c"]
+            stock.last_quote_time = datetime.datetime.utcnow()
+            db.session.commit()
+        elif stock.last_quote_time > datetime.datetime.utcnow() - datetime.timedelta(minutes=5):
             stock.last_quote = quote["c"]
             stock.last_quote_time = datetime.datetime.utcnow()
             db.session.commit()
