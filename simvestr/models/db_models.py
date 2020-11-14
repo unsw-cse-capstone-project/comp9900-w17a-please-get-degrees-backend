@@ -80,17 +80,14 @@ class WatchlistItem(db.Model):
     stock_symbol = db.Column(db.String, db.ForeignKey("stock.symbol"), primary_key=True)
     date_added = db.Column("date_added", db.DateTime, default=datetime.utcnow)
 
-    watchlist = db.relationship("Watchlist", backref=db.backref("watchlist_items", lazy="select", uselist=True),
-                                lazy="joined")
-    stock = db.relationship("Stock", backref=db.backref("watchlist_items", lazy="select", uselist=True),
-                             lazy="joined")
-
 
 class Watchlist(db.Model):
     __tablename__ = "watchlist"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, )
+    watchlist_items = db.relationship("WatchlistItem", backref=db.backref("watchlist", lazy="select", uselist=True),
+                                lazy="joined", cascade="all, delete-orphan",)
 
 
 class Stock(db.Model):
@@ -108,6 +105,9 @@ class Stock(db.Model):
     last_quote = db.Column(db.Float)
     last_quote_time = db.Column(db.DateTime)
     type = db.Column(db.String(10), default="stock", nullable=False)
+
+    watchlist_items = db.relationship("WatchlistItem", backref=db.backref("stock", lazy="select", uselist=False),
+                            lazy="joined", cascade="all, delete-orphan", )
 
     portfolios = db.relationship("Portfolio", secondary=p_stock, backref=db.backref("stock", lazy="select", ),
                                  lazy="joined")

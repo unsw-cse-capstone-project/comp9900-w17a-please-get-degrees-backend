@@ -93,6 +93,8 @@ def search(query, arg, stock_type="stock", source_api="finnhub"):
 
 
 def get_details(symbol):
+    if symbol.strip() == "":
+        return abort(400, "Empty symbol string. Symbol must not be empty or whitespace.")
     stock = Stock.query.filter_by(symbol=symbol).first()
     if stock:
         if stock.type == "crypto":
@@ -110,6 +112,10 @@ def get_details(symbol):
                 details["industry"] = details["finnhubIndustry"]
                 details["type"] = "stock"
                 quote = search(source_api="finnhub", query="quote", arg=symbol)
+        if stock.last_quote_time > datetime.datetime.utcnow() - datetime.timedelta(minutes=5):
+            stock.last_quote = quote["c"]
+            stock.last_quote_time = datetime.datetime.utcnow()
+            db.session.commit()
     else:
         # BUG: Dont have anything for crypto yet
         details = search(query="profile", stock_type="stock", arg=symbol)
@@ -123,7 +129,7 @@ def get_details(symbol):
                 name=details["name"],
                 currency=details["currency"],
                 last_quote=quote["c"],
-                last_quote_time=datetime.datetime.fromtimestamp(quote["t"]),
+                last_quote_time=datetime.datetime.utcfromtimestamp(quote["t"]),
                 industry=details["industry"],
                 type="stock",
                 display_symbol=details["symbol"],
@@ -143,7 +149,7 @@ def get_details(symbol):
                     name=details["symbol"],
                     currency=details["symbol"],
                     last_quote=quote["c"],
-                    last_quote_time=datetime.datetime.fromtimestamp(quote["t"]),
+                    last_quote_time=datetime.datetime.utcfromtimestamp(quote["t"]),
                     industry="Cryptocurrency/altcoin",
                     type="crypto",
                     display_symbol=details["symbol"],
