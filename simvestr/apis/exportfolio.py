@@ -8,7 +8,6 @@ from pathlib import Path
 from flask_restx import Resource, Namespace
 from flask import after_this_request, send_from_directory, make_response
 from simvestr.helpers.auth import requires_auth, get_user
-from simvestr.models import Stock
 from simvestr.helpers.portfolio import portfolio_value, get_portfolio
 from simvestr.helpers.exportfolio import create_csv
 
