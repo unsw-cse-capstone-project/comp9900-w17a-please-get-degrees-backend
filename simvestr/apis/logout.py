@@ -16,6 +16,7 @@ api = Namespace(
     description="Deletes the cookie from browser",
 )
 
+
 @api.route("")
 class Token(Resource):
     @api.response(200, "Successful")
@@ -26,7 +27,4 @@ class Token(Resource):
             response.delete_cookie("token")
             return response
 
-        return (
-            {"message": "Logout successful"},
-            200,
-        )
+        return 200
