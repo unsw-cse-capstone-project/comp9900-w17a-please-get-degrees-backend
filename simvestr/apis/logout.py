@@ -21,7 +21,6 @@ api = Namespace(
 class Token(Resource):
     @api.response(200, "Successful")
     def get(self):
-
         @after_this_request
         def set_cookie_value(response):
             response.delete_cookie("token")
