@@ -41,7 +41,7 @@ class ForgotUser(Resource):
     @api.response(404, "User not found")
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
-    @api.doc(id="reset_user_password", body=forgotuser_email_model,
+    @api.doc(id="reset_user_password", model=forgotuser_email_model,
              description="Send OTP to registered email")
     @api.expect(forgotuser_email_parser, validate=True)
     def get(self):

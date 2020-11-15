@@ -8,31 +8,18 @@ import yaml
 
 from simvestr.helpers.db import setup_new_db
 from simvestr.helpers.simulation import update_portfolio
+from simvestr.helpers.utils import load_yaml_config
 from simvestr.models import db
 
 from simvestr.apis import blueprint as api
 
-config_yml_path = Path(__file__).parent / "config.yml"
 
 
-def load_yaml_config():
-    with open(config_yml_path) as conf:
-        config_data = yaml.safe_load(conf)
-    return config_data
 
 
-def get_delay(start_hour=21, start_minute=30):
-    utc_today = datetime.datetime.now(datetime.timezone.utc)
-    year, month, day = utc_today.year, utc_today.month, utc_today.day
 
-    start_time = datetime.datetime(year, month, day, start_hour, start_minute, 0, 0, tzinfo=datetime.timezone.utc)
 
-    delay = start_time - utc_today
 
-    if delay.total_seconds() < 0:
-        delay += datetime.timedelta(days=1)
-
-    return delay.total_seconds()
 
 
 def boot_app(app, run_setup):
@@ -56,7 +43,7 @@ def boot_app(app, run_setup):
         print("Database file found, won\"t reset the db!")
 
 
-def create_app(test_config=None, sim_config=None, run_setup=False):
+def create_app(test_config=None, sim_config=None, run_setup=False, config_dir=None):
     # create and configure the app
 
     app = Flask(__name__, instance_relative_config=True)
@@ -94,23 +81,23 @@ def create_app(test_config=None, sim_config=None, run_setup=False):
     CORS(app, supports_credentials=True)
 
 
+    #
+    # # Example how to add a simple route that renders a page
+    # @app.route("/")
+    # def index():
+    #     return "Simvestr App"
 
-    # Example how to add a simple route that renders a page
-    @app.route("/")
-    def index():
-        return "Simvestr App"
-
-    update_config = dict(
-        duration=datetime.timedelta(weeks=10000),
-        interval=datetime.timedelta(seconds=2),
-    )
-    delay = get_delay()
-    daily_update_thread = threading.Timer(
-        interval=delay,
-        function=update_portfolio,
-        kwargs=update_config,
-    )
-    daily_update_thread.daemon = True
-    daily_update_thread.start()
+    # update_config = dict(
+    #     duration=datetime.timedelta(weeks=10000),
+    #     interval=datetime.timedelta(seconds=2),
+    # )
+    # delay = get_delay()
+    # daily_update_thread = threading.Timer(
+    #     interval=delay,
+    #     function=update_portfolio,
+    #     kwargs=update_config,
+    # )
+    # daily_update_thread.daemon = True
+    # daily_update_thread.start()
 
     return app

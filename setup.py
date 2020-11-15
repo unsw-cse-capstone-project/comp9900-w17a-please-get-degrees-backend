@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="simvestr",
-    version="0.0.1",
+    version="1.0.0",
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
@@ -35,4 +35,10 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
+    # package_data={'': [
+    #     'LICENCE',
+    #     'README.MD',
+    #     'requirements.txt',
+    #     'simvestr/config.yml',
+    # ]},
 )

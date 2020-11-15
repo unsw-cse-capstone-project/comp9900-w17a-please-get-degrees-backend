@@ -1,1 +1,9 @@
 global-exclude *.pyc
+
+include LICENCE
+
+include README.md
+
+include requirements.txt
+
+include simvestr/config.yml

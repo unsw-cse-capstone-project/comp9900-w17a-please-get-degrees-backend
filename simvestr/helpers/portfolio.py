@@ -167,7 +167,7 @@ def get_close_balance(user: User, number_of_days=7):
     return payload
 
 
-def calculate_all_portfolios_values(query_limit=60, new_day=None):
+def calculate_all_portfolios_values(query_limit=60,):
     # First, query only the stocks that are in users portfolios
     portfolio_stocks = Stock.query.join(Portfolio, Stock.portfolios).all()
     allowance_per_call = S_PER_MIN / query_limit
@@ -200,16 +200,10 @@ def calculate_all_portfolios_values(query_limit=60, new_day=None):
         portfolio_df = pd.DataFrame.from_records(portfolio, )
         investment_value = portfolio_df["value"].sum()
         cash_balance = user.portfolio.balance
-        if new_day:
-            portfolioprice = PortfolioPrice(
-                close_balance=cash_balance,
-                investment_value=investment_value,
-                timestamp=new_day,
-            )
-        else:
-            portfolioprice = PortfolioPrice(
-                close_balance=cash_balance, investment_value=investment_value,
-            )
+
+        portfolioprice = PortfolioPrice(
+            close_balance=cash_balance, investment_value=investment_value,
+        )
 
         user.portfolio.portfolioprice.append(portfolioprice)
 
