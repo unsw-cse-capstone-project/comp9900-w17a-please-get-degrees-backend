@@ -1,0 +1,72 @@
+* Error response codes *
+Endpoints are in alphabetical order:
+
+/changedetails
+	200, "Success"
+	411, "Password should be at least 8 characters"
+	422, "Password cannot contain spaces"
+
+
+/deleteaccount
+	200, "Success"
+
+/exportfolio
+	200, "Success"
+
+/forgotuser
+	200, "Success"
+	404, "User not found"
+	411, "Password should be atleast 8 characters"
+	422, "Password cannot contain spaces"
+	422, "The OTP you entered is incorrect!"
+
+
+/leaderboard
+	200, "Success"
+	404, "PortfolioPrice doesn't exist"
+
+/login
+	200, "Success"
+	401, "Incorrect password, retry"
+	404, "User not found"
+
+/logout
+	200, "Success"
+
+/marketorder
+	200, "Success"
+	400, f"Quantity should be an integer value greater than 0. Given {quantity}
+	416, "Current price has changed, can't commit this transaction"
+	417, "You currently don't own this stock"
+	417, "Insufficient quantity of stock to sell"
+	422, f"Invalid quantity. Quantity must be a non zero integer. Received {quantity}"
+
+/portfolio
+	200, "Success"
+	400, "Number of days must be a non zero positive integer"
+	400, "date_from must be a date at least 1 day before date_to. Check your inputs."
+
+/refreshtoken
+	200, "Success"
+
+/search
+	200, "Success"
+	404, "Symbol not found"
+
+/signup
+	201, "New user created!"
+	403, "Already exists"
+	411, "Password should be atleast 8 characters"
+	422, "Password cannot contain spaces"
+
+/transactions
+	200, "Success"
+
+/user
+	200, "Success"
+
+/watchlist
+	200, "Success"
+	200, "Not in watchlist"
+    201, "Removed from watchlist"
+    404, "Symbol not found"
