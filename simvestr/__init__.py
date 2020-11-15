@@ -55,14 +55,14 @@ def create_app(test_config=None, sim_config=None, run_setup=False):
     if is_production:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile("config.py", silent=True)
-        boot_app(app, run_setup)
+        boot_app(app)
     elif is_test_and_sim:
         # load the test config if passed in
         app.config.from_mapping(test_config)
     elif is_test:
         app.config.from_mapping(test_config)
     else:
-        boot_app(app, run_setup)
+        boot_app(app)
 
     app.register_blueprint(api)
 
