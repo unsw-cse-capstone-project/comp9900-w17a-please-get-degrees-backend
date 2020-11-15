@@ -8,7 +8,6 @@ Created on Mon Sep 28 12:27:41 2020
 from flask_restx import Resource, reqparse, Namespace
 from flask import after_this_request
 
-
 from simvestr.models import User
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.auth import auth, check_password
@@ -32,10 +31,13 @@ login_parser.add_argument("password", type=str)
 @api.route("")
 class Token(Resource):
     @api.response(200, "Successful")
-    @api.response(400, "Bad Request")
     @api.response(401, "Incorrect password, retry")
     @api.response(404, "User not found")
-    @api.doc(id="login_user", body=login_model, descriptions="Generates an authentication token")
+    @api.doc(
+        id="login_user", 
+        body=login_model, 
+        descriptions="Generates an authentication token"
+    )
     def post(self):
         args = login_parser.parse_args()
         email_id = (args.get("email")).lower()
@@ -55,11 +57,11 @@ class Token(Resource):
         message_content = (
             "You have logged into Simvestr. Login will expire after 24 hours!"
         )
-        
+
         # sends a logged in email to the user
         send_email(
             user.email_id, "Log in successful", message_content
-        )  
+        )
 
         # set cookie in browser
         token = auth.generate_token(user.email_id)
