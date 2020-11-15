@@ -9,8 +9,6 @@ from simvestr.helpers.db import db
 
 RUN_COMMAND = "flask run"
 
-RUN_SETUP = False
-
 SIM_DURATION = timedelta(minutes=5)
 INTERVAL = timedelta(seconds=3)
 
