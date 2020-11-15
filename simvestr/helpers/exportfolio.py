@@ -28,13 +28,13 @@ def create_csv(file_path, file_basename, user, portfolio_details, portfolio_valu
     worksheet.write("A2", "Date Joined", heading_format_2)
     worksheet.write("B2", f"{user.date_joined.date()}", cell_format_2)
 
-    worksheet.write("A3", "Balance", heading_format_1)
+    worksheet.write("A3", "Cash Balance", heading_format_1)
     worksheet.write("B3", f'{portfolio_details["balance"]}', cell_format_1)
 
-    worksheet.write("A4", "Total Value", heading_format_2)
+    worksheet.write("A4", "Investment Value", heading_format_2)
     worksheet.write("B4", f'{portfolio_details["total_value"]}', cell_format_2)
 
-    worksheet.write("A5", "Cash Balance", heading_format_1)
+    worksheet.write("A5", "Total Value", heading_format_1)
     worksheet.write(
         "B5",
         f'{portfolio_details["total_value"] + portfolio_details["balance"]}',
