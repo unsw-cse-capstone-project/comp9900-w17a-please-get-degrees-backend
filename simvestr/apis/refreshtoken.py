@@ -24,6 +24,7 @@ api = Namespace(
 
 @api.route("")
 class Token(Resource):
+    @requires_auth
     @api.response(200, "Successful")
     @api.doc(
         descriptions="Resets token cookie in browser"
