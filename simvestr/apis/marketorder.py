@@ -5,6 +5,8 @@ Created on Mon Oct 14 11:23:31 2020
 @author: Kovid
 """
 
+from datetime import datetime
+
 from flask_restx import Resource, reqparse, Namespace, abort
 
 from simvestr.helpers.auth import requires_auth, get_user
@@ -106,6 +108,7 @@ class TradeStock(Resource):
             quote=quote,
             quantity=quantity,
             fee=fee,
+            timestamp=datetime.now()
         )
 
         db.session.add(new_transaction)
