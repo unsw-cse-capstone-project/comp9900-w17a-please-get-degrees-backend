@@ -1,6 +1,7 @@
 from flask_restx import Resource, Namespace, reqparse, abort
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.models import User, Portfolio, PortfolioPrice, Transaction, Watchlist, db
+from simvestr.apis.logout import Token
 from sqlalchemy.sql import select
 
 
@@ -38,5 +39,6 @@ class DeleteAccount(Resource):
         Portfolio.query.filter_by(id=port.id).delete()       
 
         db.session.commit()
+        Token.get(self)
      
         return 200
