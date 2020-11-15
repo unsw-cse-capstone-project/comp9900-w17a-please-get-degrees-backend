@@ -4,7 +4,7 @@ Created on Mon Oct 14 11:23:31 2020
 
 @author: Kovid
 """
-from flask import current_app
+
 from flask_restx import Resource, reqparse, Namespace, abort
 
 from simvestr.helpers.auth import requires_auth, get_user
@@ -40,7 +40,11 @@ class TradeStock(Resource):
     @api.response(422, "Unprocessable Entity")
     @api.response(416, "Requested Range Not Satisfiable")
     @api.response(417, "Expectation Failed")
-    @api.doc(model="Market Order", body=market_order_model, description="Places a market order")
+    @api.doc(
+        model="Market Order", 
+        body=market_order_model, 
+        description="Places a market order"
+    )
     @api.marshal_with(market_order_model, code=200)
     @requires_auth
     def post(self):
@@ -49,13 +53,13 @@ class TradeStock(Resource):
         quote = args.get("quote")
         trade_type = args.get("trade_type")
         quantity = args.get("quantity")
-        symbol = symbol.upper()  # TODO: Need wrapper function to automatically uppercase the input
-
+        symbol = symbol.upper()
+        
         user = get_user()  # get user details from token
-
+        
         variation, slippage = check_price(symbol, quote)
         if variation:
-            return abort(417, "Current price has changed, can't commit this transaction")
+            return abort(416, "Current price has changed, can't commit this transaction")
 
         stock = Stock.query.filter_by(symbol=symbol).first()
         fee = 0
@@ -108,4 +112,3 @@ class TradeStock(Resource):
         db.session.commit()
 
         return dict(symbol=symbol, quote=quote, quantity=quantity, trade_type=trade_type, ), 200
-        # return dict(symbol=symbol, quote=quote, quantity=quantity, trade_type=trade_type, slippage=slippage ), 200

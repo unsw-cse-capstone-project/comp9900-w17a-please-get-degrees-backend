@@ -12,7 +12,7 @@ api = Namespace(
     security="TOKEN-BASED",
     default="Buying and selling stocks",
     title="Simvestr",
-    description="View transactions for a user",
+    description="All transactions for a user",
 )
 
 api.models[transaction_model.name] = transaction_model

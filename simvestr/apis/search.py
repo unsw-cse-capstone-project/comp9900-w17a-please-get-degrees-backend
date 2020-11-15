@@ -1,6 +1,5 @@
 import datetime
 
-from flask import jsonify
 from flask_restx import Resource, Namespace, reqparse
 
 from simvestr.helpers.auth import requires_auth
@@ -14,6 +13,7 @@ api.models[quote_model.name] = quote_model
 api.models[candle_model.name] = candle_model
 api.models[details_model.name] = details_model
 api.models[search_name_model.name] = search_name_model
+
 
 @api.route("/details/<string:stock_symbol>")
 class StockDetails(Resource):
@@ -30,7 +30,6 @@ class StockDetails(Resource):
     def get(self, stock_symbol):
         payload = get_details(stock_symbol.upper())
         return payload, 200
-
 
 
 @api.route("/<string:name>")
@@ -52,9 +51,11 @@ class StockSearch(Resource):
             for s in stock_q
         ]
 
+
 candle_parser = reqparse.RequestParser()
 candle_parser.add_argument("symbol", type=str, required=True, help="Stock symbol to search.")
-candle_parser.add_argument("resolution", type=str, help="Resolution of data", default="D", choices=("1", "5", "15", "30", "60", "D", "W", "M",))
+candle_parser.add_argument("resolution", type=str, help="Resolution of data", 
+                           default="D", choices=("1", "5", "15", "30", "60", "D", "W", "M",))
 candle_parser.add_argument("from", type=int, help="UNIX timestamp. Interval initial value.")
 candle_parser.add_argument("to", type=int, help="UNIX timestamp. Interval end value.")
 
@@ -86,6 +87,7 @@ class Candles(Resource):
 
         candle = search(query="candle", arg=args)
         if candle["s"] == "no_data":
-            return {"message": "Symbol not found or data unavailable for that resolution, check inputs and try again."}, 404
+            return {"message": "Symbol not found or data unavailable for that resolution, "
+                               "check inputs and try again."}, 404
 
         return candle, 200

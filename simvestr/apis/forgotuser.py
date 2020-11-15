@@ -41,8 +41,11 @@ class ForgotUser(Resource):
     @api.response(404, "User not found")
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
-    @api.doc(id="reset_user_password", model=forgotuser_email_model,
-             description="Send OTP to registered email")
+    @api.doc(
+        id="reset_user_password",
+        body=forgotuser_email_model,
+        description="Send OTP to registered email"
+    )
     @api.expect(forgotuser_email_parser, validate=True)
     def get(self):
         args = forgotuser_email_parser.parse_args()
@@ -54,7 +57,8 @@ class ForgotUser(Resource):
         global random_OTP
         random_OTP = random.randint(1000, 9999)
         print(f'\n\nOTP: {random_OTP}\n\n')
-        message_content = f'ALERT! You have requested password change for your Simvestr account. Please copy the 4 digit OTP {random_OTP}.'
+        message_content = f'ALERT! You have requested password change for your Simvestr account. ' \
+                          f'Please copy the 4 digit OTP {random_OTP}.'
         # sends a confirmation email to the user
         send_email(user.email_id, f'Forgot Password - OTP: {random_OTP}', message_content)
         return 200
@@ -85,7 +89,7 @@ class ForgotUser(Resource):
         user.password = generate_password_hash(password, method='sha256')
         db.session.commit()
 
-        message_content = "ALERT! Your password for Simvestr has been changed. Please contact us if this wasn\"t you."
+        message_content = "ALERT! Your password for Simvestr has been changed. Please contact us if this wasn't you."
         # sends a confirmation email to the user
         send_email(email_id, "Password updated successfully", message_content)
         return 200

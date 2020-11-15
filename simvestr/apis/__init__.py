@@ -15,6 +15,8 @@ from .portfolio import api as ns10
 from .transactions import api as ns11
 from .leaderboard import api as ns12
 from .exportfolio import api as ns13
+from .deleteaccount import api as ns14
+from .refreshtoken import api as ns15
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 
@@ -40,3 +42,5 @@ api.add_namespace(ns10, path="/portfolio")
 api.add_namespace(ns11, path="/transaction")
 api.add_namespace(ns12, path="/leaderboard")
 api.add_namespace(ns13, path="/exportfolio")
+api.add_namespace(ns14, path="/deleteaccount")
+api.add_namespace(ns15, path="/refreshtoken")

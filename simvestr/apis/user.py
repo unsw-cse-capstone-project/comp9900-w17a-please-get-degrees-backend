@@ -1,7 +1,6 @@
 from flask_restx import Resource, Namespace, fields
 
 from simvestr.helpers.user import get_user_details, get_info
-from simvestr.models import User
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.models.api_models import user_details_model, user_model, user_info_model
 
@@ -14,11 +13,10 @@ api.models[user_details_model.name] = user_details_model
 @api.route('/details')
 class UserQuery(Resource):
     @api.response(200, "Success")
-    @api.response(401, "Unauthorised")
     @requires_auth
     @api.doc(
         model=user_details_model,
-        description="User details endpoint"
+        description="Detailed user details"
     )
     @api.marshal_with(user_details_model)
     def get(self, ):
@@ -30,7 +28,6 @@ class UserQuery(Resource):
 @api.route('/info')
 class UserInfoQuery(Resource):
     @api.response(200, "Success")
-    @api.response(401, "Unauthorised")
     @api.doc(
         description="Basic user details",
         model=user_info_model

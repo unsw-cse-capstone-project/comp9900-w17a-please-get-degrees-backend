@@ -16,17 +16,14 @@ api = Namespace(
     description="Deletes the cookie from browser",
 )
 
+
 @api.route("")
 class Token(Resource):
     @api.response(200, "Successful")
     def get(self):
-
         @after_this_request
         def set_cookie_value(response):
             response.delete_cookie("token")
             return response
 
-        return (
-            {"message": "Logout successful"},
-            200,
-        )
+        return 200

@@ -30,7 +30,6 @@ watchlist_parser.add_argument("symbol", type=str)
 
 @api.route("")
 class Watchlist(Resource):
-    # @api.param('watchlist_id', 'Stock or crypto symbol to be searched')
     @api.response(200, "Success")
     @api.doc(
         description="Gets details for the specified stock",
@@ -43,7 +42,6 @@ class Watchlist(Resource):
         user = get_user()
         watchlist_list = get_watchlist(user)
         return watchlist_list, 200
-
 
     @api.marshal_with(base_symbol,)
     @api.response(200, "Entry in watchlist")
@@ -59,15 +57,13 @@ class Watchlist(Resource):
         args = watchlist_parser.parse_args()
         symbol = args["symbol"].upper()
 
-        # Run this to check if in the database or exisits. Will add it if not already there
+        # Run this to check if in the database or exists. Will add it if not already there
         get_details(symbol)
 
         user = get_user()
 
-
-
         if not in_watchlist(symbol, user):
-            watchlist_item =  WatchlistItem(watchlist_id=user.watchlist.id, stock_symbol=symbol,)
+            watchlist_item = WatchlistItem(watchlist_id=user.watchlist.id, stock_symbol=symbol,)
             user.watchlist.watchlist_items.append(
                 watchlist_item
             )
