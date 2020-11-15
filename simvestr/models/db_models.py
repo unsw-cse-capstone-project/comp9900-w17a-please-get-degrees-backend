@@ -1,8 +1,22 @@
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
+
+# from simvestr.helpers.db import sql_utcnow
 
 db = SQLAlchemy()
+
+from sqlalchemy.sql import expression
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.types import DateTime
+
+class utcnow(expression.FunctionElement):
+    type = DateTime()
+
+@compiles(utcnow, 'sqlite')
+def sql_utcnow(**kw):
+    return '(DATETIME("now"))'
 
 
 # from here: https://stackoverflow.com/questions/6262943/sqlalchemy-how-to-make-django-choices-using-sqlalchemy
@@ -37,8 +51,8 @@ class User(db.Model):
 
     first_name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
-    date_joined = db.Column(db.DateTime, default=datetime.utcnow)
-    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    date_joined = db.Column(db.DateTime, server_default=func.now())
+    last_updated = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
     validated = db.Column(db.Boolean, default=False)
     role = db.Column(ChoiceType(ROLE_CHOICES), default='user')
 
@@ -78,14 +92,14 @@ class WatchlistItem(db.Model):
     __tablename__ = "watchlist_item"
     watchlist_id = db.Column(db.Integer, db.ForeignKey('watchlist.id'), primary_key=True)
     stock_symbol = db.Column(db.String, db.ForeignKey("stock.symbol"), primary_key=True)
-    date_added = db.Column("date_added", db.DateTime, default=datetime.utcnow)
+    date_added = db.Column("date_added", db.DateTime, server_default=func.now())
 
 
 class Watchlist(db.Model):
     __tablename__ = "watchlist"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, )
+    timestamp = db.Column(db.DateTime, server_default=func.now(), )
     watchlist_items = db.relationship("WatchlistItem", backref=db.backref("watchlist", lazy="select", uselist=True),
                                 lazy="joined", cascade="all, delete-orphan",)
 
@@ -149,7 +163,7 @@ class PortfolioPrice(db.Model):
 
     close_balance = db.Column(db.Float)
     investment_value = db.Column(db.Float)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, )
+    timestamp = db.Column(db.DateTime, server_default=func.now(), )
 
 
 class Transaction(db.Model):
@@ -157,7 +171,7 @@ class Transaction(db.Model):
     portfolio_id = db.Column(db.Integer, db.ForeignKey("portfolio.id"))
     symbol = db.Column(db.String(6), db.ForeignKey("stock.symbol"))  # Should be foreign key in stock table
     quote = db.Column(db.Float, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, )
+    timestamp = db.Column(db.DateTime, server_default=func.now(), )
     quantity = db.Column(db.Integer, nullable=False)
     fee = db.Column(db.Integer, default=0)
 

@@ -18,6 +18,17 @@ from simvestr.helpers.portfolio import all_stocks_balance
 SALT_SIZE = 6
 
 
+from sqlalchemy.sql import expression
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.types import DateTime
+
+class utcnow(expression.FunctionElement):
+    type = DateTime()
+
+@compiles(utcnow, 'sqlite')
+def sql_utcnow(element, compiler, **kw):
+    return "datetime(now)"
+
 def make_salt():
     valid_pw_chars = current_app.config["VALID_CHARS"]
 
