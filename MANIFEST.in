@@ -7,3 +7,5 @@ include README.md
 include requirements.txt
 
 include simvestr/config.yml
+
+include resources/test_user_data.xlsx
