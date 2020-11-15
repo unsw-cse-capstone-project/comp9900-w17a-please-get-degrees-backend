@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Nov 15 14:20:41 2020
-
 @author: Kovid
 """
 
@@ -29,7 +28,6 @@ class Token(Resource):
     @api.doc(
         descriptions="Resets token cookie in browser"
     )
-
     def put(self):
         user = get_user()
 
