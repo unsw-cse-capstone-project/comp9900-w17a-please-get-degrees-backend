@@ -9,7 +9,6 @@ from simvestr.helpers.portfolio import (
     get_stocks_owned,
     get_close_balance, simulate,
 )
-from simvestr.models import Portfolio
 from simvestr.models.api_models import (
     portfolio_model,
     value_model,
@@ -79,7 +78,6 @@ class PortfolioHistory(Resource):
         description="Show the user's current portfolio holdings and value",
         model=portfolios_historic_model,
     )
-    # @api.marshal_with(portfolios_historic_model)
     def get(self):
         user = get_user()
         args = portfolio_history_parser.parse_args()
