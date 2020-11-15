@@ -38,7 +38,7 @@ class Signup(Resource):
     @api.response(403, "Already exists")
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
-    @api.doc(id="create_new_user",body=signup_model, description="Creates a new user")
+    @api.doc(id="create_new_user", body=signup_model, description="Creates a new user")
     def post(self):
         args = signup_parser.parse_args()
         email_id = args["email"].lower()
@@ -65,7 +65,7 @@ class Signup(Resource):
                 {"message": "Password should be at least 8 characters", },
                 411,
             )
-        
+
         if " " in password:
             return (
                 {"message": "Password cannot contain spaces", },
@@ -79,12 +79,13 @@ class Signup(Resource):
             password=password,
         )
 
-        message_content = "A new user from your email ID has signed-up for our free investing simulator. Please login to start investing"
+        message_content = "A new user from your email ID has signed-up for " \
+                          "our free investing simulator. Please login to start investing"
         # sends a confirmation email to the user
         send_email(
             email_id, "User created successfully", message_content
         )
-        
+
         return (
             {"message": "New user created!"},
             201
