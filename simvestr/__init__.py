@@ -25,7 +25,7 @@ def boot_app(app, run_setup=False):
 
     if not db_path.is_file() or run_setup:
         print("Aah new installation!")
-        curr_dir = Path(__file__).parent
+        curr_dir = Path(__file__).absolute().parent
         input_data = curr_dir / "resources" / "test_data_user.xlsx"
         print(input_data)
         setup_new_db(app, input_data)
