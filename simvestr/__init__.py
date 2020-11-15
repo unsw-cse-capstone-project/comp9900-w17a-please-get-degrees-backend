@@ -53,7 +53,7 @@ def boot_app(app, run_setup):
         input_data = curr_dir / "resources" / "test_data_user.xlsx"
         setup_new_db(app, input_data)
     else:
-        print("Database file found, won\"t reset the db!")
+        print("Database file found, won't reset the db!")
 
 
 def create_app(test_config=None, sim_config=None, run_setup=False):
