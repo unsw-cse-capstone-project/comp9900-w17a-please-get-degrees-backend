@@ -20,12 +20,12 @@ from .refreshtoken import api as ns15
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 
+# All API metadatas
 api = Api(
     blueprint,
     title="SimvestrAPI",
     version="0.01",
     description="Simvestr api",
-    # All API metadatas
 )
 
 # Register each new namespace here
