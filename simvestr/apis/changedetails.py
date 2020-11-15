@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Oct 18 11:57:41 2020
-
 @author: Kovid
 """
 
@@ -10,8 +9,7 @@ from flask_restx import Resource, reqparse, Namespace, abort
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.user import change_password
-from simvestr.models import Portfolio
-from simvestr.models import db
+from simvestr.models import db, Portfolio
 from simvestr.models.api_models import changenames_model, changepwd_model
 
 api = Namespace(
@@ -39,7 +37,10 @@ changepwd_parser.add_argument("password", type=str)
 @api.route('/changenames')
 class ChangeNames(Resource):
     @api.response(200, "Successful")
-    @api.doc(body=changenames_model, description="Resets user's names")
+    @api.doc(
+        body=changenames_model, 
+        description="Resets user's names"
+    )
     @api.expect(changenames_parser, validate=True)
     @requires_auth
     def put(self):
@@ -64,14 +65,17 @@ class ChangeNames(Resource):
             user.email_id, "User details have been changed", message_content
         )
         return 200
-
+    
 
 @api.route('/changepwd')
 class ChangePwd(Resource):
     @api.response(200, "Successful")
     @api.response(411, "Length required")
     @api.response(422, "Unprocessable entity")
-    @api.doc(body=changepwd_model, description="Resets password")
+    @api.doc(
+        body=changepwd_model, 
+        description="Resets password"
+    )
     @api.expect(changepwd_parser, validate=True)
     @requires_auth
     def put(self):
@@ -79,22 +83,22 @@ class ChangePwd(Resource):
         password = args.get("password")
 
         user = get_user()
-            
+
         if len(password) < 8:
             return abort(
                 411, "Password should be at least 8 characters"
             )
-        
+
         if " " in password:
             return abort(
                 422, "Password cannot contain spaces"
             )
-        
+
         change_password(user, password)
-        
+
         message_content = "You have successfully changed your password. Let us know if this wasn't you."
         # sends a confirmation email to the user
         send_email(
             user.email_id, "User details have been changed", message_content
-        )  
+        )
         return 200
