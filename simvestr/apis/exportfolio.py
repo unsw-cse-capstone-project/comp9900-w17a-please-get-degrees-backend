@@ -51,7 +51,4 @@ class ExportPortfolio(Resource):
             response.headers["Cache-Control"] = "public, max-age=0"
             return response
 
-        return (
-            {"message": "Portfolio downloaded", },
-            200,
-        )
+        return 200
