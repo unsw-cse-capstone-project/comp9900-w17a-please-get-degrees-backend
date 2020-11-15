@@ -22,7 +22,7 @@ class DeleteAccount(Resource):
     @requires_auth
     @api.response(200, "Successful")
     @api.doc(
-        description="deletes users account, watchlist and portfolio",
+        description="delete user account",
     )
     def get(self):
         user = get_user()
@@ -32,7 +32,7 @@ class DeleteAccount(Resource):
         for pp in PortfolioPrice.query.filter_by(portfolio_id=port.id).all() :
             PortfolioPrice.query.filter_by(id=pp.id).delete()
         for tr in Transaction.query.filter_by(portfolio_id=port.id).all() :
-            Transaction.query.filter_by(id=pp.id).delete()
+            Transaction.query.filter_by(id=tr.id).delete()
 
         User.query.filter_by(id=user.id).delete()
         Watchlist.query.filter_by(id=watch.id).delete()
