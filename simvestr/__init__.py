@@ -1,28 +1,16 @@
-import datetime
 from pathlib import Path
-import threading
 
 from flask import Flask
 from flask_cors import CORS
-import yaml
 
+from simvestr.apis import blueprint as api
 from simvestr.helpers.db import setup_new_db
 from simvestr.helpers.simulation import update_portfolio
 from simvestr.helpers.utils import load_yaml_config
 from simvestr.models import db
 
-from simvestr.apis import blueprint as api
 
-
-
-
-
-
-
-
-
-
-def boot_app(app, run_setup):
+def boot_app(app):
 
     db_path = Path(app.instance_path) / "simvestr.db"
     app.config.from_mapping(
@@ -43,7 +31,7 @@ def boot_app(app, run_setup):
         print("Database file found, won't reset the db!")
 
 
-def create_app(test_config=None, sim_config=None, run_setup=False, config_dir=None):
+def create_app(test_config=None, sim_config=None, run_setup=False):
     # create and configure the app
 
     app = Flask(__name__, instance_relative_config=True)
