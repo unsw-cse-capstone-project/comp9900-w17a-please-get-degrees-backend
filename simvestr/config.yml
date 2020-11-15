@@ -1,1 +1,15 @@
-Finnhub API Key: bu0ggnv48v6qoj76f840
+FINNHUB_API_KEY: bu0ggnv48v6qoj76f840
+START_BALANCE: 100000
+SLIPPAGE: 0.0005
+VALID_CHARS: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY0123456789!@#$%^&*()-_=+<>,./?:;{}[]`~
+
+UPDATE_DURATION:
+  days: 1000000
+
+UPDATE_INTERVAL:
+  seconds: 2
+
+UPDATE_TIME:
+  hour: 21
+  minute: 30
+  second: 0

@@ -1,55 +1,40 @@
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, fields
 
+from simvestr.helpers.user import get_user_details, get_info
 from simvestr.helpers.auth import get_user, requires_auth
-from simvestr.helpers.portfolio import all_stocks_balance
-from simvestr.models import User
+from simvestr.models.api_models import user_details_model, user_model, user_info_model
 
 api = Namespace('view user details', description='Demo api for querying users')
-
-
-@api.route('/all')
-class UsersQuery(Resource):
-    @requires_auth
-    def get(self):
-        user = User.query.all()
-        data = {u.id: dict
-        (email=u.email_id,
-         role=u.role,
-         fname=u.first_name,
-         lname=u.last_name,
-         validated=u.validated,
-         ) for u in user}
-        payload = dict(
-            data=data
-        )
-        return payload
+api.models[user_model.name] = user_model
+api.models[user_info_model.name] = user_info_model
+api.models[user_details_model.name] = user_details_model
 
 
 @api.route('/details')
 class UserQuery(Resource):
+    @api.response(200, "Success")
+    @requires_auth
+    @api.doc(
+        model=user_details_model,
+        description="Detailed user details"
+    )
+    @api.marshal_with(user_details_model)
+    def get(self, ):
+        user = get_user()
+        data = get_user_details(user)
+        return data, 200
+
+
+@api.route('/info')
+class UserInfoQuery(Resource):
+    @api.response(200, "Success")
+    @api.doc(
+        description="Basic user details",
+        model=user_info_model
+    )
+    @api.marshal_with(user_info_model)
     @requires_auth
     def get(self, ):
         user = get_user()
-        watch = user.watchlist
-        port = user.portfolio
-        transact = user.portfolio.transactions.all()
-        data = dict(
-            email=user.email_id,
-            watchlist=[s.symbol for s in watch.stocks],
-            portfolio={
-                "name": port.portfolio_name,
-                "portfolio": all_stocks_balance(user)
-            },
-            transaction={
-                t.symbol: {
-                    "quantity": t.quantity,
-                    "quote": t.quote,
-                    "date": str(t.timestamp),
-                } for t in transact
-            }
-        )
-        print(data)
-        payload = dict(
-            data=data
-        )
-        return payload
+        info = get_info(user)
+        return info, 200

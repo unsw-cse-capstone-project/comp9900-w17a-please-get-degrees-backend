@@ -11,16 +11,26 @@ from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
 
 from simvestr.models import db
-from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges
+from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, Transaction, Exchanges, WatchlistItem
 from simvestr.helpers.search import search
-
-from pathlib import Path
+from simvestr.helpers.portfolio import all_stocks_balance
 
 SALT_SIZE = 6
 
 
+from sqlalchemy.sql import expression
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.types import DateTime
+
+class utcnow(expression.FunctionElement):
+    type = DateTime()
+
+@compiles(utcnow, 'sqlite')
+def sql_utcnow(element, compiler, **kw):
+    return "datetime(now)"
+
 def make_salt():
-    valid_pw_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY0123456789!@#$%^&*()-_=+<>,./?:;{}[]`~"
+    valid_pw_chars = current_app.config["VALID_CHARS"]
 
     return "".join(np.random.choice(list(valid_pw_chars), size=SALT_SIZE))
 
@@ -43,7 +53,6 @@ def close_db(e=None):
 
 
 def init_db():
-    # db = get_db()
     db.create_all()
 
 
@@ -79,14 +88,14 @@ def populate_stocks():
             },
             "search": lambda ex: search(query="exchange", arg=ex)
         },
-        # "crypto": {
-        #     "exchange": crypto_exchanges,
-        #     "name": {
-        #         "description": "name",
-        #         "displaySymbol": "currency",  # please review, unsure if this is a good idea
-        #     },
-        #     "search": lambda ex: search(query="exchange", arg=ex, stock_type="crypto")
-        # },
+        "crypto": {
+            "exchange": crypto_exchanges,
+            "name": {
+                "description": "name",
+                "displaySymbol": "currency",  # please review, unsure if this is a good idea
+            },
+            "search": lambda ex: search(query="exchange", arg=ex, stock_type="crypto")
+        },
     }
 
     exchange_stocks = []
@@ -109,21 +118,20 @@ def populate_stocks():
         num_stocks, stock_dict = heapq.heappop(exchange_stocks)
         ex, df = stock_dict.popitem()
         unique_stocks = df.name.unique()
-        sq = Stock.query.filter(Stock.name.in_(list(unique_stocks))).all()
+        sq = Stock.query.filter(Stock.symbol.in_(list(unique_stocks))).all()
 
         if sq:
-            names = [n.name for n in sq]
-            df = df[~df.name.isin(names)]
+            symbols = [n.symbol for n in sq]
+            df = df[~df.symbol.isin(symbols)]
 
         if len(df):
             bulk_add_from_df(df, db, Stock)
 
 
-def load_dummy():
+def load_dummy(data_path: Path):
     db = get_db()
-    data_path = Path.cwd() / "resources" / "test_data_user.xlsx"
 
-    # Order of models matterss
+    # Order of models matters
     load_mapping = dict(
         exchanges=Exchanges,
         watchlist=Watchlist,
@@ -137,7 +145,7 @@ def load_dummy():
 
     df_map["users"]['salt'] = [make_salt() for _ in range(len(df_map["users"]))]
     df_map["users"].password = df_map["users"].password + df_map["users"].salt
-    df_map["users"].password = df_map["users"].password.apply(generate_password_hash, method="sha256")
+    df_map["users"].password = df_map["users"].password.apply(generate_password_hash, method="sha256", )
 
     bulk_add_from_df(df_map["exchanges"], db, Exchanges)
     bulk_add_from_df(df_map["transaction"], db, Transaction)
@@ -153,11 +161,14 @@ def load_dummy():
         watch_df = df_map["watchlist"]
         watch_df = watch_df[watch_df.user_id == user.id]
         watchlist = Watchlist(user_id=user.id)
+        db.session.add(watchlist)
 
         stocks = Stock.query.filter(Stock.symbol.in_(list(watch_df["symbol"].values))).all()
-        watchlist.stocks = stocks
-
-        db.session.add(watchlist)
+        for stock in stocks:
+            watchlist_item = WatchlistItem(watchlist_id=watchlist.id, stock_symbol=stock.symbol, )
+            db.session.add(watchlist_item)
+            db.session.commit()
+        # watchlist.stocks = stocks
 
         user.watchlist = watchlist
 
@@ -165,7 +176,7 @@ def load_dummy():
 
         port_df = df_map["portfolio"]
         port_df = port_df[port_df.user_id == user.id]
-        port = Portfolio(portfolio_name=port_df.to_dict(orient="records")[0]["portfolio_name"])
+        port = Portfolio(**port_df[["portfolio_name", "balance"]].to_dict(orient="records")[0])
         port.transactions = []
 
         db.session.add(port)
@@ -200,6 +211,12 @@ def load_dummy():
             db.session.add(trans)
             db.session.commit()
 
+        curr_balance = all_stocks_balance(user)
+        stock_list = Stock.query.filter(Stock.symbol.in_(list(curr_balance))).all()
+        user.portfolio.stocks.extend(stock_list)
+
+        db.session.commit()
+
 
 @click.command("init-db")
 @with_appcontext
@@ -212,3 +229,10 @@ def init_db_command():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+
+
+def setup_new_db(app, data_path: Path):
+    with app.app_context():
+        delete_db()
+        init_db()
+        load_dummy(data_path)

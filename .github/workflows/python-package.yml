@@ -29,23 +29,26 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
     - name: Run the package script
       run: |
         python setup.py sdist bdist_wheel
 
+
+    - name: Test with pytest
+      run: |
+        pytest
+
+    - name: Install applciation
+      run: |
+        pip install dist/simvestr-1.0.0.tar.gz
+
     - name: Commit build files
       run: |
+        git add dist/simvestr-1.0.0.tar.gz
+        git add dist/simvestr-1.0.0-py3-none-any.whl
         git config --global user.name "Github Action"
         git config --global user.email "KhanMechAI@users.noreply.github.com"
         git commit -am "Build distribution"
         git push
 
-#    - name: GitHub Push
-#      uses: ad-m/github-push-action@v0.6.0
-#
-#    - name: Push changes
-#      uses: ad-m/github-push-action@master
-#      with:
-#        github_token: ${{ secrets.GITHUB_TOKEN }}
-#        branch: ${{ github.ref }}
-#        git config --global user.email "KhanMechAI@users.noreply.github.com"

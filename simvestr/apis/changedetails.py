@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Oct 18 11:57:41 2020
-
 @author: Kovid
 """
 
-from flask_restx import Resource, fields, reqparse, Namespace
+from flask_restx import Resource, reqparse, Namespace, abort
 
 from simvestr.helpers.auth import get_user, requires_auth
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.helpers.user import change_password
-from simvestr.models import Portfolio
-from simvestr.models import db
+from simvestr.models import db, Portfolio
+from simvestr.models.api_models import changenames_model, changepwd_model
 
 api = Namespace(
     "change user details",
@@ -24,26 +23,13 @@ api = Namespace(
     description="Back-end API for changing user details - Name and Password",
 )
 
-# ------------ Change user details ----------- #
-changenames_model = api.model(
-    "ChangeNames",
-    {
-        "email_id": fields.String,
-        "first_name": fields.String,
-        "last_name": fields.String
-    },
-)
+api.models[changenames_model.name] = changenames_model
+api.models[changepwd_model.name] = changepwd_model
+
 changenames_parser = reqparse.RequestParser()
 changenames_parser.add_argument("first_name", type=str)
 changenames_parser.add_argument("last_name", type=str)
 
-changepwd_model = api.model(
-    "ChangePwd",
-    {
-        "email_id": fields.String,
-        "password": fields.String
-    },
-)
 changepwd_parser = reqparse.RequestParser()
 changepwd_parser.add_argument("password", type=str)
 
@@ -51,7 +37,10 @@ changepwd_parser.add_argument("password", type=str)
 @api.route('/changenames')
 class ChangeNames(Resource):
     @api.response(200, "Successful")
-    @api.doc(model="ChangeNames", body=changenames_model, description="Resets user\'s names")
+    @api.doc(
+        body=changenames_model, 
+        description="Resets user's names"
+    )
     @api.expect(changenames_parser, validate=True)
     @requires_auth
     def put(self):
@@ -70,21 +59,23 @@ class ChangeNames(Resource):
         portfolio.portfolio_name = user.first_name + '\'s Portfolio'
         db.session.commit()
 
-        message_content = "You have succesfully changed your personal details. Let us know if this wasn\'t you."
+        message_content = "You have successfully changed your personal details. Let us know if this wasn't you."
+        # sends a confirmation email to the user
         send_email(
             user.email_id, "User details have been changed", message_content
-        )  # sends a confirmation email to the user
-        return (
-            {"error": False, "message": "User details changed!"},
-            200
         )
-
+        return 200
+    
 
 @api.route('/changepwd')
 class ChangePwd(Resource):
     @api.response(200, "Successful")
-    @api.response(447, "Password should be at least 8 characters")
-    @api.doc(model="ChangePwd", body=changepwd_model, description="Resets password")
+    @api.response(411, "Length required")
+    @api.response(422, "Unprocessable entity")
+    @api.doc(
+        body=changepwd_model, 
+        description="Resets password"
+    )
     @api.expect(changepwd_parser, validate=True)
     @requires_auth
     def put(self):
@@ -93,20 +84,21 @@ class ChangePwd(Resource):
 
         user = get_user()
 
-        # Need to add check for invalid characters
         if len(password) < 8:
-            return (
-                {"error": True, "message": "Password should be at least 8 characters", },
-                447,
+            return abort(
+                411, "Password should be at least 8 characters"
             )
+
+        if " " in password:
+            return abort(
+                422, "Password cannot contain spaces"
+            )
+
         change_password(user, password)
 
-        message_content = "You have succesfully changed your password. Let us know if this wasn\'t you."
+        message_content = "You have successfully changed your password. Let us know if this wasn't you."
+        # sends a confirmation email to the user
         send_email(
             user.email_id, "User details have been changed", message_content
-        )  # sends a confirmation email to the user
-        return (
-            {"error": False, "message": "Password changed!"},
-            200
         )
-# ------------ Change user details ----------- #
+        return 200

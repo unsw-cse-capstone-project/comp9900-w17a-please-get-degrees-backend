@@ -5,8 +5,6 @@ Created on Thu Oct 22 12:07:31 2020
 @author: Kovid
 """
 
-# eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbF9pZCI6Imsuc2Nocm9kZXItdHVybmVyQHN0dWRlbnQudW5zdy5lZHUuYXUiLCJleHAiOjE2MDM2MDkzODh9.40_crwz6fdnYEZsWN5XfSJqybHRFQVeSurfOUYt3Fh4
-
 import numpy as np
 
 from functools import wraps
@@ -14,9 +12,11 @@ import datetime
 import jwt
 
 from flask_restx import abort, reqparse
+from werkzeug.security import check_password_hash
 
 from simvestr.models import User
 
+# TODO: MOve to config file
 SECRET_KEY = "thisismysecretkeydonotstealit"
 EXPIRES_IN = 86400  # 24 Hours
 
@@ -66,7 +66,7 @@ def requires_auth(f):
         arg = token_parser.parse_args()  # From http cookies
         token = arg.get("token")
         try:
-            user = auth.validate_token(token)
+            auth.validate_token(token)
         except Exception as e:
             abort(401, e)
         return f(*args, **kwargs)
@@ -94,6 +94,11 @@ def get_user():
         abort(449, "User doesn't exist")
 
     return user
+
+
+def check_password(user, test_password):
+    test_password = "".join([test_password, user.salt])
+    return True if check_password_hash(user.password, test_password) else False
 
 
 auth = AuthenticationToken(SECRET_KEY, EXPIRES_IN)
