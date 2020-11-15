@@ -5,8 +5,10 @@ Created on Sun Nov  1 01:08:54 2020
 """
 
 from pathlib import Path
+
 from flask_restx import Resource, Namespace
 from flask import after_this_request, send_from_directory, make_response
+
 from simvestr.helpers.auth import requires_auth, get_user
 from simvestr.helpers.portfolio import portfolio_value, get_portfolio
 from simvestr.helpers.exportfolio import create_csv
@@ -42,7 +44,9 @@ class ExportPortfolio(Resource):
 
         @after_this_request
         def download_file(response):
-            response = make_response(send_from_directory(directory=file_path, filename=file_basename, as_attachment=True))
+            response = make_response(
+                send_from_directory(directory=file_path, filename=file_basename, as_attachment=True)
+            )
             response.headers["X-UA-Compatible"] = "IE=Edge,chrome=1"
             response.headers["export"] = "portfolio"
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
