@@ -11,7 +11,9 @@ on:
 
 jobs:
   installation:
+
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         python-version: [3.7,]
@@ -30,18 +32,18 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
   test:
     runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          python-version: [ 3.7, ]
+    strategy:
+      matrix:
+        python-version: [ 3.7, ]
     needs: installation
     - name: Test with pytest
       run: |
         pytest
   build:
     runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          python-version: [ 3.7, ]
+    strategy:
+      matrix:
+        python-version: [ 3.7, ]
     needs: [installation, test]
     - name: Run the package script
       run: |
