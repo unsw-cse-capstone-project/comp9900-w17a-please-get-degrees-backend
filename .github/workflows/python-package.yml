@@ -11,7 +11,6 @@ on:
 
 jobs:
   installation:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,15 +28,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
   test:
-    - needs: installation
+    needs: installation
     - name: Test with pytest
       run: |
         pytest
-
   build:
-    - needs: [installation, test]
+    needs: [installation, test]
     - name: Run the package script
       run: |
         python setup.py sdist bdist_wheel
