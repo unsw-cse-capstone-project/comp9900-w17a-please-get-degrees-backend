@@ -43,7 +43,6 @@ class ForgotUser(Resource):
     @api.response(422, "Unprocessable entity")
     @api.doc(
         id="reset_user_password",
-        body=forgotuser_email_model,
         description="Send OTP to registered email"
     )
     @api.expect(forgotuser_email_parser, validate=True)
