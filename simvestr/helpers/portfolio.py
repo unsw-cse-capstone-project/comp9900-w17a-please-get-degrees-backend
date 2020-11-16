@@ -134,9 +134,12 @@ def portfolio_value(user: User, use_stored=False, average_mode="moving"):
 
 def get_portfolio(user, averagemode):
     portfolio = portfolio_value(user, average_mode=averagemode.lower())
+    day_change = user.portfolio.portfolioprice[-1]
     return dict(
         name=user.portfolio.portfolio_name,
         balance=user.portfolio.balance,
+        prev_balance=day_change.close_balance,
+        prev_investment_value=day_change.investment_value,
         total_value=sum([x["value"] for x in portfolio]),
         total_return=sum([x["return"] for x in portfolio]),
         portfolio=portfolio,
