@@ -22,6 +22,14 @@ def make_salt():
     return "".join(np.random.choice(list(valid_pw_chars), size=salt_length))
 
 
+def update_password(password: str, user: User, db):
+    new_salt = make_salt()
+    password += new_salt
+    user.salt = new_salt
+    user.password = generate_password_hash(password, method='sha256')
+    db.session.commit()
+
+
 # Defines setup and tear down the database
 
 def get_db():
@@ -101,15 +109,12 @@ def populate_stocks():
                 (exchange.priority, {exchange: df})
             )
 
+    stocks_df = pd.read_sql(Stock.query.with_entities(Stock.symbol).subquery(), db.session.bind)
     while exchange_stocks:
         num_stocks, stock_dict = heapq.heappop(exchange_stocks)
         ex, df = stock_dict.popitem()
-        unique_stocks = df.name.unique()
-        sq = Stock.query.filter(Stock.symbol.in_(list(unique_stocks))).all()
 
-        if sq:
-            symbols = [n.symbol for n in sq]
-            df = df[~df.symbol.isin(symbols)]
+        df = df[~df.symbol.isin(stocks_df.symbol)]
 
         if len(df):
             bulk_add_from_df(df, db, Stock)

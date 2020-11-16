@@ -12,8 +12,9 @@ import datetime
 import jwt
 
 from flask_restx import abort, reqparse
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
+from simvestr.helpers.db import make_salt
 from simvestr.models import User
 
 # TODO: MOve to config file
@@ -99,6 +100,8 @@ def get_user():
 def check_password(user, test_password):
     test_password = "".join([test_password, user.salt])
     return True if check_password_hash(user.password, test_password) else False
+
+
 
 
 auth = AuthenticationToken(SECRET_KEY, EXPIRES_IN)
