@@ -55,6 +55,7 @@ class User(db.Model):
     last_updated = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
     validated = db.Column(db.Boolean, default=False)
     role = db.Column(ChoiceType(ROLE_CHOICES), default='user')
+    otp = db.Column(db.String(4))
 
     watchlist = db.relationship(
         "Watchlist",
@@ -75,13 +76,7 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.email_id
 
-
-#
-# wl_stock = db.Table("watchlist_stock",
-#                     db.Column("watchlist_id", db.Integer, db.ForeignKey("watchlist.id")),
-#                     db.Column("stock_symbol", db.String, db.ForeignKey("stock.symbol"))
-#                     )
-
+    
 p_stock = db.Table("portfolio_stock",
                    db.Column("portfolio_id", db.Integer, db.ForeignKey("portfolio.id")),
                    db.Column("stock_symbol", db.String, db.ForeignKey("stock.symbol"))
@@ -105,9 +100,6 @@ class Watchlist(db.Model):
 
 
 class Stock(db.Model):
-    # TODO: Need to confirm max length of symbol, light research suggests 6
-    # TODO: Need to confirm max length of name
-    # TODO: Handle crypto currencies codes
     __tablename__ = "stock"
     # id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     symbol = db.Column(db.String(15), primary_key=True, nullable=False)
@@ -127,7 +119,6 @@ class Stock(db.Model):
                                  lazy="joined")
     transactions = db.relationship("Transaction", backref=db.backref("stock", lazy="select", ), lazy="joined")
 
-    # CHANGE: I think these two can be deleted.
     industry = db.Column(db.String(120), )
     country = db.Column(db.String(120), )
 
