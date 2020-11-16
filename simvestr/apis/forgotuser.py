@@ -43,7 +43,6 @@ class ForgotUser(Resource):
     @api.response(422, "Unprocessable entity")
     @api.doc(
         id="reset_user_password",
-        body=forgotuser_email_model,
         description="Send OTP to registered email"
     )
     @api.expect(forgotuser_email_parser, validate=True)
@@ -64,7 +63,8 @@ class ForgotUser(Resource):
         send_email(user.email_id, f'Forgot Password - OTP: {random_OTP}', message_content)
         return {"email": email_id}, 200
 
-    @api.doc(id="reset_user_password", body=forgotuser_model,
+    @api.doc(id="reset_user_password", 
+             body=forgotuser_model,
              description="Resets password for user using OTP")
     @api.expect(forgotuser_parser, validate=True)
     def put(self):
