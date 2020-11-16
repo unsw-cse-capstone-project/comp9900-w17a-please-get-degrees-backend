@@ -37,7 +37,7 @@ class ExportPortfolio(Resource):
 
         file_basename = f'{portfolio_details["name"]}.xlsx'
         curr_dir = Path.cwd()
-        file_path = curr_dir / "resources"
+        file_path = curr_dir / "simvestr" / "resources"
         create_csv(
             file_path, file_basename, user, portfolio_details, portfolio_value_user
         )
