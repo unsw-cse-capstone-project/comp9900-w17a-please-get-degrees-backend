@@ -85,4 +85,19 @@ def test_logout(auth):
 
     assert response._status_code == 401
 
-
+def test_account_delete(auth):
+    auth.sign_up()
+    auth.login()
+    response =  auth._client.get(
+            "/".join([API_URL, "deleteaccount"]),
+        )
+    assert response._status_code == 200
+    
+    response = auth._client.post(
+            "/".join([API_URL, "login"]),
+            data={
+                "email": auth.email,
+                "password": auth.password,
+            }
+        )
+    assert response._status_code == 404
