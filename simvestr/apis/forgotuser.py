@@ -57,7 +57,6 @@ class ForgotUser(Resource):
         otp = str(random.randint(1000, 9999))
         update_otp(otp=otp, user=user, db=db)
 
-        print(f"\n\nOTP: {user.otp}\n\n")
         message_content = f"ALERT! You have requested password change for your Simvestr account. " \
                           f"Please copy the 4 digit OTP {user.otp}."
         # sends a confirmation email to the user
