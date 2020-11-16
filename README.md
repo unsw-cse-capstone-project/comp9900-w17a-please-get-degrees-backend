@@ -100,10 +100,3 @@ Navigate to the root directory of the source code and simply run:
 ## License
 [comment]: <> (TODO)
 This project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE v3 - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-[comment]: <> (TODO)
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
