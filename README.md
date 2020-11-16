@@ -13,17 +13,8 @@ All pre-requisites are listed in [requirements.txt](requirements.txt). They have
 
 ### Development Setup
 [comment]: <> (TODO: check that this procedure works on CSE/team pcs)
-First, setup your virtual environment. You can use conda or venv.
+First, setup your virtual environment. You can use the venv package.
 
-#### ```conda```
-```
-path_to_app $ conda create -n "simvestr" python=3.7.0
-path_to_app $ conda activate simvestr
-(simvestr) path_to_app $ 
-```
-
-#### ```pip``` 
-You must have the correct python version installed (python3.7) when using the pip method
 ```
 path_to_app $ python3.7 -m venv .simvestr
 ```
@@ -49,7 +40,7 @@ path_to_app>.\simvestr\Scripts\activate
 Now  ```pip```  install the the application from the distribution, it contains all the dependencies needed:
 
 ```
-(.simvestr) ($ or >) pip install dist\simvestr-1.0.0.tar.gz
+(.simvestr) ($ or >) pip install dist/simvestr-1.0.0.tar.gz
 ```
 
 
@@ -63,13 +54,15 @@ OSX or Linux:
 
 If the virtual environment created in the Getting Started section is not active, please activate it or re-visit the section to ensure a virtual environment is made.
 
-Within the virtual environment start the server using:
+If you're running the app for the first time and the database needs to be setup, run the following command within the virtual environment with the ```run_setup``` flag equal to ```True```.  This will start the server and intialise the database.
 
 ```
-(.your_env) path_to_app $ gunicorn "simvestr:create_app(run_setup=True)" --bind <host>:<port>
+(.your_env) path_to_app $ gunicorn "simvestr:create_app(run_setup=False)" --bind <host>:<port>
 ```
 
-Common ```host```'s and ```port```'s are ```0.0.0.0``` and ```5000``` respectively for running in a local environment.
+If the database has already been setup by running the above command, toggle the ```run_setup``` flag to ```false```. 
+
+Common ```host```'s and ```port```'s are ```0.0.0.0``` and ```5000``` respectively for running in a local environment. To work with the Front-end application however, please use ```host=127.0.0.1``` and ```port=5000``` .
 
 
 Windows:
@@ -86,7 +79,7 @@ To run the tests, the source code is required.
 
 Navigate to the root directory of the source code and simply run:
 ```
-(.your_env) path_to_app > pytest
+(.your_env) path_to_app $ pytest
 ```
 
 ## Authors
