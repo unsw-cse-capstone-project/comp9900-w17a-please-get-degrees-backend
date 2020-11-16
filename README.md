@@ -8,16 +8,16 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 [comment]: <> (TODO: expand on this as we go)
-All pre-requisites are listed in [requirements.txt](requirements.txt). They have also been packaged in the distribution if that is the preferred method for building.
+All pre-requisites are listed in [requirements.txt](requirements.txt). They have also been packaged in the distribution, which is the preferred method for installing the application.
 
 
-### Dev Setup
+### Development Setup
 [comment]: <> (TODO: check that this procedure works on CSE/team pcs)
 First, setup your virtual environment. You can use conda or venv.
 
 #### ```conda```
 ```
-path_to_app $ conda create -n "simvestr" python=3.7.0 flask flask_sqlalchemy
+path_to_app $ conda create -n "simvestr" python=3.7.0
 path_to_app $ conda activate simvestr
 (simvestr) path_to_app $ 
 ```
@@ -44,76 +44,50 @@ path_to_app>.\simvestr\Scripts\activate
 (.simvestr) path_to_app>
 ```
 
-Now either ```pip``` or ```conda``` install the dependencies:
+##### Dependencies
+
+Now  ```pip```  install the the application from the distribution, it contains all the dependencies needed:
 
 ```
-(.simvestr) ($ or >) pip install -r pip_requirments.txt
-```
-
-```
-(.simvestr) ($ or >) conda install --file conda_requirments.txt
+(.simvestr) ($ or >) pip install dist\simvestr-1.0.0.tar.gz
 ```
 
 
-### Installation as package
-
-If you git clone the repo it can also be installed as a package in your virtual environment.
-
-```
-pip install -e .
-```
-
-or you can build from the distribution if you are unable to download packages from pip or conda.
-
-```
-pip install dist\simvestr-0.0.1.tar.gz
-```
+The source code can then be seen in the ```~/your_virtual_environment/lib/site-packages/simvestr``` folder.
 
 ## Running the app
 
-Running the app is as simple as running the [run.py](run.py) file.
-```
-chmod -x run.py
-python run.py
-```
+The production server has been setup to run in a Unix environment. We have built a helper script for Windows, but note this will only launch the Flask debug server and is not suitable for production use.
 
-## Packaging new versions
+OSX or Linux:
 
-To package simply run the [package.py](package.py) file. This will package the app into build and dist directories. Only [dist](dist) is maintained on github.
+If the virtual environment created in the Getting Started section is not active, please activate it or re-visit the section to ensure a virtual environment is made.
+
+Within the virtual environment start the server using:
 
 ```
-python package.py
+(.your_env) path_to_app $ gunicorn "simvestr:create_app(run_setup=True)" --bind <host>:<port>
 ```
 
-Note: any additional packages that are required to the app must be added to the requirements files and to the [setup.py](setup.py) file.
+Common ```host```'s and ```port```'s are ```0.0.0.0``` and ```5000``` respectively for running in a local environment.
+
+
+Windows:
+
+To run from windows, the source code is required. Assuming that the tarball has been installed (and as such, the dependencies), the ```run.py``` script (whcih is stored at the root of the source code) can be used to run the application. 
+
+```
+(.your_env) path_to_source_code > python3 run.py
+```
 
 ## Running the tests
 [comment]: <> (TODO)
-Explain how to run the automated tests for this system
+To run the tests, the source code is required.
 
-### Break down into end to end tests
-
-Explain what these tests test and why
-
+Navigate to the root directory of the source code and simply run:
 ```
-Give an example
+(.your_env) path_to_app > pytest
 ```
-
-### And coding style tests
-[comment]: <> (TODO)
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-[comment]: <> (TODO)
-Add additional notes about how to deploy this on a live system
-
-## Versioning
-[comment]: <> (TODO)
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
 
 ## Authors
 [comment]: <> (TODO)
@@ -128,10 +102,3 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 ## License
 [comment]: <> (TODO)
 This project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE v3 - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-[comment]: <> (TODO)
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
