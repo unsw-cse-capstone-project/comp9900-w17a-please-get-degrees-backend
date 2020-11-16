@@ -13,17 +13,8 @@ All pre-requisites are listed in [requirements.txt](requirements.txt). They have
 
 ### Development Setup
 [comment]: <> (TODO: check that this procedure works on CSE/team pcs)
-First, setup your virtual environment. You can use conda or venv.
+First, setup your virtual environment. You can use the venv package.
 
-#### ```conda```
-```
-path_to_app $ conda create -n "simvestr" python=3.7.0
-path_to_app $ conda activate simvestr
-(simvestr) path_to_app $ 
-```
-
-#### ```pip``` 
-You must have the correct python version installed (python3.7) when using the pip method
 ```
 path_to_app $ python3.7 -m venv .simvestr
 ```
@@ -71,7 +62,7 @@ If you're running the app for the first time and the database needs to be setup,
 
 If the database has already been setup by running the above command, toggle the ```run_setup``` flag to ```false```. 
 
-Common ```host```'s and ```port```'s are ```0.0.0.0``` and ```5000``` respectively for running in a local environment.
+Common ```host```'s and ```port```'s are ```0.0.0.0``` and ```5000``` respectively for running in a local environment. To work with the Front-end application however, please use ```host=127.0.0.1``` and ```port=5000``` .
 
 
 Windows:
@@ -88,7 +79,7 @@ To run the tests, the source code is required.
 
 Navigate to the root directory of the source code and simply run:
 ```
-(.your_env) path_to_app > pytest
+(.your_env) path_to_app $ pytest
 ```
 
 ## Authors
