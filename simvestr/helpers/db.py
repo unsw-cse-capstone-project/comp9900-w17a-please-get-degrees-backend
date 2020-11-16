@@ -16,6 +16,10 @@ from simvestr.helpers.search import search
 from simvestr.helpers.portfolio import all_stocks_balance
 
 
+def update_otp(otp: str, user: User, db):
+    user.otp = otp
+    db.session.commit()
+
 def make_salt():
     valid_pw_chars = current_app.config["VALID_CHARS"]
     salt_length = current_app.config["SALT_LENGTH"]

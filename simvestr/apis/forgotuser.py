@@ -8,7 +8,7 @@ import random
 
 from flask_restx import Resource, reqparse, Namespace, abort
 
-from simvestr.helpers.db import update_password
+from simvestr.helpers.db import update_password, update_otp
 from simvestr.models import User, db
 from simvestr.helpers.simvestr_email import send_email
 from simvestr.models.api_models import forgotuser_model, forgotuser_email_model
@@ -32,8 +32,6 @@ forgotuser_parser.add_argument("OTP", type=str, required=True)
 forgotuser_email_parser = reqparse.RequestParser()
 forgotuser_email_parser.add_argument("email", type=str, required=True)
 
-random_OTP = 1234
-
 
 @api.route("")
 class ForgotUser(Resource):
@@ -55,13 +53,15 @@ class ForgotUser(Resource):
         if not user:
             return abort(404, "User not found")
 
-        global random_OTP
-        random_OTP = random.randint(1000, 9999)
-        print(f"\n\nOTP: {random_OTP}\n\n")
+        # set an otp in the user's dB so multiple users can reset pwd at the same time
+        otp = str(random.randint(1000, 9999))
+        update_otp(otp=otp, user=user, db=db)
+
+        print(f"\n\nOTP: {user.otp}\n\n")
         message_content = f"ALERT! You have requested password change for your Simvestr account. " \
-                          f"Please copy the 4 digit OTP {random_OTP}."
+                          f"Please copy the 4 digit OTP {user.otp}."
         # sends a confirmation email to the user
-        send_email(user.email_id, f"Forgot Password - OTP: {random_OTP}", message_content)
+        send_email(user.email_id, f"Forgot Password - OTP: {user.otp}", message_content)
         return {"email": email_id}, 200
 
 
@@ -84,9 +84,7 @@ class ForgotUser(Resource):
         if " " in password:
             return abort(422, "Password cannot contain spaces")
 
-        global random_OTP
-
-        if one_time_pass != str(random_OTP):
+        if one_time_pass != str(user.otp):
             return abort(422, "The OTP you entered is incorrect!")
 
         update_password(password=password, user=user, db=db)
