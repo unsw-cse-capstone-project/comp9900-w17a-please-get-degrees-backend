@@ -8,4 +8,4 @@ include requirements.txt
 
 include simvestr/config.yml
 
-include resources/test_data_user.xlsx
+include simvestr/resources/test_data_user.xlsx

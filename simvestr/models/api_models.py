@@ -209,6 +209,14 @@ balance_model = Model(
 portfolio_model = balance_model.clone(
     "Portfolio",
     {
+        "prev_balance": fields.Float(
+          description="Previous closing cash balance of portfolio",
+          example=85000,
+        ),
+        "prev_investment_value": fields.Float(
+          description="Previous investment value of portfolio",
+          example=30000,
+        ),
         "total_value": fields.Float(
             description="The sum of the current cash balance and the value of the current holdings",
             example=55500.0,
