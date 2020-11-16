@@ -10,10 +10,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-def send_email(user_email_address, message_text, message_content):
+def send_email(to_address, message_text, message_content):
     from_address = "simvestr@gmail.com"
-    to_address = user_email_address
-
+    
     message_content = "Hello Investor,\n\n" + message_content + "\n\nSimvestr Pvt. Ltd.\nSyndey, Australia"
 
     message = MIMEMultipart("Simvestr")
