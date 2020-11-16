@@ -49,7 +49,7 @@ path_to_app>.\simvestr\Scripts\activate
 Now  ```pip```  install the the application from the distribution, it contains all the dependencies needed:
 
 ```
-(.simvestr) ($ or >) pip install dist\simvestr-1.0.0.tar.gz
+(.simvestr) ($ or >) pip install dist/simvestr-1.0.0.tar.gz
 ```
 
 
@@ -63,11 +63,13 @@ OSX or Linux:
 
 If the virtual environment created in the Getting Started section is not active, please activate it or re-visit the section to ensure a virtual environment is made.
 
-Within the virtual environment start the server using:
+If you're running the app for the first time and the database needs to be setup, run the following command within the virtual environment with the ```run_setup``` flag equal to ```True```.  This will start the server and intialise the database.
 
 ```
-(.your_env) path_to_app $ gunicorn "simvestr:create_app(run_setup=True)" --bind <host>:<port>
+(.your_env) path_to_app $ gunicorn "simvestr:create_app(run_setup=False)" --bind <host>:<port>
 ```
+
+If the database has already been setup by running the above command, toggle the ```run_setup``` flag to ```false```. 
 
 Common ```host```'s and ```port```'s are ```0.0.0.0``` and ```5000``` respectively for running in a local environment.
 
