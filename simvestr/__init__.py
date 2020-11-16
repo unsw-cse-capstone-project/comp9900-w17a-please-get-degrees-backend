@@ -43,6 +43,7 @@ def create_app(test_config=None, sim_config=None, run_setup=False):
     app.config["START_BALANCE"] = config_yml["START_BALANCE"]
     app.config["SLIPPAGE"] = config_yml["SLIPPAGE"]
     app.config["VALID_CHARS"] = config_yml["VALID_CHARS"]
+    app.config["SALT_LENGTH"] = config_yml["SALT_LENGTH"]
 
     is_test = (test_config is not None)
     is_sim = (sim_config is None)

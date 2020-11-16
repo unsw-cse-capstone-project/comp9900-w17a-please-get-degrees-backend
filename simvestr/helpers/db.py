@@ -15,24 +15,11 @@ from simvestr.models import User, Watchlist, Stock, Portfolio, PortfolioPrice, T
 from simvestr.helpers.search import search
 from simvestr.helpers.portfolio import all_stocks_balance
 
-SALT_SIZE = 6
-
-
-from sqlalchemy.sql import expression
-from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.types import DateTime
-
-class utcnow(expression.FunctionElement):
-    type = DateTime()
-
-@compiles(utcnow, 'sqlite')
-def sql_utcnow(element, compiler, **kw):
-    return "datetime(now)"
 
 def make_salt():
     valid_pw_chars = current_app.config["VALID_CHARS"]
-
-    return "".join(np.random.choice(list(valid_pw_chars), size=SALT_SIZE))
+    salt_length = current_app.config["SALT_LENGTH"]
+    return "".join(np.random.choice(list(valid_pw_chars), size=salt_length))
 
 
 # Defines setup and tear down the database

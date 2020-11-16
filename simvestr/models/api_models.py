@@ -60,7 +60,7 @@ signup_model = login_model.clone("Signup", changenames_model,)
 
 forgotuser_model = Model("Forgot User", {"email_id": email, "password": password, "OTP": otp})
 
-forgotuser_email_model = Model("Forgot User Email", {'email_id': email})
+forgotuser_email_model = Model("Forgot User Email", {'email': email})
 
 transaction_model = Model(
     "Transaction",

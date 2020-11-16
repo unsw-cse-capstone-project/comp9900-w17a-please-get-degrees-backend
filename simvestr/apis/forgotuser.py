@@ -25,12 +25,12 @@ api.models[forgotuser_model.name] = forgotuser_model
 api.models[forgotuser_email_model.name] = forgotuser_email_model
 
 forgotuser_parser = reqparse.RequestParser()
-forgotuser_parser.add_argument('email_id', type=str)
+forgotuser_parser.add_argument('email', type=str)
 forgotuser_parser.add_argument('password', type=str)
 forgotuser_parser.add_argument('OTP', type=str)
 
 forgotuser_email_parser = reqparse.RequestParser()
-forgotuser_email_parser.add_argument('email_id', type=str)
+forgotuser_email_parser.add_argument('email', type=str)
 
 random_OTP = 1234
 
@@ -47,9 +47,10 @@ class ForgotUser(Resource):
         description="Send OTP to registered email"
     )
     @api.expect(forgotuser_email_parser, validate=True)
-    def get(self):
+    @api.marshal_with(forgotuser_email_model, 200)
+    def post(self):
         args = forgotuser_email_parser.parse_args()
-        email_id = (args.get("email_id")).lower()
+        email_id = args["email"].lower()
         user = User.query.filter_by(email_id=email_id).first()
         if not user:
             return abort(404, "User not found")
@@ -61,7 +62,7 @@ class ForgotUser(Resource):
                           f'Please copy the 4 digit OTP {random_OTP}.'
         # sends a confirmation email to the user
         send_email(user.email_id, f'Forgot Password - OTP: {random_OTP}', message_content)
-        return 200
+        return {"email": email_id}, 200
 
     @api.doc(id="reset_user_password", body=forgotuser_model,
              description="Resets password for user using OTP")
