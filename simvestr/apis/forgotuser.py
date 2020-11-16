@@ -62,7 +62,8 @@ class ForgotUser(Resource):
         send_email(user.email_id, f'Forgot Password - OTP: {random_OTP}', message_content)
         return 200
 
-    @api.doc(id="reset_user_password", body=forgotuser_model,
+    @api.doc(id="reset_user_password", 
+             body=forgotuser_model,
              description="Resets password for user using OTP")
     @api.expect(forgotuser_parser, validate=True)
     def put(self):
