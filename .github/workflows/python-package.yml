@@ -10,7 +10,7 @@ on:
     branches: [ dev ]
 
 jobs:
-  pull:
+  installation:
 
     runs-on: ubuntu-latest
     strategy:
@@ -31,11 +31,13 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
   test:
+    - needs: installation
     - name: Test with pytest
       run: |
         pytest
 
   build:
+    - needs: [installation, test]
     - name: Run the package script
       run: |
         python setup.py sdist bdist_wheel
