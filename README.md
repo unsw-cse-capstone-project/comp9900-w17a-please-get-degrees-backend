@@ -44,6 +44,8 @@ path_to_app>.\simvestr\Scripts\activate
 (.simvestr) path_to_app>
 ```
 
+##### Dependencies
+
 Now  ```pip```  install the the application from the distribution, it contains all the dependencies needed:
 
 ```
