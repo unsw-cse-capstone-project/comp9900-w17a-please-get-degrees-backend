@@ -37,8 +37,8 @@ jobs:
 
   build:
     - name: Run the package script
-        run: |
-          python setup.py sdist bdist_wheel
+      run: |
+        python setup.py sdist bdist_wheel
 
     - name: Install applciation
       run: |
